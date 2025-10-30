@@ -27,7 +27,6 @@ QStatusBar{
   color:palette(text);
 }
 QStatusBar::item QLabel {
-  font-size: 12px;
 }
 QMenuBar{
   background-color:transparent;
@@ -83,32 +82,32 @@ QMenu::indicator{
   height:15px;
 }
 QMenu::indicator:non-exclusive:checked{
-  padding-left:2px;
+  padding-left:9px;
 }
 QMenu::indicator:non-exclusive:unchecked{
-  padding-left:2px;
+  padding-left:9px;
 }
 QMenu::indicator:exclusive:checked{
-  padding-left:2px;
+  padding-left:9px;
 }
 QMenu::indicator:exclusive:unchecked{
-  padding-left:2px;
+  padding-left:9px;
 }
 QToolBar::top{
-  background-color:qlineargradient(x1:0,y1:0,x2:0,y2:1,stop:0 rgba(220,220,220,127),stop:1 rgba(200,200,200,75));
+  background-color:qlineargradient(x1:0,y1:0,x2:0,y2:1,stop:0 rgba(200,200,200,255),stop:1 rgba(255,255,255,255));
   border-bottom:3px solid qlineargradient(x1:0,y1:0,x2:0,y2:1,stop:0 rgba(220,220,220,127),stop:1 rgba(200,200,200,75));
 }
 QToolBar::bottom{
-  background-color:qlineargradient(x1:0,y1:1,x2:0,y2:0,stop:0 rgba(220,220,220,127),stop:1 rgba(200,200,200,75));
-  border-top:3px solid qlineargradient(x1:0,y1:1,x2:0,y2:0,stop:0 rgba(220,220,220,127),stop:1 rgba(200,200,200,75));
+  background-color:qlineargradient(x1:0,y1:1,x2:0,y2:0,stop:0 rgba(255,255,255,255),stop:1 rgba(200,200,200,255));
+  border-top:3px solid qlineargradient(x1:0,y1:1,x2:0,y2:0,stop:0 rgba(255,255,255,255),stop:1 rgba(200,200,200,75));
 }
 QToolBar::left{
-  background-color:qlineargradient(x1:0,y1:0,x2:1,y2:0,stop:0 rgba(220,220,220,127),stop:1 rgba(200,200,200,75));
-  border-right:3px solid qlineargradient(x1:0,y1:0,x2:1,y2:0,stop:0 rgba(220,220,220,127),stop:1 rgba(200,200,200,75));
+  background-color:qlineargradient(x1:0,y1:0,x2:1,y2:0,stop:0 rgba(255,255,255,255),stop:1 rgba(200,200,200,255));
+  border-right:3px solid qlineargradient(x1:0,y1:0,x2:1,y2:0,stop:0 rgba(255,255,255,255),stop:1 rgba(200,200,200,75));
 }
 QToolBar::right{
-  background-color:qlineargradient(x1:1,y1:0,x2:0,y2:0,stop:0 rgba(220,220,220,127),stop:1 rgba(200,200,200,75));
-  border-left:3px solid qlineargradient(x1:1,y1:0,x2:0,y2:0,stop:0 rgba(220,220,220,127),stop:1 rgba(200,200,200,75));
+  background-color:qlineargradient(x1:1,y1:0,x2:0,y2:0,stop:0 rgba(255,255,255,255),stop:1 rgba(200,200,200,255));
+  border-left:3px solid qlineargradient(x1:1,y1:0,x2:0,y2:0,stop:0 rgba(255,255,255,255),stop:1 rgba(200,200,200,75));
 }
 QMainWindow::separator{
   width:6px;

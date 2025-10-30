@@ -31,7 +31,6 @@ QStatusBar{
   color:palette(text);
 }
 QStatusBar::item QLabel {
-  font-size: 12px;
 }
 QMenuBar{
   background-color:transparent;

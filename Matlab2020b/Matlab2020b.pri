@@ -1,9 +1,5 @@
 INCLUDEPATH += -L $$PWD
 
-# Matlab SDK库的头文件
-win32: LIBS += -L$$PWD/UnfolddingAlgorithm_Gravel/ -lUnfolddingAlgorithm_Gravel
-INCLUDEPATH += $$PWD/UnfolddingAlgorithm_Gravel/
-
 # Matlab 运行库的头文件
 INCLUDEPATH += $$PWD/v99/extern/include
 INCLUDEPATH += $$PWD/v99/extern/include/Win64

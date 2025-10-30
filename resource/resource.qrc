@@ -63,5 +63,6 @@
         <file>zuoye.png</file>
 		<file>empty.png</file>
 		<file>save.png</file>
+		<file>aboutqt.png</file>
     </qresource>
 </RCC>

@@ -57,7 +57,7 @@ public:
         palette.setColor(QPalette::Window, QColor(qMin((int)(159+r*1.75),255), qMin((int)(159+g*1.75),255), qMin((int)(159+b*1.75),255)));
         palette.setColor(QPalette::WindowText, QColor(0, 0, 0));
         palette.setColor(QPalette::Disabled, QPalette::WindowText, QColor(120, 120, 120));
-        palette.setColor(QPalette::Base, QColor(qMin((int)(159+r*2.1),255), qMin((int)(159+g*2.1),255), qMin((int)(159+b*2.1),255)));
+        palette.setColor(QPalette::Base, QColor(qMin((int)(159+r*2.1),200), qMin((int)(159+g*2.1),200), qMin((int)(159+b*2.1),200)));
         palette.setColor(QPalette::AlternateBase, QColor(qMin((int)(159+r),255), qMin((int)(159+g),255), qMin((int)(159+b),255)));
         palette.setColor(QPalette::ToolTipBase, QColor(255, 255, 220));
         palette.setColor(QPalette::ToolTipText, QColor(0, 0, 0));

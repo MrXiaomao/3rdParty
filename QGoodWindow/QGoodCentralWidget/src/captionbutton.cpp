@@ -88,8 +88,8 @@ void CaptionButton::paintIcons(const QPixmap &pix_in, bool dark,
 
 void CaptionButton::drawIcons()
 {
-    const int w = 8;
-    const int h = 6;
+    const int w = 16;
+    const int h = 12;
 
     switch (m_type)
     {

@@ -741,6 +741,7 @@ bool QGoodCentralWidget::eventFilter(QObject *watched, QEvent *event)
         case QEvent::WindowStateChange:
         case QEvent::WindowActivate:
         case QEvent::WindowDeactivate:
+        case QEvent::WindowUnblocked:
         {
             updateWindow();
             break;
