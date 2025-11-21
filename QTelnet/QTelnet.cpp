@@ -1,5 +1,7 @@
 #include "QTelnet.h"
 #include <QHostAddress>
+#include <QNetworkSession>
+#include <QNetworkConfigurationManager>
 
 const char QTelnet::IACWILL[2] = { IAC, WILL };
 const char QTelnet::IACWONT[2] = { IAC, WONT };
@@ -24,6 +26,17 @@ QTelnet::QTelnet(SocketType type, QObject *parent) :
     connect(&m_webSocket, &QWebSocket::binaryMessageReceived, this, &QTelnet::binaryMessageReceived);
     connect(&m_webSocket, &QWebSocket::stateChanged, this, &QTelnet::onStateChanged);
 #endif
+
+    QNetworkConfigurationManager manager;
+    QNetworkConfiguration config = manager.defaultConfiguration();
+    QList<QNetworkConfiguration> cfg_list = manager.allConfigurations();
+    if (cfg_list.size() > 0)
+    {
+        cfg_list.first().setConnectTimeout(1000);
+        config = cfg_list.first();
+    }
+    QSharedPointer<QNetworkSession> spNetworkSession(new QNetworkSession(config));
+    m_tcpSocket.setProperty("_q_networksession", QVariant::fromValue(spNetworkSession));
 }
 
 void QTelnet::setType(SocketType type)
