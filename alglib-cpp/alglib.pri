@@ -1,0 +1,9 @@
+ALGLIB_LIBRARY_ROOT = $$PWD
+
+# 包含目录
+INCLUDEPATH += $$ALGLIB_LIBRARY_ROOT/src
+DEPENDPATH += $$ALGLIB_LIBRARY_ROOT/src
+
+# 递归添加头文件和源文件
+HEADERS += $$files($$ALGLIB_LIBRARY_ROOT/src/*.h)
+SOURCES += $$files($$ALGLIB_LIBRARY_ROOT/src/*.cpp)

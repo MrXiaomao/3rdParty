@@ -14405,6 +14405,23 @@ QCPAbstractPlottable *QCustomPlot::plottable(int index)
   }
 }
 
+QCPAbstractPlottable *QCustomPlot::plottable(QString name)
+{
+  if (mPlottables.size() > 0)
+  {
+    for (auto findPlottable : mPlottables)
+    {
+      if (findPlottable->name() == name)
+        return findPlottable;
+    }
+  }
+
+  {
+    qDebug() << Q_FUNC_INFO << "don't find:" << name;
+    return nullptr;
+  }
+}
+
 /*! \overload
   
   Returns the last plottable that was added to the plot. If there are no plottables in the plot,
@@ -17146,6 +17163,14 @@ void QCPColorGradient::loadPreset(GradientPreset preset)
       setColorStopAt(0, QColor(255, 0, 0));
       setColorStopAt(1.0/3.0, QColor(0, 0, 255));
       setColorStopAt(2.0/3.0, QColor(0, 255, 0));
+      setColorStopAt(1, QColor(255, 0, 0));
+      break;
+    case gpRainbow:
+      setColorInterpolation(ciRGB);
+      setColorStopAt(0, QColor(0, 0, 255));
+      setColorStopAt(0.25, QColor(0, 255, 255));
+      setColorStopAt(0.5, QColor(0, 255, 0));
+      setColorStopAt(0.75, QColor(255, 255, 0));
       setColorStopAt(1, QColor(255, 0, 0));
       break;
   }
