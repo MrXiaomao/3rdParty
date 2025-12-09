@@ -14417,7 +14417,7 @@ QCPAbstractPlottable *QCustomPlot::plottable(QString name)
   }
 
   {
-    qDebug() << Q_FUNC_INFO << "don't find:" << name;
+    // qDebug() << Q_FUNC_INFO << "don't find:" << name;
     return nullptr;
   }
 }
@@ -21139,7 +21139,10 @@ void QCPGraph::setData(QSharedPointer<QCPGraphDataContainer> data)
 void QCPGraph::setData(const QVector<double> &keys, const QVector<double> &values, bool alreadySorted)
 {
   mDataContainer->clear();
-  addData(keys, values, alreadySorted);
+  QVector<QColor> colors;
+  for (int i=0; i<keys.size(); ++i)
+      colors << mScatterStyle.pen().color();
+  addData(keys, values, colors, alreadySorted);
 }
 
 void QCPGraph::setData(const QVector<double> &keys, const QVector<double> &values, const QVector<QColor> &colors, bool alreadySorted)
