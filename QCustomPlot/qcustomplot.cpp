@@ -1,4 +1,4 @@
-/***************************************************************************
+﻿/***************************************************************************
 **                                                                        **
 **  QCustomPlot, an easy to use, modern plotting widget for Qt            **
 **  Copyright (C) 2011-2022 Emanuel Eichhammer                            **
@@ -683,7 +683,7 @@ QCPPainter *QCPPaintBufferPixmap::startPainting()
 
   QCPPainter *result = new QCPPainter(&mBuffer);
 #if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
-  result->setRenderHint(QPainter::HighQualityAntialiasing);
+  result->setRenderHint(QPainter::Antialiasing);
 #endif
   return result;
 }
@@ -15677,7 +15677,7 @@ void QCustomPlot::paintEvent(QPaintEvent *event)
   if (painter.isActive())
   {
 #if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
-  painter.setRenderHint(QPainter::HighQualityAntialiasing); // to make Antialiasing look good if using the OpenGL graphicssystem
+  painter.setRenderHint(QPainter::Antialiasing); // to make Antialiasing look good if using the OpenGL graphicssystem
 #endif
     if (mBackgroundBrush.style() != Qt::NoBrush)
       painter.fillRect(mViewport, mBackgroundBrush);
@@ -15779,8 +15779,19 @@ void QCustomPlot::mousePressEvent(QMouseEvent *event)
     QList<QCPLayerable*> candidates = layerableListAt(mMousePressPos, false, &details);
     if (!candidates.isEmpty())
     {
-      mMouseSignalLayerable = candidates.first(); // candidate for signal emission is always topmost hit layerable (signal emitted in release event)
-      mMouseSignalLayerableDetails = details.first();
+        mMouseSignalLayerable = candidates.first(); // candidate for signal emission is always topmost hit layerable (signal emitted in release event)
+        mMouseSignalLayerableDetails = details.first();
+
+        for (int i=0; i<candidates.size(); ++i){
+            if (candidates.at(i)->inherits("QCPAbstractPlottable")
+                    || candidates.at(i)->inherits("QCPAxis")
+                    || candidates.at(i)->inherits("QCPAbstractItem")
+                    ||candidates.at(i)->inherits("QCPLegend")
+                    ||candidates.at(i)->inherits("QCPAbstractLegendItem")){
+                mMouseSignalLayerable = candidates.at(i); // candidate for signal emission is always topmost hit layerable (signal emitted in release event)
+                mMouseSignalLayerableDetails = details.at(i);
+            }
+        }
     }
     // forward event to topmost candidate which accepts the event:
     for (int i=0; i<candidates.size(); ++i)
@@ -16533,7 +16544,7 @@ QCPLayerable *QCustomPlot::layerableAt(const QPointF &pos, bool onlySelectable, 
   
   \see layerableAt, layoutElementAt, axisRectAt
 */
-QList<QCPLayerable*> QCustomPlot::layerableListAt(const QPointF &pos, bool onlySelectable, QList<QVariant> *selectionDetails) const
+QList<QCPLayerable*> QCustomPlot::layerableListAt(const QPointF &pos, bool /*onlySelectable*/, QList<QVariant> *selectionDetails) const
 {
   QList<QCPLayerable*> result;
   for (int layerIndex=mLayers.size()-1; layerIndex>=0; --layerIndex)
@@ -29925,7 +29936,7 @@ QCPItemText::QCPItemText(QCustomPlot *parentPlot) :
   bottom(createAnchor(QLatin1String("bottom"), aiBottom)),
   bottomLeft(createAnchor(QLatin1String("bottomLeft"), aiBottomLeft)),
   left(createAnchor(QLatin1String("left"), aiLeft)),
-  mText(QLatin1String("text")),
+  mText(QLatin1String("")),
   mPositionAlignment(Qt::AlignCenter),
   mTextAlignment(Qt::AlignTop|Qt::AlignHCenter),
   mRotation(0)

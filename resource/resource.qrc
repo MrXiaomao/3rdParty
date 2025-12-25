@@ -61,8 +61,12 @@
         <file>work-on.png</file>
         <file>zhiling.png</file>
         <file>zuoye.png</file>
-		<file>empty.png</file>
-		<file>save.png</file>
-		<file>aboutqt.png</file>
+        <file>empty.png</file>
+        <file>save.png</file>
+        <file>aboutqt.png</file>
+    </qresource>
+    <qresource prefix="/font">
+        <file>Font/FluentIcons.ttf</file>
+        <file>Font/inziu-iosevkaCC-SC-regular.ttf</file>
     </qresource>
 </RCC>
