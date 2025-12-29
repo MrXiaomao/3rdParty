@@ -27,7 +27,7 @@ void QGoodWindowHelper::setupUiHelper(QMainWindow* centralWidget, bool isDarkThe
 #else
             font.setFamily(qApp->font().family());
 #endif
-            //mMenuBar->setFont(font);
+            mMenuBar->setFont(font);
 
             QTimer::singleShot(0, this, [&]{
                 const int title_bar_height = mGoodCentraWidget->titleBarHeight();

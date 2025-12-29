@@ -1,4 +1,4 @@
-/*
+﻿/*
 The MIT License (MIT)
 
 Copyright © 2018-2023 Antonio Dias (https://github.com/antonypro)

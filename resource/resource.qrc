@@ -64,6 +64,8 @@
         <file>empty.png</file>
         <file>save.png</file>
         <file>aboutqt.png</file>
+        <file>zoom_out.png</file>
+        <file>zoom_in.png</file>
     </qresource>
     <qresource prefix="/font">
         <file>font/FluentIcons.ttf</file>
