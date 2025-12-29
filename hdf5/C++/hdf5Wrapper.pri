@@ -68,6 +68,10 @@ SOURCES += $$PWD/src/H5AbstractDs.cpp \
     $$PWD/src/H5VarLenType.cpp \
 
 win32: LIBS += -L$$PWD/lib/ -lhdf5
+unix:!macx: LIBS += -L$$PWD/lib/unix/ -lhdf5 -lz -lsz
+unix:!macx: PRE_TARGETDEPS += $$PWD/lib/unix/libhdf5.a
+unix:!macx: PRE_TARGETDEPS += $$PWD/lib/unix/libz.a
+unix:!macx: PRE_TARGETDEPS += $$PWD/lib/unix/libsz.a
 
 INCLUDEPATH += $$PWD/src/
 INCLUDEPATH += $$PWD/include/

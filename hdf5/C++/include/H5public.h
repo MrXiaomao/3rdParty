@@ -286,7 +286,10 @@ typedef int ssize_t;
 typedef long ssize_t;
 #define H5_SIZEOF_SSIZE_T H5_SIZEOF_LONG
 #elif H5_SIZEOF_SIZE_T == H5_SIZEOF_LONG_LONG
-typedef long long ssize_t;
+#ifndef __ssize_t_defined
+#define __ssize_t_defined
+typedef long long int ssize_t;
+#endif
 #define H5_SIZEOF_SSIZE_T H5_SIZEOF_LONG_LONG
 #else /* Can't find matching type for ssize_t */
 #error "nothing appropriate for ssize_t"
