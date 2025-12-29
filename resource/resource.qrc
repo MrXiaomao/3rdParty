@@ -68,5 +68,7 @@
     <qresource prefix="/font">
         <file>font/FluentIcons.ttf</file>
         <file>font/inziu-iosevkaCC-SC-regular.ttf</file>
+        <file>switchOffline.png</file>
+        <file>switchOnline.png</file>
     </qresource>
 </RCC>
