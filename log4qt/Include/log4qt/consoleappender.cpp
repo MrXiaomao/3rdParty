@@ -1,4 +1,4 @@
-/******************************************************************************
+﻿/******************************************************************************
  *
  * This file is part of Log4Qt library.
  *
@@ -140,7 +140,17 @@ void ConsoleAppender::append(const LoggingEvent &event)
 
         QString message(layout()->format(event));
 
-        OutputDebugString(message.toStdWString().c_str());
+        /**
+         * qDebug() << QString::fromLocal8Bit("我是中文符号").toUtf8().constData()
+         * 除了这种调用方式，在应用程序输出窗口显示中文不会出现乱码，其它方式中文显示均会出现乱码
+         */
+        //OutputDebugString(message.toStdWString().c_str());
+
+        /**
+         * 配合QTextCodec::setCodecForLocale(QTextCodec::codecForMib(106));
+         * @brief OutputDebugStringA
+         */
+        OutputDebugStringA(message.toLocal8Bit().toStdString().c_str());
     }
     else
 #endif

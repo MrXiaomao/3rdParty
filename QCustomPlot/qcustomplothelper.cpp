@@ -817,7 +817,7 @@ void QCustomPlotHelper::afterLayout()
         int avg_height = fontMetrics.ascent() + fontMetrics.descent();
         int i = 0;
         for (auto checkBox : checkBoxs){
-            checkBox->move(customPlot->axisRect()->left() + 10, customPlot->axisRect()->topRight().y() + i++ * avg_height + 5);
+            checkBox->move(customPlot->axisRect()->left() + 10, customPlot->axisRect()->topRight().y() + i++ * checkBox->height() + 5);
         }
     }
 

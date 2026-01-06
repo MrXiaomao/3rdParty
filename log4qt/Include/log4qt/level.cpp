@@ -1,4 +1,4 @@
-/******************************************************************************
+﻿/******************************************************************************
  *
  * This file is part of Log4Qt library.
  *
@@ -60,23 +60,23 @@ QString Level::toString() const
     switch (mValue)
     {
     case NULL_INT:
-        return QCoreApplication::translate(p_context, "NULL");
+        return QCoreApplication::translate(p_context, "N");
     case ALL_INT:
-        return QCoreApplication::translate(p_context, "全局");//ALL
+        return QCoreApplication::translate(p_context, "A");//ALL
     case TRACE_INT:
-        return QCoreApplication::translate(p_context, "跟踪");//TRACE
+        return QCoreApplication::translate(p_context, "T");//TRACE
     case DEBUG_INT:
-        return QCoreApplication::translate(p_context, "调试");//DEBUG
+        return QCoreApplication::translate(p_context, "D");//DEBUG
     case INFO_INT:
-        return QCoreApplication::translate(p_context, "信息");//INFO
+        return QCoreApplication::translate(p_context, "I");//INFO
     case WARN_INT:
-        return QCoreApplication::translate(p_context, "警告");//WARN
+        return QCoreApplication::translate(p_context, "W");//WARN
     case ERROR_INT:
-        return QCoreApplication::translate(p_context, "错误");//ERROR
+        return QCoreApplication::translate(p_context, "E");//ERROR
     case FATAL_INT:
-        return QCoreApplication::translate(p_context, "严重");//FATAL
+        return QCoreApplication::translate(p_context, "F");//FATAL
     case OFF_INT:
-        return QCoreApplication::translate(p_context, "关闭");//OFF
+        return QCoreApplication::translate(p_context, "O");//OFF
     default:
         Q_ASSERT_X(false, "Level::toString()", "Unknown level value");
         return QCoreApplication::translate(p_context, "NULL");
