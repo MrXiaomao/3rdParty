@@ -148,7 +148,7 @@ void ConsoleAppender::append(const LoggingEvent &event)
 
         /**
          * 配合QTextCodec::setCodecForLocale(QTextCodec::codecForMib(106));
-         * @brief OutputDebugStringA
+         * qDebug() 中文输出均不会出现乱码
          */
         OutputDebugStringA(message.toLocal8Bit().toStdString().c_str());
     }
