@@ -357,6 +357,8 @@ QCustomPlotHelper::QCustomPlotHelper(QCustomPlot* customPlot, QObject *parent)
 
     actResetView = new QAction(tr("恢复视图"), this);
     connect(actResetView, &QAction::triggered, this, &QCustomPlotHelper::resetView);
+    actClearMarker = new QAction(tr("清除标签"), this);
+    connect(actClearMarker, &QAction::triggered, this, &QCustomPlotHelper::clearMarker);
     actExportGraphic = new QAction(tr("导出图像..."), this);
     connect(actExportGraphic, &QAction::triggered, this, &QCustomPlotHelper::exportGraphic);
 
@@ -520,7 +522,7 @@ void QCustomPlotHelper::plottableClick(QCPAbstractPlottable *plottable, int data
         mTracerData->setPen(graph->pen());
         mTracerData->setBrush(Qt::NoBrush);
         mTracerData->setTextPen(graph->pen());
-        mTracerData->setTextVisible(true);
+        mTracerData->setVisible(true);
         mTracerData->updatePosition(key, value);
 
         mCustomPlot->replot(QCustomPlot::rpQueuedReplot);//曲线重绘
@@ -754,8 +756,9 @@ void QCustomPlotHelper::mouseRelease(QMouseEvent * event)
     else if (event->button() == Qt::RightButton)
     {
         QMenu contextMenu(customPlot);
-        contextMenu.addAction(actResetView);
+        contextMenu.addAction(actResetView);        
         contextMenu.addSeparator();
+        contextMenu.addAction(actClearMarker);
         contextMenu.addAction(actEnableStraightLine);
         contextMenu.addAction(actEnableRangeSelect);
         contextMenu.addSeparator();
@@ -851,7 +854,13 @@ void QCustomPlotHelper::enableStraightLine(bool enable)
 
         mCustomPlot->replot(QCustomPlot::rpQueuedReplot);
     }
- }
+}
+
+
+void QCustomPlotHelper::clearMarker()
+{
+    mTracerData->setVisible(false);
+}
 
 void QCustomPlotHelper::enableRangeSelect(bool enable)
 {

@@ -124,6 +124,15 @@ public:
     Q_SLOT void enableStraightLine(bool enable = true);
 
     /**
+    * @function name: clearMarker
+    * @brief 清楚标记
+    * @param[in]        none
+    * @param[out]       none
+    * @return           void
+    */
+    Q_SLOT void clearMarker();
+
+    /**
     * @function name: enableRangeSelect
     * @brief 启用范围选取功能
     * @param[in]        none
@@ -203,6 +212,7 @@ private:
 
     QIcon mIconUnchecked, mIconChecked;
     QAction *actResetView;// 恢复试图
+    QAction *actClearMarker;// 清除标签
     QAction *actExportGraphic;// 导出图像
     QAction *actEnableStraightLine;// 启用参考线或基准线
     QAction *actEnableRangeSelect;// 启用范围选取功能

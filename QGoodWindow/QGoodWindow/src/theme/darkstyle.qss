@@ -8,11 +8,21 @@ QLineEdit[text=""]{
   color:palette(text); /* 空文本时文字颜色仍使用系统文本色（默认可能为灰色提示文字） */
 }
 
+/* 行文本编辑框只读属性样式 */
+QLineEdit:read-only, QLineEdit:disabled{
+  background:palette(window); /* 文字颜色使用系统文本色 */
+}
+
 /* QTextEdit基础样式 */
 QTextEdit{
   color:palette(text); /* 文字颜色使用系统文本色 */
   border:0px solid palette(highlight); /* 边框：2px系统高亮色实线 */
   border-radius:0px; /* 边框无圆角（直角） */
+}
+
+/* 多行富文本编辑框只读属性样式 */
+QTextEdit:read-only, QTextEdit:disabled{
+  background:palette(window); /* 文字颜色使用系统文本色 */
 }
 
 /* 空文本状态下的QTextEdit样式 */

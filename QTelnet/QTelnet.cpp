@@ -1,4 +1,4 @@
-#include "QTelnet.h"
+﻿#include "QTelnet.h"
 #include <QHostAddress>
 #include <QNetworkSession>
 #include <QNetworkConfigurationManager>
