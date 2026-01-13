@@ -860,6 +860,7 @@ void QCustomPlotHelper::enableStraightLine(bool enable)
 void QCustomPlotHelper::clearMarker()
 {
     mTracerData->setVisible(false);
+    mCustomPlot->replot(QCustomPlot::rpQueuedReplot);
 }
 
 void QCustomPlotHelper::enableRangeSelect(bool enable)
