@@ -133,7 +133,7 @@ void TitleWidget::paintEvent(QPaintEvent *event)
     font.setFamily("Segoe UI");
 #endif
 
-    painter.setFont(font);
+    //painter.setFont(font);
 
     QPen pen;
     pen.setColor(m_active ? m_active_color : m_inactive_color);

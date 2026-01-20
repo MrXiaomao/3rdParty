@@ -10,12 +10,12 @@ QLineEdit[text=""]{
 
 /* 行文本编辑框只读属性样式 */
 QLineEdit:read-only{
-  background:palette(text); /* 文字颜色使用系统文本色 */
+  background:palette(window); /* 文字颜色使用系统文本色 */
 }
 
 /* 行文本编辑框禁用属性样式 */
 QLineEdit:disabled{
-  background:palette(window); /* 文字颜色使用系统文本色 */
+  background:palette(base); /* 文字颜色使用系统文本色 */
 }
 
 /* 多行富文本编辑框基础样式 */
@@ -27,12 +27,12 @@ QTextEdit{
 
 /* 多行富文本编辑框只读属性样式 */
 QTextEdit:read-only{
-  background:palette(text); /* 文字颜色使用系统文本色 */
+  background:palette(window); /* 文字颜色使用系统文本色 */
 }
 
 /* 多行富文本编辑框禁用属性样式 */
 QTextEdit:disabled{
-  background:palette(window); /* 文字颜色使用系统文本色 */
+  background:palette(base); /* 文字颜色使用系统文本色 */
 }
 
 /* 多行富文本编辑框空文本状态（当前样式与默认一致，可能用于预留扩展） */
