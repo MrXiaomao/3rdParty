@@ -792,7 +792,7 @@ void QCustomPlotHelper::setGraphCheckBox(QCustomPlot* customPlot)
     customPlot->legend->setVisible(false);
 
     // 添加可选项
-    for (int i=0; i<2; ++i){
+    for (int i=0; i<customPlot->graphCount(); ++i){
         QCheckBox* checkBox = new QCheckBox(customPlot);
         checkBox->setText(customPlot->graph(i)->name());
         checkBox->setObjectName(tr(""));
