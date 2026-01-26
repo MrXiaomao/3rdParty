@@ -1,6 +1,7 @@
 QT       += printsupport
 
-INCLUDEPATH += -L $$PWD
+# INCLUDEPATH += -L $$PWD
+INCLUDEPATH += $$PWD
 
 HEADERS += $$PWD/qcustomplot.h \
     $$PWD/qcustomplothelper.h
