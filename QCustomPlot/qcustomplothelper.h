@@ -23,7 +23,7 @@ public:
     void setBrush(const QBrush &brush);
     void setText(const QString &text);
     void setTextPen(const QPen &pen);
-    void updatePosition(double xValue, double yValue);
+    void updatePosition(QCPAxisRect *axisRect, double xValue, double yValue);
     void setVisible(bool visible);
     void setTracerVisible(bool visible);
     void setTextVisible(bool visible);
@@ -54,7 +54,7 @@ public:
     ~XCPItemTracerLine();
 
     void initLine();
-    void updatePosition(double xValue, double yValue);
+    void updatePosition(QCPAxisRect *axisRect, double xValue, double yValue);
     void setVisible(bool visible);
 
 protected:
@@ -104,6 +104,11 @@ public:
     QCPGraph *addScatterGraph(QCPAxis *keyAxis, QCPAxis *valueAxis);
     QCPGraph *addLineScatterGraph(QCPAxis *keyAxis, QCPAxis *valueAxis);
     QCPGraph *addColorMapGraph(QCPAxis *keyAxis, QCPAxis *valueAxis);
+
+    void setResetActionVisible(bool visible = true);
+    void setClearMarkerActionVisible(bool visible = true);
+    void setStraightLineActionVisible(bool visible = true);
+    void setRangeSelectActionVisible(bool visible = true);
 
     /**
     * @function name: setGraphCheckBox
@@ -190,6 +195,8 @@ public:
     Q_SLOT void mouseRelease(QMouseEvent * event);
     Q_SLOT void afterLayout();
 
+    Q_SIGNAL void itemActived(QCPGraph *graph, double key, double value);//节点被鼠标点击激活
+
 protected:
     virtual bool eventFilter(QObject *watched, QEvent *event) override;
 
@@ -218,6 +225,11 @@ private:
     QAction *actEnableRangeSelect;// 启用范围选取功能
     QAction *actLinearScale;// 线性缩放
     QAction *actLogarithmicScale;// 对数缩放
+
+    bool mResetActionVisible = true;
+    bool mClearMarkerActionVisible = true;
+    bool mStraightLineActionVisible = true;
+    bool mRangeSelectActionVisible = true;
 
     /**
     * @function name: 生成一个圆形的图标
