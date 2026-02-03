@@ -77,7 +77,7 @@ public:
     explicit XCPItemStraightRect(QCustomPlot *customPlot, StraightType _type = VerticalStraight, QObject *parent = Q_NULLPTR);
     ~XCPItemStraightRect();
 
-    void setRange(const QCPRange& range);//更新范围
+    void setRange(QCPAxisRect *axisRect, const QCPRange& range);//更新范围
     QCPRange range() const;//更新范围
     void setVisible(bool visible);
     void setBrush(const QBrush &brush);
@@ -127,6 +127,12 @@ public:
     * @return           void
     */
     Q_SLOT void enableStraightLine(bool enable = true);
+
+    /**
+     * @function name: enableDataTracer
+     * @brief 启用数据点标记
+     */
+    Q_SLOT void enableDataTracer(bool enable = true);
 
     /**
     * @function name: clearMarker
@@ -222,6 +228,7 @@ private:
     QAction *actClearMarker;// 清除标签
     QAction *actExportGraphic;// 导出图像
     QAction *actEnableStraightLine;// 启用参考线或基准线
+    QAction *actEnableDataTracer;// 启用数据点标记
     QAction *actEnableRangeSelect;// 启用范围选取功能
     QAction *actLinearScale;// 线性缩放
     QAction *actLogarithmicScale;// 对数缩放

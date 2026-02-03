@@ -16,23 +16,25 @@ XCPItemTracer::XCPItemTracer(QCustomPlot *customPlot, TracerType _type, QObject 
         penDefault.setWidthF(0.5);
 
         mTracer = new QCPItemTracer(mCustomPlot);
+        mTracer->setObjectName("mTracer");
         mTracer->setStyle(QCPItemTracer::tsCircle);
         mTracer->setPen(penDefault);
         mTracer->setBrush(brushDefault);
 
         mTracerText = new QCPItemText(mCustomPlot);
+        mTracerText->setObjectName("mTracerText");
         mTracerText->setLayer("overlay");
         mTracerText->setClipToAxisRect(false);
         mTracerText->setPadding(QMargins(5, 5, 5, 5));
         mTracerText->setBrush(brushDefault);
         mTracerText->setPen(penDefault);
         mTracerText->position->setParentAnchor(mTracer->position);
-        //        mTracerText->setFont(QFont("宋体", 8));
-        mTracerText->setFont(QFont("Arial", 8));
+        mTracerText->setFont(QFont("Arial", 8, QFont::Weight::Thin));
         mTracerText->setColor(clrDefault);
         mTracerText->setText("");
 
         mTracerArrow = new QCPItemLine(mCustomPlot);
+        mTracerArrow->setObjectName("mTracerArrow");
         QPen  arrowPen(clrDefault, 1);
         mTracerArrow->setPen(penDefault);
         mTracerArrow->setLayer("overlay");
@@ -161,6 +163,7 @@ void XCPItemTracer::updatePosition(QCPAxisRect *axisRect, double xValue, double 
     if (!mTextVisible && !mTracerVisible)
         return;
 
+    QCPAxis* xAxis = axisRect->axis(QCPAxis::AxisType::atBottom);
     QCPAxis* yAxis = axisRect->axis(QCPAxis::AxisType::atLeft);
     if (yValue > yAxis->range().upper)
         yValue = yAxis->range().upper;
@@ -170,7 +173,9 @@ void XCPItemTracer::updatePosition(QCPAxisRect *axisRect, double xValue, double 
     switch (mTracerType)
     {
     case XAxisTracer:
-    {        
+    {
+        mTracer->position->setAxisRect(axisRect);
+        mTracer->position->setAxes(xAxis, yAxis);
         mTracer->position->setCoords(xValue, 1);
         mTracerText->position->setCoords(0, 15);
         mTracerArrow->start->setCoords(0, 15);
@@ -180,6 +185,8 @@ void XCPItemTracer::updatePosition(QCPAxisRect *axisRect, double xValue, double 
     }
     case YAxisTracer:
     {
+        mTracer->position->setAxisRect(axisRect);
+        mTracer->position->setAxes(xAxis, yAxis);
         mTracer->position->setCoords(0, yValue);
         mTracerText->position->setCoords(-20, 0);
         //        mTracerArrow->start->setCoords(20, 0);
@@ -189,6 +196,8 @@ void XCPItemTracer::updatePosition(QCPAxisRect *axisRect, double xValue, double 
     }
     case DataTracer:
     {
+        mTracer->position->setAxisRect(axisRect);
+        mTracer->position->setAxes(xAxis, yAxis);
         mTracer->position->setCoords(xValue, yValue);
         mTracerText->position->setCoords(20 + mOffset.x(), mOffset.y());
         mTracerArrow->start->setCoords(20 + mOffset.x(), mOffset.y() == 0 ? 0 : (mOffset.y() / 2 + 2));
@@ -198,6 +207,14 @@ void XCPItemTracer::updatePosition(QCPAxisRect *axisRect, double xValue, double 
     default:
         break;
     }
+
+    //设置裁剪区域，超出边界就不显示了
+    mTracer->setClipToAxisRect(true);
+    mTracer->setClipAxisRect(axisRect);
+    mTracerText->setClipToAxisRect(true);
+    mTracerText->setClipAxisRect(axisRect);
+    mTracerArrow->setClipToAxisRect(true);
+    mTracerArrow->setClipAxisRect(axisRect);
 }
 
 //////////////////////////////////////////////////////////////////////////////////
@@ -250,13 +267,13 @@ void XCPItemTracerLine::initLine()
 
 void XCPItemTracerLine::updatePosition(QCPAxisRect *axisRect, double xValue, double yValue)
 {
+    QCPAxis* yAxis = axisRect->axis(QCPAxis::AxisType::atLeft);
+    QCPAxis* xAxis = axisRect->axis(QCPAxis::AxisType::atBottom);
+
     if(VerticalLine == mLineType || Both == mLineType)
     {
         if(mStraightLineV)
         {
-            QCPAxis* yAxis = axisRect->axis(QCPAxis::AxisType::atLeft);
-            QCPAxis* xAxis = axisRect->axis(QCPAxis::AxisType::atBottom);
-
             mStraightLineV->point1->setCoords(xValue, yAxis->range().lower);
             mStraightLineV->point2->setCoords(xValue, yAxis->range().upper);
         }
@@ -266,13 +283,24 @@ void XCPItemTracerLine::updatePosition(QCPAxisRect *axisRect, double xValue, dou
     {
         if(mStraightLineH)
         {
-            QCPAxis* yAxis = axisRect->axis(QCPAxis::AxisType::atLeft);
-            QCPAxis* xAxis = axisRect->axis(QCPAxis::AxisType::atBottom);
-
             mStraightLineH->point1->setCoords(xAxis->range().lower, yValue);
             mStraightLineH->point2->setCoords(xAxis->range().upper, yValue);
         }
     }
+
+    //设置裁剪区域，超出边界就不显示了
+    mStraightLineH->point1->setAxisRect(axisRect);
+    mStraightLineH->point2->setAxisRect(axisRect);
+    mStraightLineH->point1->setAxes(xAxis, yAxis);
+    mStraightLineH->point2->setAxes(xAxis, yAxis);
+    mStraightLineV->point1->setAxisRect(axisRect);
+    mStraightLineV->point2->setAxisRect(axisRect);
+    mStraightLineV->point1->setAxes(xAxis, yAxis);
+    mStraightLineV->point2->setAxes(xAxis, yAxis);
+    mStraightLineH->setClipToAxisRect(true);
+    mStraightLineH->setClipAxisRect(axisRect);
+    mStraightLineV->setClipToAxisRect(true);
+    mStraightLineV->setClipAxisRect(axisRect);
 }
 
 void XCPItemTracerLine::setVisible(bool visible)
@@ -307,11 +335,10 @@ XCPItemStraightRect::~XCPItemStraightRect()
     }
 }
 
-void XCPItemStraightRect::setRange(const QCPRange& range)
+void XCPItemStraightRect::setRange(QCPAxisRect *axisRect, const QCPRange& range)
 {
     if(mMaskRect)
     {
-        QCPAxisRect *axisRect = mCustomPlot->axisRect();
         QCPAxis* yAxis = axisRect->axis(QCPAxis::AxisType::atLeft);
         QCPAxis* xAxis = axisRect->axis(QCPAxis::AxisType::atBottom);
 
@@ -348,11 +375,13 @@ void XCPItemStraightRect::setBrush(const QBrush &brush)
 
 void XCPItemStraightRect::refresh()
 {
+    return;//
     if(mMaskRect)
     {
         QCPAxisRect *axisRect = mCustomPlot->axisRect();
         QCPAxis* yAxis = axisRect->axis(QCPAxis::AxisType::atLeft);
         QCPAxis* xAxis = axisRect->axis(QCPAxis::AxisType::atBottom);
+
 
         mMaskRect->topLeft->setCoords(mMaskRect->topLeft->key(), yAxis->range().upper);
         mMaskRect->bottomRight->setCoords(mMaskRect->bottomRight->key(), yAxis->range().lower);
@@ -384,6 +413,8 @@ QCustomPlotHelper::QCustomPlotHelper(QCustomPlot* customPlot, QObject *parent)
 
     actEnableStraightLine = new QAction(mIconUnchecked, tr("轴参考线"), this);
     connect(actEnableStraightLine, &QAction::triggered, this, &QCustomPlotHelper::enableStraightLine);
+    actEnableDataTracer = new QAction(mIconUnchecked, tr("点位标记"), this);
+    connect(actEnableDataTracer, &QAction::triggered, this, &QCustomPlotHelper::enableDataTracer);
     actEnableRangeSelect = new QAction(mIconUnchecked, tr("选择范围"), this);
     connect(actEnableRangeSelect, &QAction::triggered, this, &QCustomPlotHelper::enableRangeSelect);
 
@@ -553,26 +584,12 @@ void QCustomPlotHelper::plottableClick(QCPAbstractPlottable *plottable, int data
 
     QCPGraph *graph = qobject_cast<QCPGraph*>(plottable);
     if (graph) {
-        QCPAxisRect *axisRect = mCustomPlot->axisRect(0);
-        // QList<QCPAxisRect*> axisRects = mCustomPlot->axisRects();
-        // for (auto iter : axisRects)
-        // {
-        //     if (iter == axisRect)
-        //         continue;
-        //     QRect rect = iter->rect();
-        //     QRect outerRect = iter->outerRect();
-        //     QPoint pos = event->pos();
-        //     if (iter->rect().contains(event->pos()))
-        //     {
-        //         axisRect = iter;
-        //         break;
-        //     }
-        // }
-
+        QCPAxis *axis = graph->keyAxis(); // 或者 graph->valueAxis();
+        QCPAxisRect *axisRect = axis->axisRect();
         double key = graph->dataMainKey(dataIndex); // 获取X轴的值
         double value = graph->dataMainValue(dataIndex); // 获取Y轴的值
 
-        if (customPlot->property("enable-straightLine").toBool())
+        if (customPlot->property("enable-dataTracer").toBool())
         {
             //标记点和标签
             if(!mTracerData)
@@ -798,7 +815,7 @@ void QCustomPlotHelper::mouseMove(QMouseEvent * event)
 
                 if(Q_NULLPTR == mDragStraightRect)
                     mDragStraightRect = new XCPItemStraightRect(customPlot);//蒙版
-                mDragStraightRect->setRange(QCPRange(key_from, key_to));
+                mDragStraightRect->setRange(axisRect, QCPRange(key_from, key_to));
                 mDragStraightRect->setVisible(true);
 
                 for (int i = 0; i < mCustomPlot->graphCount(); ++i)
@@ -866,6 +883,7 @@ void QCustomPlotHelper::mouseRelease(QMouseEvent * event)
             contextMenu.addAction(actEnableRangeSelect);
         if (mClearMarkerActionVisible || mStraightLineActionVisible || mRangeSelectActionVisible)
             contextMenu.addSeparator();
+        contextMenu.addAction(actEnableDataTracer);
         contextMenu.addAction(actLinearScale);
         contextMenu.addAction(actLogarithmicScale);
         contextMenu.addSeparator();
@@ -955,14 +973,29 @@ void QCustomPlotHelper::enableStraightLine(bool enable)
             mTracerCrossLine->setVisible(enable);
         for (auto tracer : mDataTracers)
             tracer->setVisible(enable);
-
         mCustomPlot->replot(QCustomPlot::rpQueuedReplot);
     }
 }
 
+void QCustomPlotHelper::enableDataTracer(bool enable/* = true*/)
+{
+    if (mCustomPlot->property("enable-dataTracer").toBool())
+        enable = false;
+    else
+        enable = true;
+    mCustomPlot->setProperty("enable-dataTracer", enable);
+    actEnableDataTracer->setIcon(enable ? mIconChecked : mIconUnchecked);
+
+    {
+        //mTracerData->setVisible(false);
+        //mCustomPlot->replot(QCustomPlot::rpQueuedReplot);
+    }
+}
 
 void QCustomPlotHelper::clearMarker()
 {
+    for (auto tracer : mDataTracers)
+        tracer->setVisible(false);
     mTracerData->setVisible(false);
     mCustomPlot->replot(QCustomPlot::rpQueuedReplot);
 }
