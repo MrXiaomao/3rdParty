@@ -168,8 +168,8 @@ void XCPItemTracer::updatePosition(QCPAxisRect *axisRect, double xValue, double 
     if (yValue > yAxis->range().upper)
         yValue = yAxis->range().upper;
 
-    int xNumberPrecision = 3;//xAxis->numberPrecision();
-    int yNumberPrecision = 0;//yAxis->numberPrecision();
+    int xNumberPrecision = 1;//xAxis->numberPrecision();
+    int yNumberPrecision = 1;//yAxis->numberPrecision();
     switch (mTracerType)
     {
     case XAxisTracer:
@@ -418,11 +418,14 @@ QCustomPlotHelper::QCustomPlotHelper(QCustomPlot* customPlot, QObject *parent)
     actEnableRangeSelect = new QAction(mIconUnchecked, tr("选择范围"), this);
     connect(actEnableRangeSelect, &QAction::triggered, this, &QCustomPlotHelper::enableRangeSelect);
 
+    customPlot->setProperty("enableAutoScale", true);//图像启用自缩放功能
+    customPlot->setProperty("enableFixedScale", false);//图像禁用自定义范围
+    customPlot->setProperty("xAxisFixedRange", mXAxisFixedRange);
+    customPlot->rescaleAxes(true);//设置试图自由缩放
     customPlot->setAntialiasedElements(QCP::aeAll);//设置所有图形元素使用抗锯齿渲染
     customPlot->legend->setVisible(true);//设置图例可见
     customPlot->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom | QCP::iSelectPlottables);//设置图形可移动、缩放、选中
     customPlot->xAxis->setTickLabelRotation(-45);//x轴文字倾斜45°角，方便显示长文本
-    customPlot->rescaleAxes(true);//设置试图自由缩放
     // customPlot->yAxis->ticker()->setTickCount(5);
     // customPlot->xAxis->ticker()->setTickCount(10);
     // customPlot->yAxis2->ticker()->setTickCount(5);
@@ -869,7 +872,61 @@ void QCustomPlotHelper::mouseRelease(QMouseEvent * event)
     // 右键
     else if (event->button() == Qt::RightButton)
     {
-        QMenu contextMenu(customPlot);
+        QMenu contextMenu;
+        QMenu *subMenu = contextMenu.addMenu(tr("适应模式"));
+        //QAction * actScaleModel = contextMenu.addAction(tr("自适应"));
+        //subMenu->addAction(actAutoScale);
+
+        QWidgetAction* actFixedRange = new QWidgetAction(subMenu);
+
+        QWidget* container = new QWidget(subMenu);
+        QGridLayout* gridLayout = new QGridLayout(container);
+        gridLayout->setContentsMargins(5, 2, 5, 2); // 调整内边距
+        QCheckBox* checkBox1 = new QCheckBox(tr("自动适应"), container);
+        QCheckBox* checkBox2 = new QCheckBox(tr("限定范围"), container);
+        if (mCustomPlot->property("enableAutoScale").toBool())
+            checkBox1->setChecked(true);
+        else if (mCustomPlot->property("enableFixedScale").toBool())
+            checkBox2->setChecked(true);
+        QSpinBox* spinBoxFixed = new QSpinBox(container);
+        spinBoxFixed->setRange(60, 65536);
+        spinBoxFixed->setValue(mXAxisFixedRange);
+        connect(spinBoxFixed, qOverload<int>(&QSpinBox::valueChanged), this, [=](int value){
+            mXAxisFixedRange = value;
+            mCustomPlot->setProperty("xAxisFixedRange", mXAxisFixedRange);
+        });
+        connect(checkBox1, &QRadioButton::toggled, this, [=](bool checked){
+            mCustomPlot->setProperty("enableAutoScale", checked);
+            mCustomPlot->rescaleAxes(checked);//设置试图自由缩放
+            if (checked){
+                mCustomPlot->setProperty("enableFixedScale", false);
+                checkBox2->setChecked(false);
+            }
+            // spinBoxMin->setEnabled(!checked);
+            // spinBoxMax->setEnabled(!checked);
+            emit autoScaleChanged(checked);
+        });
+        connect(checkBox2, &QRadioButton::toggled, this, [=](bool checked){
+            mCustomPlot->setProperty("enableFixedScale", checked);
+            if (checked){
+                mCustomPlot->setProperty("enableAutoScale", false);
+                mCustomPlot->rescaleAxes(false);//设置试图自由缩放
+                checkBox1->setChecked(false);
+            }
+            // spinBoxMin->setEnabled(!checked);
+            // spinBoxMax->setEnabled(!checked);
+            emit fixedScaleChanged(checked);
+        });
+
+        gridLayout->addWidget(checkBox1, 0, 0);
+        gridLayout->addWidget(checkBox2, 1, 0);
+        gridLayout->addWidget(new QLabel(tr("显示最近记录数："), container), 1, 1);
+        gridLayout->addWidget(spinBoxFixed, 1, 2);
+
+        actFixedRange->setDefaultWidget(container);
+        subMenu->addAction(actFixedRange);
+
+        contextMenu.addSeparator();
         if (mResetActionVisible)
         {
             contextMenu.addAction(actResetView);
@@ -889,6 +946,9 @@ void QCustomPlotHelper::mouseRelease(QMouseEvent * event)
         contextMenu.addSeparator();
         contextMenu.addAction(actExportGraphic);
         contextMenu.exec(QCursor::pos());
+        connect(&contextMenu, &QMenu::destroyed, [&](){
+            container->deleteLater();
+        });
     }
 
     if (customPlot->property("enable-straightLine").toBool())
