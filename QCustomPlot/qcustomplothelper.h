@@ -202,6 +202,8 @@ public:
     Q_SLOT void afterLayout();
 
     Q_SIGNAL void itemActived(QCPGraph *graph, double key, double value);//节点被鼠标点击激活
+    Q_SIGNAL void autoScaleChanged(bool);
+    Q_SIGNAL void fixedScaleChanged(bool);
 
 protected:
     virtual bool eventFilter(QObject *watched, QEvent *event) override;
@@ -225,6 +227,9 @@ private:
 
     QIcon mIconUnchecked, mIconChecked;
     QAction *actResetView;// 恢复试图
+    QAction *actAutoScale;// 自适应模式
+    QWidgetAction* actFixedRange;//自定义范围
+    quint32 mXAxisFixedRange = 300;//最近范围最值
     QAction *actClearMarker;// 清除标签
     QAction *actExportGraphic;// 导出图像
     QAction *actEnableStraightLine;// 启用参考线或基准线
