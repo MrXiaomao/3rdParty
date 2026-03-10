@@ -228,6 +228,7 @@ private:
 
     QIcon mIconUnchecked, mIconChecked;
     QAction *actResetView;// 恢复试图
+    QAction *actAutoScale;// 自适应模式
     QWidgetAction* actFixedRange;//自定义范围
     quint32 mXAxisFixedRange = 300;//最近范围最值
     QAction *actClearMarker;// 清除标签

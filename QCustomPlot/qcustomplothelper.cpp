@@ -875,6 +875,9 @@ void QCustomPlotHelper::mouseRelease(QMouseEvent * event)
     {
         QMenu contextMenu;
         QMenu *subMenu = contextMenu.addMenu(tr("适应模式"));
+        //QAction * actScaleModel = contextMenu.addAction(tr("自适应"));
+        //subMenu->addAction(actAutoScale);
+
         QWidgetAction* actFixedRange = new QWidgetAction(subMenu);
 
         QWidget* container = new QWidget(subMenu);
@@ -883,6 +886,7 @@ void QCustomPlotHelper::mouseRelease(QMouseEvent * event)
         QCheckBox* checkBox1 = new QCheckBox(tr("自动适应"), container);
         QCheckBox* checkBox2 = new QCheckBox(tr("限定范围"), container);
         QCheckBox* checkBox3 = new QCheckBox(tr("手动模式"), container);
+
         if (mCustomPlot->property("enableAutoScale").toBool())
             checkBox1->setChecked(true);
         else if (mCustomPlot->property("enableFixedScale").toBool())
