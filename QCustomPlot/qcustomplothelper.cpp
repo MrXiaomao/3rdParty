@@ -885,14 +885,14 @@ void QCustomPlotHelper::mouseRelease(QMouseEvent * event)
         gridLayout->setContentsMargins(5, 2, 5, 2); // 调整内边距
         QCheckBox* checkBox1 = new QCheckBox(tr("自动适应"), container);
         QCheckBox* checkBox2 = new QCheckBox(tr("限定范围"), container);
-        QCheckBox* checkBox3 = new QCheckBox(tr("手动模式"), container);
+        //QCheckBox* checkBox3 = new QCheckBox(tr("手动模式"), container);
 
         if (mCustomPlot->property("enableAutoScale").toBool())
             checkBox1->setChecked(true);
         else if (mCustomPlot->property("enableFixedScale").toBool())
             checkBox2->setChecked(true);
-        else if (mCustomPlot->property("enableManualScale").toBool())
-            checkBox3->setChecked(true);
+        // else if (mCustomPlot->property("enableManualScale").toBool())
+        //     checkBox3->setChecked(true);
 
         QSpinBox* spinBoxFixed = new QSpinBox(container);
         spinBoxFixed->setRange(60, 65536);
@@ -908,7 +908,7 @@ void QCustomPlotHelper::mouseRelease(QMouseEvent * event)
                 mCustomPlot->setProperty("enableFixedScale", false);
                 mCustomPlot->setProperty("enableManualScale", false);
                 checkBox2->setChecked(false);
-                checkBox3->setChecked(false);
+                //checkBox3->setChecked(false);
             }
             // spinBoxMin->setEnabled(!checked);
             // spinBoxMax->setEnabled(!checked);
@@ -921,31 +921,31 @@ void QCustomPlotHelper::mouseRelease(QMouseEvent * event)
                 mCustomPlot->setProperty("enableManualScale", false);
                 mCustomPlot->rescaleAxes(false);//设置试图自由缩放
                 checkBox1->setChecked(false);
-                checkBox3->setChecked(false);
+                //checkBox3->setChecked(false);
             }
             // spinBoxMin->setEnabled(!checked);
             // spinBoxMax->setEnabled(!checked);
             emit fixedScaleChanged(checked);
         });
-        connect(checkBox3, &QRadioButton::toggled, this, [=](bool checked){
-            mCustomPlot->setProperty("enableManualScale", checked);
-            if (checked){
-                mCustomPlot->setProperty("enableAutoScale", false);
-                mCustomPlot->setProperty("enableFixedScale", false);
-                mCustomPlot->rescaleAxes(false);//设置试图自由缩放
-                checkBox1->setChecked(false);
-                checkBox2->setChecked(false);
-            }
-            // spinBoxMin->setEnabled(!checked);
-            // spinBoxMax->setEnabled(!checked);
-            emit manualScaleChanged(checked);
-        });
+        // connect(checkBox3, &QRadioButton::toggled, this, [=](bool checked){
+        //     mCustomPlot->setProperty("enableManualScale", checked);
+        //     if (checked){
+        //         mCustomPlot->setProperty("enableAutoScale", false);
+        //         mCustomPlot->setProperty("enableFixedScale", false);
+        //         mCustomPlot->rescaleAxes(false);//设置试图自由缩放
+        //         checkBox1->setChecked(false);
+        //         checkBox2->setChecked(false);
+        //     }
+        //     // spinBoxMin->setEnabled(!checked);
+        //     // spinBoxMax->setEnabled(!checked);
+        //     emit manualScaleChanged(checked);
+        // });
 
         gridLayout->addWidget(checkBox1, 0, 0);
         gridLayout->addWidget(checkBox2, 1, 0);
         gridLayout->addWidget(new QLabel(tr("显示最近记录数："), container), 1, 1);
         gridLayout->addWidget(spinBoxFixed, 1, 2);
-        gridLayout->addWidget(checkBox3, 2, 0);
+        //gridLayout->addWidget(checkBox3, 2, 0);
 
         actFixedRange->setDefaultWidget(container);
         subMenu->addAction(actFixedRange);
