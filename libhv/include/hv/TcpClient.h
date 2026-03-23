@@ -240,6 +240,16 @@ public:
         *unpack_setting = *setting;
     }
 
+    std::string peerip() {
+        if (channel == NULL) return "";
+        char buf[SOCKADDR_STRLEN] = {0};
+        return SOCKADDR_IP(&remote_addr, buf);
+    }
+
+    unsigned short peerport() {
+        if (channel == NULL) return 0;
+        return remote_port;
+    }
 public:
     TSocketChannelPtr       channel;
 

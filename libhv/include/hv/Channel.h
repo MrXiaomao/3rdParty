@@ -354,6 +354,19 @@ public:
         return SOCKADDR_STR(addr, buf);
     }
 
+    std::string peerip() {
+        if (io_ == NULL) return "";
+        struct sockaddr* addr = hio_peeraddr(io_);
+        char buf[SOCKADDR_STRLEN] = {0};
+        return SOCKADDR_IP(addr, buf);
+    }
+
+    unsigned short peerport() {
+        if (io_ == NULL) return 0;
+        struct sockaddr_in* addr = (sockaddr_in*)hio_peeraddr(io_);
+        return SOCKADDR_PORT(addr);
+    }
+
 private:
     static void on_connect(hio_t* io) {
         SocketChannel* channel = (SocketChannel*)hio_context(io);

@@ -144,6 +144,8 @@ HV_INLINE void sockaddr_print(sockaddr_u* addr) {
 #define SOCKADDR_LEN(addr)      sockaddr_len((sockaddr_u*)addr)
 #define SOCKADDR_STR(addr, buf) sockaddr_str((sockaddr_u*)addr, buf, sizeof(buf))
 #define SOCKADDR_PRINT(addr)    sockaddr_print((sockaddr_u*)addr)
+#define SOCKADDR_IP(addr, buf)  sockaddr_ip((sockaddr_u*)addr, buf, sizeof(buf))
+#define SOCKADDR_PORT(addr)     sockaddr_port((sockaddr_u*)addr)
 //=====================================================================================
 
 // socket -> setsockopt -> bind
