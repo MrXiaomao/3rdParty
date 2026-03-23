@@ -1,6 +1,11 @@
 #ifndef QGOODWINDOWHELPER_H
 #define QGOODWINDOWHELPER_H
 
+#ifdef Q_OS_WIN
+#include <objidl.h>  // 包含 FORMATETC、STGMEDIUM 定义
+#include <oleidl.h>  // 包含 IDataObject 定义
+#endif //Q_OS_WIN
+
 #include <QGoodWindow>
 #include <QGoodCentralWidget>
 
