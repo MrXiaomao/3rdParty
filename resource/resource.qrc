@@ -69,6 +69,7 @@
         <file>zoom_in.png</file>
         <file>switchOffline.png</file>
         <file>switchOnline.png</file>
+        <file>picture_reset.png</file>
     </qresource>
     <qresource prefix="/font">
         <file>font/FluentIcons.ttf</file>
