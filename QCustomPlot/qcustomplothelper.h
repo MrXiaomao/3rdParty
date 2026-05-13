@@ -117,7 +117,7 @@ public:
     * @param[out]       none
     * @return           void
     */
-    static void setGraphCheckBox(QCustomPlot* customPlot);
+    void setGraphCheckBox(QCustomPlot* customPlot, const QCPAxisRect *axisRect = nullptr);
 
     /**
     * @function name: enableStraightLine
@@ -205,6 +205,7 @@ public:
     Q_SIGNAL void autoScaleChanged(bool);
     Q_SIGNAL void fixedScaleChanged(bool);
     Q_SIGNAL void manualScaleChanged(bool);
+    Q_SIGNAL void selectRangeChanged(const QCPAxisRect *axisRect, const QCPRange& range);
 
 protected:
     virtual bool eventFilter(QObject *watched, QEvent *event) override;
@@ -244,6 +245,8 @@ private:
     bool mStraightLineActionVisible = true;
     bool mRangeSelectActionVisible = true;
 
+    QMap<QString, QList<QCheckBox*>> mChkAxisRect;
+
     /**
     * @function name: 生成一个圆形的图标
     * @brief
@@ -255,6 +258,9 @@ private:
     */
     static QPixmap roundPixmap(QSize sz, QColor clrOut);//单圆
     static QPixmap dblroundPixmap(QSize sz, QColor clrIn, QColor clrOut);//双圆
+
+public:
+    std::function<void(const QCPAxisRect*, bool&)> onContextMenu;
 };
 
 #endif // QCUSTOMPLOTHELPER_H

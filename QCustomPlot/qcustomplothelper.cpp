@@ -382,7 +382,6 @@ void XCPItemStraightRect::refresh()
         QCPAxis* yAxis = axisRect->axis(QCPAxis::AxisType::atLeft);
         QCPAxis* xAxis = axisRect->axis(QCPAxis::AxisType::atBottom);
 
-
         mMaskRect->topLeft->setCoords(mMaskRect->topLeft->key(), yAxis->range().upper);
         mMaskRect->bottomRight->setCoords(mMaskRect->bottomRight->key(), yAxis->range().lower);
     }
@@ -554,6 +553,7 @@ QPixmap QCustomPlotHelper::roundPixmap(QSize sz, QColor clrOut)
 
     QPainter painter(&result);
     painter.setRenderHint(QPainter::Antialiasing,true);
+    painter.setRenderHint(QPainter::SmoothPixmapTransform,true);
 
     QPainterPath bigCirclePath;
     bigCirclePath.addEllipse(0, 0, sz.width(), sz.height());
@@ -738,7 +738,7 @@ void QCustomPlotHelper::mouseMove(QMouseEvent * event)
         mTracerY->updatePosition(axisRect, key, value);
 
         int nTracerCount = mDataTracers.count();
-        int nGraphCount = customPlot->graphCount();
+        int nGraphCount = customPlot->graphCount(axisRect);
         if(nTracerCount < nGraphCount)
         {
             // 根据线条的个数，调整可显示数据点的个数
@@ -768,9 +768,9 @@ void QCustomPlotHelper::mouseMove(QMouseEvent * event)
             XCPItemTracer *tracer = mDataTracers[i];
             if(tracer)
             {
-                tracer->setPen(customPlot->graph(i)->pen());
+                tracer->setPen(customPlot->graph(axisRect, i)->pen());
                 tracer->setBrush(Qt::NoBrush);
-                tracer->setTextPen(customPlot->graph(i)->pen());
+                tracer->setTextPen(customPlot->graph(axisRect, i)->pen());
                 tracer->setTextVisible(true);
                 tracer->updatePosition(axisRect, key, value);
             }
@@ -822,21 +822,16 @@ void QCustomPlotHelper::mouseMove(QMouseEvent * event)
                 mDragStraightRect->setRange(axisRect, QCPRange(key_from, key_to));
                 mDragStraightRect->setVisible(true);
 
-                for (int i = 0; i < mCustomPlot->graphCount(); ++i)
+                for (int i = 0; i < mCustomPlot->graphCount(axisRect); ++i)
                 {
-                    QCPGraph *graph = mCustomPlot->graph(i);
-                    QColor ivertColor = graph->scatterStyle().pen().color();
-                    ivertColor.setRgb(0xff - ivertColor.red(),
-                                      0xff - ivertColor.green(),
-                                      0xff - ivertColor.blue());
-
+                    QCPGraph *graph = mCustomPlot->graph(axisRect, i);
                     QVector<double> keys, values;
                     QVector<QColor> colors;
                     for (int i=0; i<graph->data()->size(); ++i){
-                        if (graph->data()->at(i)->key>=key_from && graph->data()->at(i)->key<=key_to){// && graph->data()->at(i)->value>=value_to) {
+                        if ((qFuzzyCompare(graph->data()->at(i)->key, key_from) || graph->data()->at(i)->key>=key_from) && (qFuzzyCompare(graph->data()->at(i)->key,key_to) || graph->data()->at(i)->key<=key_to)){// && graph->data()->at(i)->value>=value_to) {
                             keys << (double)graph->data()->at(i)->key;
                             values << (double)graph->data()->at(i)->value;
-                            colors << ivertColor;
+                            colors << graph->scatterStyle().pen().color().darker();
                         } else {
                             keys << (double)graph->data()->at(i)->key;
                             values << (double)graph->data()->at(i)->value;
@@ -850,7 +845,7 @@ void QCustomPlotHelper::mouseMove(QMouseEvent * event)
                 mTracerDragLeftLine->setVisible(true);
                 mTracerDragRightLine->setVisible(true);
                 customPlot->setCursor(Qt::SplitHCursor);
-                customPlot->replot(QCustomPlot::rpQueuedReplot);
+                customPlot->replot(QCustomPlot::rpQueuedReplot);                
             }
         }
         else
@@ -868,16 +863,52 @@ void QCustomPlotHelper::mouseRelease(QMouseEvent * event)
     // 左键
     if (event->button() == Qt::LeftButton)
     {
+        if (customPlot->property("enable-rangeSelect").toBool())
+        {
+            QCPAxisRect *axisRect = mCustomPlot->axisRect();
+            QList<QCPAxisRect*> axisRects = mCustomPlot->axisRects();
+            for (auto iter : axisRects)
+            {
+                if (iter == axisRect)
+                    continue;
 
+                if (iter->rect().contains(event->pos()))
+                {
+                    axisRect = iter;
+                    break;
+                }
+            }
+
+            if (mDragStraightRect)
+                emit selectRangeChanged(axisRect, mDragStraightRect->range());
+        }
     }
     // 右键
     else if (event->button() == Qt::RightButton)
     {
+        QCPAxisRect *axisRect = mCustomPlot->axisRect();
+        QList<QCPAxisRect*> axisRects = mCustomPlot->axisRects();
+        for (auto iter : axisRects)
+        {
+            if (iter == axisRect)
+                continue;
+
+            if (iter->rect().contains(event->pos()))
+            {
+                axisRect = iter;
+                break;
+            }
+        }
+
+        // 检查是否允许弹出右键菜单
+        bool allow = true;
+        if (onContextMenu)
+            onContextMenu(axisRect, allow);
+        if (!allow)
+            return;
+
         QMenu contextMenu;
         QMenu *subMenu = contextMenu.addMenu(tr("适应模式"));
-        //QAction * actScaleModel = contextMenu.addAction(tr("自适应"));
-        //subMenu->addAction(actAutoScale);
-
         QWidgetAction* actFixedRange = new QWidgetAction(subMenu);
 
         QWidget* container = new QWidget(subMenu);
@@ -885,14 +916,11 @@ void QCustomPlotHelper::mouseRelease(QMouseEvent * event)
         gridLayout->setContentsMargins(5, 2, 5, 2); // 调整内边距
         QCheckBox* checkBox1 = new QCheckBox(tr("自动适应"), container);
         QCheckBox* checkBox2 = new QCheckBox(tr("限定范围"), container);
-        //QCheckBox* checkBox3 = new QCheckBox(tr("手动模式"), container);
 
         if (mCustomPlot->property("enableAutoScale").toBool())
             checkBox1->setChecked(true);
         else if (mCustomPlot->property("enableFixedScale").toBool())
             checkBox2->setChecked(true);
-        // else if (mCustomPlot->property("enableManualScale").toBool())
-        //     checkBox3->setChecked(true);
 
         QSpinBox* spinBoxFixed = new QSpinBox(container);
         spinBoxFixed->setRange(60, 65536);
@@ -908,10 +936,8 @@ void QCustomPlotHelper::mouseRelease(QMouseEvent * event)
                 mCustomPlot->setProperty("enableFixedScale", false);
                 mCustomPlot->setProperty("enableManualScale", false);
                 checkBox2->setChecked(false);
-                //checkBox3->setChecked(false);
             }
-            // spinBoxMin->setEnabled(!checked);
-            // spinBoxMax->setEnabled(!checked);
+
             emit autoScaleChanged(checked);
         });
         connect(checkBox2, &QRadioButton::toggled, this, [=](bool checked){
@@ -921,31 +947,15 @@ void QCustomPlotHelper::mouseRelease(QMouseEvent * event)
                 mCustomPlot->setProperty("enableManualScale", false);
                 mCustomPlot->rescaleAxes(false);//设置试图自由缩放
                 checkBox1->setChecked(false);
-                //checkBox3->setChecked(false);
             }
-            // spinBoxMin->setEnabled(!checked);
-            // spinBoxMax->setEnabled(!checked);
+
             emit fixedScaleChanged(checked);
         });
-        // connect(checkBox3, &QRadioButton::toggled, this, [=](bool checked){
-        //     mCustomPlot->setProperty("enableManualScale", checked);
-        //     if (checked){
-        //         mCustomPlot->setProperty("enableAutoScale", false);
-        //         mCustomPlot->setProperty("enableFixedScale", false);
-        //         mCustomPlot->rescaleAxes(false);//设置试图自由缩放
-        //         checkBox1->setChecked(false);
-        //         checkBox2->setChecked(false);
-        //     }
-        //     // spinBoxMin->setEnabled(!checked);
-        //     // spinBoxMax->setEnabled(!checked);
-        //     emit manualScaleChanged(checked);
-        // });
 
         gridLayout->addWidget(checkBox1, 0, 0);
         gridLayout->addWidget(checkBox2, 1, 0);
         gridLayout->addWidget(new QLabel(tr("显示最近记录数："), container), 1, 1);
         gridLayout->addWidget(spinBoxFixed, 1, 2);
-        //gridLayout->addWidget(checkBox3, 2, 0);
 
         actFixedRange->setDefaultWidget(container);
         subMenu->addAction(actFixedRange);
@@ -992,43 +1002,55 @@ void QCustomPlotHelper::mouseRelease(QMouseEvent * event)
     customPlot->setProperty("left-clicked", false);
 }
 
-void QCustomPlotHelper::setGraphCheckBox(QCustomPlot* customPlot)
+void QCustomPlotHelper::setGraphCheckBox(QCustomPlot* customPlot, const QCPAxisRect *axisRect)
 {
     // 隐藏图例
     customPlot->legend->setVisible(false);
+    if (axisRect == nullptr)
+        axisRect = customPlot->axisRect();
 
+    int graphCount = customPlot->graphCount(axisRect);
     // 添加可选项
-    for (int i=0; i<customPlot->graphCount(); ++i){
+    for (int i=0; i<graphCount; ++i){
         QCheckBox* checkBox = new QCheckBox(customPlot);
-        checkBox->setText(customPlot->graph(i)->name());
+        checkBox->setText(customPlot->graph(axisRect, i)->name());
         checkBox->setObjectName(tr(""));
         QIcon actionIcon = roundPixmap(QSize(16,16), customPlot->graph(i)->pen().color());
         checkBox->setIcon(actionIcon);
-        checkBox->setChecked(true);
+        checkBox->setChecked(customPlot->graph(axisRect, i)->visible());
         connect(checkBox, &QCheckBox::stateChanged, [=](int state){
-            QCPGraph *graph = customPlot->graph(i);
+            QCPGraph *graph = customPlot->graph(axisRect, i);
             if (graph){
                 graph->setVisible(Qt::CheckState::Checked == state ? true : false);
                 customPlot->replot(QCustomPlot::rpQueuedReplot);
             }
         });
-    }
+        mChkAxisRect[axisRect->objectName()].push_back(checkBox);
+    }    
 }
 
 void QCustomPlotHelper::afterLayout()
 {
     QCustomPlot* customPlot = qobject_cast<QCustomPlot*>(sender());
+    QList<QCPAxisRect*> axisRects = customPlot->axisRects();
+    QFontMetrics fontMetrics(customPlot->font());
+    int avg_height = fontMetrics.ascent() + fontMetrics.descent();
 
-    // 布局改变之前重新设定位置
+    foreach (QCPAxisRect *axisRect, axisRects)
     {
-        QList<QCheckBox*> checkBoxs = customPlot->findChildren<QCheckBox*>();
-        QFontMetrics fontMetrics(customPlot->font());
-        int avg_height = fontMetrics.ascent() + fontMetrics.descent();
-        int i = 0;
-        for (auto checkBox : checkBoxs){
-            checkBox->move(customPlot->axisRect()->left() + 10, customPlot->axisRect()->topRight().y() + i++ * checkBox->height() + 5);
+        if (mChkAxisRect.contains(axisRect->objectName())){
+            QList<QCheckBox*> checkBoxs = mChkAxisRect[axisRect->objectName()];
+            // 布局改变之前重新设定位置
+            {
+                int i = 0;
+                for (auto checkBox : checkBoxs){
+                    int h = 20;//checkBox->height();
+                    checkBox->move(axisRect->left() + 10, axisRect->topRight().y() + i++ * h + 5);
+                }
+            }
         }
     }
+
 
     if (mCustomPlot->property("enable-rangeSelect").toBool())
     {
@@ -1080,7 +1102,8 @@ void QCustomPlotHelper::clearMarker()
 {
     for (auto tracer : mDataTracers)
         tracer->setVisible(false);
-    mTracerData->setVisible(false);
+    if (mTracerData)
+        mTracerData->setVisible(false);
     mCustomPlot->replot(QCustomPlot::rpQueuedReplot);
 }
 

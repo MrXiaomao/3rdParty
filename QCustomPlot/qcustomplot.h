@@ -3907,12 +3907,14 @@ public:
   // specialized interface for QCPGraph:
   QCPGraph *graph(int index) const;
   QCPGraph *graph(QString name) const;
+  QCPGraph *graph(const QCPAxisRect *axisRect, const int& index) const;
+  QCPGraph *graph(const QCPAxisRect *axisRect, const QString& name) const;
   QCPGraph *graph() const;
   QCPGraph *addGraph(QCPAxis *keyAxis=nullptr, QCPAxis *valueAxis=nullptr);
   bool removeGraph(QCPGraph *graph);
   bool removeGraph(int index);
   int clearGraphs();
-  int graphCount() const;
+  int graphCount(const QCPAxisRect *axisRect = nullptr) const;
   QList<QCPGraph*> selectedGraphs() const;
 
   // item interface:
@@ -3942,6 +3944,7 @@ public:
   // axis rect/layout interface:
   int axisRectCount() const;
   QCPAxisRect* axisRect(int index=0) const;
+  QCPAxisRect *axisRect(const QString& name) const;
   QList<QCPAxisRect*> axisRects() const;
   QCPLayoutElement* layoutElementAt(const QPointF &pos) const;
   QCPAxisRect* axisRectAt(const QPointF &pos) const;
@@ -5454,6 +5457,7 @@ protected:
   QCPRange mDataRange;
   QCPAxis::ScaleType mDataScaleType;
   QCPColorGradient mGradient;
+  QCP::Interactions mInteractions;
   int mBarWidth;
   
   // non-property members:
@@ -5826,6 +5830,8 @@ public:
   inline QCPRange valueRange() const { return QCPRange(value, value); } // note that bar base value isn't held in each QCPBarsData and thus can't/shouldn't be returned here
   
   double key, value;
+  QPen pen;
+  QBrush brush;
 };
 Q_DECLARE_TYPEINFO(QCPBarsData, Q_PRIMITIVE_TYPE);
 
@@ -5882,6 +5888,7 @@ public:
   // setters:
   void setData(QSharedPointer<QCPBarsDataContainer> data);
   void setData(const QVector<double> &keys, const QVector<double> &values, bool alreadySorted=false);
+  void setData(const QVector<double> &keys, const QVector<double> &values, const QVector<QPen>& pens, const QVector<QBrush>& brushs, bool alreadySorted=false);
   void setWidth(double width);
   void setWidthType(WidthType widthType);
   void setBarsGroup(QCPBarsGroup *barsGroup);
@@ -5890,6 +5897,7 @@ public:
   
   // non-property methods:
   void addData(const QVector<double> &keys, const QVector<double> &values, bool alreadySorted=false);
+  void addData(const QVector<double> &keys, const QVector<double> &values, const QVector<QPen>& pens, const QVector<QBrush>& brushs, bool alreadySorted=false);
   void addData(double key, double value);
   void moveBelow(QCPBars *bars);
   void moveAbove(QCPBars *bars);

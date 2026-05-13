@@ -2,7 +2,15 @@
 #define QTELNET_H
 
 #include <QObject>
+#define USED_LIBHV  1
+#if USED_LIBHV
+#include <hv/TcpClient.h>
+#include <hv/htime.h>
+#include <hv/hsocket.h>
+#else
+#endif //USED_LIBHV
 #include <QTcpSocket>
+
 #if (QT_VERSION >= QT_VERSION_CHECK(6,8,0))
 #include <QWebSocket>
 #endif
@@ -75,7 +83,14 @@ protected:
     };
 
 private:
+#if USED_LIBHV
+    hv::TcpClient m_tcpSocket;
+    bool m_isConnected = false;
+#else
     QTcpSocket m_tcpSocket;
+#endif //USED_LIBHV
+
+
 #if (QT_VERSION >= QT_VERSION_CHECK(6,8,0))
     QWebSocket m_webSocket;
 #endif
@@ -145,21 +160,25 @@ public:
 
     QString peerInfo()const;
     QString peerName()const;
-
+#if USED_LIBHV
+#else
     QString errorString();
+#endif //USED_LIBHV
 
 signals:
     void socketReadyRead(const char *buff, int len);
     void endOfRecord();
     void echoLocal(bool echo);
+
 	void stateChanged(QAbstractSocket::SocketState s);
     void error(QAbstractSocket::SocketError err);
 
 private slots:
     void socketError(QAbstractSocket::SocketError err);
+    void onStateChanged(QAbstractSocket::SocketState s);
+
     void onTcpReadyRead();
     void binaryMessageReceived(const QByteArray &message);
-	void onStateChanged(QAbstractSocket::SocketState s);
 };
 
 #endif // QTELNET_H

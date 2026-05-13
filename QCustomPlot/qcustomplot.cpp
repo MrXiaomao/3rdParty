@@ -3558,7 +3558,7 @@ void QCPLayoutElement::parentPlotInitialized(QCustomPlot *parentPlot)
 {
   foreach (QCPLayoutElement *el, elements(false))
   {
-    if (!el->parentPlot())
+    if (el && !el->parentPlot())
       el->initializeParentPlot(parentPlot);
   }
 }
@@ -14583,6 +14583,51 @@ QCPGraph *QCustomPlot::graph(QString name) const
   }
 }
 
+QCPGraph *QCustomPlot::graph(const QCPAxisRect *axisRect, const int& index) const
+{
+  QList<QCPGraph*> graphs;
+
+  // 遍历目标AxisRect下所有坐标轴
+  for (QCPAxis *axis : axisRect->axes(QCPAxis::atLeft)) {
+    // 拿到当前轴绑定的所有plottable
+    for (QCPAbstractPlottable *plottable : axis->plottables()) {
+      // 检查是否是QCPGraph
+      if (QCPGraph *graph = qobject_cast<QCPGraph*>(plottable)) {
+        graphs.append(graph);
+      }
+    }
+  }
+
+  if (index >= 0 && index < graphs.size())
+  {
+    return graphs.at(index);
+  } else
+  {
+    qDebug() << Q_FUNC_INFO << "index out of bounds:" << index;
+    return nullptr;
+  }
+}
+
+QCPGraph *QCustomPlot::graph(const QCPAxisRect *axisRect, const QString& name) const
+{
+    // 遍历目标AxisRect下所有坐标轴
+    for (QCPAxis *axis : axisRect->axes(QCPAxis::atLeft)) {
+        // 拿到当前轴绑定的所有plottable
+        for (QCPAbstractPlottable *plottable : axis->plottables()) {
+            // 检查是否是QCPGraph
+            if (QCPGraph *graph = qobject_cast<QCPGraph*>(plottable)) {
+                if (graph->name() == name)
+                  return graph;
+            }
+        }
+    }
+
+    {
+      qDebug() << Q_FUNC_INFO << "don't find:" << name;
+      return nullptr;
+    }
+}
+
 /*! \overload
   
   Returns the last graph, that was created with \ref addGraph. If there are no graphs in the plot,
@@ -14679,9 +14724,26 @@ int QCustomPlot::clearGraphs()
   
   \see graph, addGraph
 */
-int QCustomPlot::graphCount() const
+int QCustomPlot::graphCount(const QCPAxisRect *axisRect) const
 {
-  return mGraphs.size();
+  if (axisRect == nullptr)
+    return mGraphs.size();
+  else{
+    QList<QCPGraph*> graphs;
+
+    // 遍历目标AxisRect下所有坐标轴
+    for (QCPAxis *axis : axisRect->axes(QCPAxis::atLeft)) {
+            // 拿到当前轴绑定的所有plottable
+            for (QCPAbstractPlottable *plottable : axis->plottables()) {
+                // 检查是否是QCPGraph
+                if (QCPGraph *graph = qobject_cast<QCPGraph*>(plottable)) {
+                  graphs.append(graph);
+                }
+            }
+    }
+
+    return graphs.size();
+  }
 }
 
 /*!
@@ -15102,6 +15164,22 @@ QCPAxisRect *QCustomPlot::axisRect(int index) const
   } else
   {
     qDebug() << Q_FUNC_INFO << "invalid axis rect index" << index;
+    return nullptr;
+  }
+}
+
+
+QCPAxisRect *QCustomPlot::axisRect(const QString& name) const
+{
+  const QList<QCPAxisRect*> rectList = axisRects();
+  foreach (QCPAxisRect *targetAxisRect, rectList)
+  {
+    if (targetAxisRect->objectName() == name)
+      return targetAxisRect;
+  }
+
+  {
+    qDebug() << Q_FUNC_INFO << "invalid axis rect name" << name;
     return nullptr;
   }
 }
@@ -24811,6 +24889,12 @@ void QCPBars::setData(const QVector<double> &keys, const QVector<double> &values
   addData(keys, values, alreadySorted);
 }
 
+void QCPBars::setData(const QVector<double>& keys, const QVector<double>& values, const QVector<QPen>& pens, const QVector<QBrush>& brushs, bool alreadySorted)
+{
+    mDataContainer->clear();
+    addData(keys, values, pens, brushs, alreadySorted);
+}
+
 /*!
   Sets the width of the bars.
 
@@ -24904,10 +24988,33 @@ void QCPBars::addData(const QVector<double> &keys, const QVector<double> &values
   {
     it->key = keys[i];
     it->value = values[i];
+    it->pen = mPen;
+    it->brush = mBrush;
     ++it;
     ++i;
   }
   mDataContainer->add(tempData, alreadySorted); // don't modify tempData beyond this to prevent copy on write
+}
+
+void QCPBars::addData(const QVector<double>& keys, const QVector<double>& values, const QVector<QPen>& pens, const QVector<QBrush>& brushs, bool alreadySorted)
+{
+    if (keys.size() != values.size())
+        qDebug() << Q_FUNC_INFO << "keys and values have different sizes:" << keys.size() << values.size();
+    const int n = qMin(keys.size(), values.size());
+    QVector<QCPBarsData> tempData(n);
+    QVector<QCPBarsData>::iterator it = tempData.begin();
+    const QVector<QCPBarsData>::iterator itEnd = tempData.end();
+    int i = 0;
+    while (it != itEnd)
+    {
+        it->key = keys[i];
+        it->value = values[i];
+        it->pen = (pens.size() > i) ? pens[i] : mPen;
+        it->brush = (brushs.size() > i) ? brushs[i] : mBrush;
+        ++it;
+        ++i;
+    }
+    mDataContainer->add(tempData, alreadySorted); // don't modify tempData beyond this to prevent copy on write
 }
 
 /*! \overload
@@ -25185,11 +25292,33 @@ void QCPBars::draw(QCPPainter *painter)
         mSelectionDecorator->applyPen(painter);
       } else
       {
-        painter->setBrush(mBrush);
-        painter->setPen(mPen);
+        if (it->brush.gradient()) {
+          //QLinearGradient gradient(getBarRect(it->key, it->value).topLeft(), getBarRect(it->key, it->value).bottomLeft());
+          const QGradient* gradientPtr = it->brush.gradient();
+          if (gradientPtr->type() == QGradient::LinearGradient) {
+              // 这里只考虑上下线性渐变色
+              QLinearGradient gradient(getBarRect(it->key, it->value).topLeft(), getBarRect(it->key, it->value).bottomLeft());
+              gradient.setStops(gradientPtr->stops());
+              painter->setBrush(QBrush(gradient));
+          }
+          else if (gradientPtr->type() == QGradient::RadialGradient) {
+              painter->setBrush(it->brush);
+          }
+          else if (gradientPtr->type() == QGradient::ConicalGradient) {
+              painter->setBrush(it->brush);
+          }
+        } else
+        {
+            painter->setBrush(it->brush/*mBrush*/);
+        }
+
+        painter->setPen(it->pen/*mPen*/);
       }
       applyDefaultAntialiasingHint(painter);
       painter->drawPolygon(getBarRect(it->key, it->value));
+      // QRectF barRectF = getBarRect(it->key, it->value);
+      // QRect barRect(barRectF.left(), barRectF.top(), barRectF.width(), barRectF.height());
+      // painter->drawPolygon(barRect);// drawPolygon(barRectF) //会使图像产生渐变色 drawRect
     }
   }
   

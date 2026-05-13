@@ -2,6 +2,7 @@
 #include <QHostAddress>
 #include <QNetworkSession>
 #include <QNetworkConfigurationManager>
+#include <QNetworkProxy>
 
 const char QTelnet::IACWILL[2] = { IAC, WILL };
 const char QTelnet::IACWONT[2] = { IAC, WONT };
@@ -17,15 +18,75 @@ char QTelnet::_arrCR[2]           = { 13, 0 };
 QTelnet::QTelnet(SocketType type, QObject *parent) :
     QObject(parent),  m_socketType(type), m_actualSB(0)
 {
+#if USED_LIBHV
+    m_tcpSocket.onConnection = [&](const hv::SocketChannelPtr& channel)
+    {
+        if (channel->isConnected()){
+            m_isConnected = true;
+        }
+        else if (channel->isClosed()){
+            m_isConnected = false;
+        }
+        else {
+            return;
+        }
+    };
+    m_tcpSocket.onMessage = [&](const hv::SocketChannelPtr& channel, hv::Buffer* buf)
+    {
+        char* src = (char*)buf->data();
+        QByteArray dest;
+        for (int i=0; i<buf->size(); ++i){
+            // 保留：英文字母、数字、空格、回车、常见符号
+            if (isalpha(src[i]) || isdigit(src[i]) || src[i] == ' ' || src[i] == '\r' || src[i] == '\n' ||
+                (src[i] >= 33 && src[i] <= 47) ||  // !"#$%&'()*+,-./
+                (src[i] >= 58 && src[i] <= 64) ||  // :;<=>?@
+                (src[i] >= 91 && src[i] <= 96) ||  // [\]^_`
+                (src[i] >= 123 && src[i] <= 126)) { // {|}~
+                dest.push_back(src[i]);
+            }
+        }
+
+        emit socketReadyRead(dest.constData(), dest.size());
+        return ;
+
+        qint64 readed = buf->size();
+        if (readed > IncommingBufferSize)
+        {
+            memcpy(m_buffIncoming, buf->data(), IncommingBufferSize);
+        }
+        else
+        {
+            memcpy(m_buffIncoming, buf->data(), readed);
+        }
+
+        qint64 processed;
+        if( readed != 0 )
+        {
+            switch( readed )
+            {
+            case -1:
+                disconnectFromHost();
+                break;
+            default:
+                processed = doTelnetInProtocol(readed);
+                if( processed > 0 )
+                    emit socketReadyRead(m_buffProcessed, processed);
+
+                break;
+            }
+        }
+    };
+
+#else
     connect(&m_tcpSocket, &QTcpSocket::errorOccurred, this, &QTelnet::socketError);
     connect(&m_tcpSocket, &QTcpSocket::readyRead, this, &QTelnet::onTcpReadyRead);
     connect(&m_tcpSocket, &QTcpSocket::stateChanged, this, &QTelnet::onStateChanged);
+#endif //USED_LIBHV
 
 #if (QT_VERSION >= QT_VERSION_CHECK(6,8,0))
     connect(&m_webSocket, &QWebSocket::errorOccurred, this, &QTelnet::socketError);
     connect(&m_webSocket, &QWebSocket::binaryMessageReceived, this, &QTelnet::binaryMessageReceived);
     connect(&m_webSocket, &QWebSocket::stateChanged, this, &QTelnet::onStateChanged);
-#endif
 
     QNetworkConfigurationManager manager;
     QNetworkConfiguration config = manager.defaultConfiguration();
@@ -37,6 +98,7 @@ QTelnet::QTelnet(SocketType type, QObject *parent) :
     }
     QSharedPointer<QNetworkSession> spNetworkSession(new QNetworkSession(config));
     m_tcpSocket.setProperty("_q_networksession", QVariant::fromValue(spNetworkSession));
+#endif
 }
 
 void QTelnet::setType(SocketType type)
@@ -54,7 +116,14 @@ void QTelnet::setType(SocketType type)
 QString QTelnet::peerInfo() const
 {
     if(m_socketType == TCP)
+#if USED_LIBHV
+    {
+        char buf[SOCKADDR_STRLEN] = {0};
+        return QString::fromStdString(m_tcpSocket.remote_host)+" ("+QString::fromStdString(SOCKADDR_STR(&m_tcpSocket.remote_addr, buf))+" ):"+QString::number(m_tcpSocket.remote_port);
+    }
+#else
         return m_tcpSocket.peerName()+" ("+m_tcpSocket.peerAddress().toString()+" ):"+m_tcpSocket.peerPort();
+#endif // USED_LIBHV
 #if (QT_VERSION >= QT_VERSION_CHECK(6,8,0))
     else if(m_socketType == WEBSOCKET || m_socketType == SECUREWEBSOCKET)
         return m_webSocket.peerName()+" ("+m_webSocket.peerAddress().toString()+" ):"+QString::number(m_webSocket.peerPort());
@@ -66,7 +135,11 @@ QString QTelnet::peerInfo() const
 QString QTelnet::peerName() const
 {
     if(m_socketType == TCP)
+#if USED_LIBHV
+        return "unknown";
+#else
         return m_tcpSocket.peerName();
+#endif //USED_LIBHV
 #if (QT_VERSION >= QT_VERSION_CHECK(6,8,0))
     else if(m_socketType == WEBSOCKET || m_socketType == SECUREWEBSOCKET)
         return m_webSocket.peerName();
@@ -78,7 +151,12 @@ QString QTelnet::peerName() const
 bool QTelnet::isConnected() const
 {
     if(m_socketType == TCP)
+#if USED_LIBHV
+        return m_isConnected;
+#else
         return m_tcpSocket.state() == QAbstractSocket::ConnectedState;
+#endif // USED_LIBHV
+
 #if (QT_VERSION >= QT_VERSION_CHECK(6,8,0))
     else if(m_socketType == WEBSOCKET || m_socketType == SECUREWEBSOCKET)
         return m_webSocket.state() == QAbstractSocket::ConnectedState;
@@ -92,9 +170,19 @@ bool QTelnet::connectToHost(const QString &host, quint16 port)
     if(!isConnected()) {
         resetProtocol();
         if(m_socketType == TCP) {
+#if USED_LIBHV
+            int connfd = m_tcpSocket.createsocket(port, host.toStdString().c_str());
+            if (connfd < 0){
+                return false;
+            }
+
+            m_tcpSocket.start();
+            return true;
+#else
             m_tcpSocket.abort();
             m_tcpSocket.connectToHost(host, port, QAbstractSocket::ReadWrite, QAbstractSocket::AnyIPProtocol);
             m_tcpSocket.waitForConnected();
+#endif //USED_LIBHV
             return isConnected();
         }
 #if (QT_VERSION >= QT_VERSION_CHECK(6,8,0))
@@ -116,7 +204,11 @@ bool QTelnet::connectToHost(const QString &host, quint16 port)
 void QTelnet::disconnectFromHost(void)
 {
     if(m_socketType == TCP)
+#if USED_LIBHV
+        m_tcpSocket.closesocket();
+#else
         m_tcpSocket.disconnectFromHost();
+#endif //USED_LIBHV
 #if (QT_VERSION >= QT_VERSION_CHECK(6,8,0))
     else if(m_socketType == WEBSOCKET || m_socketType == SECUREWEBSOCKET)
         m_webSocket.close();
@@ -128,7 +220,11 @@ void QTelnet::write(const char c)
     if(!isConnected())
         return;
     if(m_socketType == TCP)
+#if USED_LIBHV
+        m_tcpSocket.send( (char*)&c, 1 );
+#else
         m_tcpSocket.write( (char*)&c, 1 );
+#endif //USED_LIBHV
 #if (QT_VERSION >= QT_VERSION_CHECK(6,8,0))
     else if(m_socketType == WEBSOCKET || m_socketType == SECUREWEBSOCKET)
         m_webSocket.sendBinaryMessage(QByteArray(&c, 1));
@@ -140,7 +236,11 @@ qint64 QTelnet::write(const char *data, qint64 len)
     if(!isConnected())
         return 0;
     if(m_socketType == TCP) {
+#if USED_LIBHV
+        return m_tcpSocket.send( data, len );
+#else
         return m_tcpSocket.write( data, len );
+#endif //USED_LIBHV
     }
 #if (QT_VERSION >= QT_VERSION_CHECK(6,8,0))
     else if(m_socketType == WEBSOCKET || m_socketType == SECUREWEBSOCKET) {
@@ -156,7 +256,11 @@ qint64 QTelnet::read(char *data, qint64 maxlen)
     if(!isConnected())
         return 0;
     if(m_socketType == TCP)
+#if USED_LIBHV
+        return 0;
+#else
         return m_tcpSocket.read(data, maxlen);
+#endif //USED_LIBHV
 #if (QT_VERSION >= QT_VERSION_CHECK(6,8,0))
     else if(m_socketType == WEBSOCKET || m_socketType == SECUREWEBSOCKET) {
         return 0;
@@ -179,8 +283,66 @@ void QTelnet::sendData(const QByteArray &ba)
 
 void QTelnet::sendData(const char *data, int len)
 {
-    if( isConnected() )
-        transpose( data, len );
+    if( isConnected() ){
+        //transpose( data, len ); // 逐个字符发送效率太低
+        m_tcpSocket.send(data, len);
+        return;
+        QByteArray buf;
+        for( int i = 0; i < len; i++ )
+        {
+            switch( data[i] )
+            {
+            case IAC:
+                // Escape IAC twice in stream ... to be telnet protocol compliant
+                // this is there in binary and non-binary mode.
+                buf.push_back(IAC);
+                buf.push_back(IAC);
+                break;
+            case 10:    // \n
+                // We need to heed RFC 854. LF (\n) is 10, CR (\r) is 13
+                // we assume that the Terminal sends \n for lf+cr and \r for just cr
+                // linefeed+carriage return is CR LF
+
+                // En modo binario no se traduce nada.
+                if( testBinaryMode()
+#if (QT_VERSION >= QT_VERSION_CHECK(6,8,0))
+                    || m_socketType == WEBSOCKET  || m_socketType == SECUREWEBSOCKET
+#endif
+                    )
+                    buf.push_back(data[i]);
+                else{
+                    buf.push_back('\r');
+                    buf.push_back('\n');
+                }
+                break;
+            case 13:    // \r
+                // carriage return is CR NUL */
+
+                // En modo binario no se traduce nada.
+                if( testBinaryMode()
+#if (QT_VERSION >= QT_VERSION_CHECK(6,8,0))
+                    || m_socketType == WEBSOCKET || m_socketType == SECUREWEBSOCKET
+#endif
+                    )
+                    buf.push_back(data[i]);
+                else
+                {
+                    buf.push_back('\r');
+                    buf.push_back('\n');
+                }
+                break;
+            default:
+                // all other characters are just copied
+                buf.push_back(data[i]);
+                break;
+            }
+        }
+#if USED_LIBHV
+        m_tcpSocket.send(buf.constData(), buf.size());
+#else
+        m_tcpSocket.write(buf.constData(), buf.size());
+#endif
+    }
 }
 
 void QTelnet::socketError(QAbstractSocket::SocketError err)
@@ -188,7 +350,13 @@ void QTelnet::socketError(QAbstractSocket::SocketError err)
     disconnectFromHost();
     emit error(err);
 }
+void QTelnet::onStateChanged(QAbstractSocket::SocketState s)
+{
+    emit stateChanged(s);
+}
 
+#if USED_LIBHV
+#else
 QString QTelnet::errorString()
 {
     if(m_socketType == TCP)
@@ -200,6 +368,7 @@ QString QTelnet::errorString()
 
     return QString();
 }
+#endif //USED_LIBHV
 
 void QTelnet::setCustomCR(char cr, char cr2)
 {
@@ -661,7 +830,7 @@ void QTelnet::onTcpReadyRead()
 {
     qint64 readed;
     qint64 processed;
-
+    QByteArray buf;
     while( (readed = read(m_buffIncoming, IncommingBufferSize)) != 0 )
     {
         switch( readed )
@@ -671,12 +840,17 @@ void QTelnet::onTcpReadyRead()
             break;
         default:
             processed = doTelnetInProtocol(readed);
-            if( processed > 0 )
-                emit socketReadyRead(m_buffProcessed, processed);
+            if( processed > 0 ){
+                buf.push_back(QByteArray::fromRawData(m_buffProcessed, processed));
+                //emit socketReadyRead(m_buffProcessed, processed);
+            }
 
             break;
         }
     }
+
+    if (buf.size() > 0)
+        emit socketReadyRead(buf.constData(), buf.size());
 }
 
 void QTelnet::binaryMessageReceived(const QByteArray &message)
@@ -684,8 +858,4 @@ void QTelnet::binaryMessageReceived(const QByteArray &message)
     emit socketReadyRead(message.constData(), message.length());
 }
 
-void QTelnet::onStateChanged(QAbstractSocket::SocketState s) 
-{
-    emit stateChanged(s);
-}
 
