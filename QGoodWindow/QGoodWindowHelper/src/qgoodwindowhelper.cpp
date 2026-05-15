@@ -56,7 +56,8 @@ void QGoodWindowHelper::setupUiHelper(QMainWindow* centralWidget, bool isDarkThe
     mGoodCentraWidget->setCentralWidget(mCentralWidget);
     setCentralWidget(mGoodCentraWidget);
 
-    setWindowIcon(mCentralWidget->windowIcon());
+    if (!mCentralWidget->windowIcon().isNull())
+        setWindowIcon(mCentralWidget->windowIcon());
     setWindowTitle(mCentralWidget->windowTitle());
 
     mGoodCentraWidget->setTitleAlignment(Qt::AlignCenter);

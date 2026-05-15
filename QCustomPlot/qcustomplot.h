@@ -3664,17 +3664,17 @@ public:
     
     \see setType
   */
-  enum PositionType { ptAbsolute        ///< 绝对像素左边，相对于左上角
+  enum PositionType { ptAbsolute        ///< 绝对像素坐标，以绘图区域左上角为原点 (0,0)，单位为像素。
                                         ///< Static positioning in pixels, starting from the top left corner of the viewport/widget.
-                      ,ptViewportRatio  ///< 相对于整个视口的比例位置(0-1)
+                      ,ptViewportRatio  ///< 视口比例坐标，范围 [0,1]，表示相对于整个 QCustomPlot 视图（含边距）的相对位置。
                                         ///< Static positioning given by a fraction of the viewport size. For example, if you call setCoords(0, 0), the position will be at the top
                                         ///< left corner of the viewport/widget. setCoords(1, 1) will be at the bottom right corner, setCoords(0.5, 0) will be horizontally centered and
                                         ///< vertically at the top of the viewport/widget, etc.
-                      ,ptAxisRectRatio  ///< 相对于轴矩形的比例位置(0-1)
+                      ,ptAxisRectRatio  ///< 轴矩形比例坐标，范围 [0,1]，表示相对于当前坐标轴矩形（axis rect）的相对位置，0 为左/下边缘，1 为右/上边缘。
                                         ///< Static positioning given by a fraction of the axis rect size (see \ref setAxisRect). For example, if you call setCoords(0, 0), the position will be at the top
                                         ///< left corner of the axis rect. setCoords(1, 1) will be at the bottom right corner, setCoords(0.5, 0) will be horizontally centered and
                                         ///< vertically at the top of the axis rect, etc. You can also go beyond the axis rect by providing negative coordinates or coordinates larger than 1.
-                      ,ptPlotCoords     ///< 绘图坐标
+                      ,ptPlotCoords     ///< 绘图数值坐标（数据坐标），使用实际数据轴上的数值（如 x=2.5, y=3.8），随坐标轴缩放自动调整。
                                         ///< Dynamic positioning at a plot coordinate defined by two axes (see \ref setAxes).
                     };
   Q_ENUMS(PositionType)
