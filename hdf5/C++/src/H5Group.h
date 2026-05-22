@@ -20,7 +20,7 @@ namespace H5 {
     \brief Class Group represents an HDF5 group.
 */
 //  Inheritance: CommonFG/H5Object -> H5Location -> IdComponent
-class H5_DLLCPP Group : public H5Object, public CommonFG {
+class  Group : public H5Object, public CommonFG {
   public:
     // Close this group.
     virtual void close() override;
@@ -36,7 +36,7 @@ class H5_DLLCPP Group : public H5Object, public CommonFG {
     virtual void throwException(const H5std_string &func_name, const H5std_string &msg) const override;
 
     // for CommonFG to get the file id.
-    virtual hid_t getLocId() const override;
+    virtual hid_t getLocId() const;
 
     // Creates a group by way of dereference.
     Group(const H5Location &loc, const void *ref, H5R_type_t ref_type = H5R_OBJECT,

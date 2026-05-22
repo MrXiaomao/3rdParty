@@ -76,4 +76,3 @@ unix:!macx: PRE_TARGETDEPS += $$PWD/lib/unix/libsz.a
 INCLUDEPATH += $$PWD/src/
 INCLUDEPATH += $$PWD/include/
 DEPENDPATH += $$PWD/include/
-

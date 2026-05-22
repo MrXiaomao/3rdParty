@@ -23,7 +23,7 @@ namespace H5 {
     In most cases, the C library handles these operations and an application
     rarely needs them.
 */
-class H5_DLLCPP IdComponent {
+class  IdComponent {
   public:
     // Increment reference counter.
     void incRefCount(const hid_t obj_id) const;
@@ -58,7 +58,7 @@ class H5_DLLCPP IdComponent {
     // Sets the identifier of this object to a new value.
     void setId(const hid_t new_id);
 
-#ifndef DOXYGEN_SHOULD_SKIP_THIS
+//#ifndef DOXYGEN_SHOULD_SKIP_THIS
 
     // Gets the identifier of this object.
     virtual hid_t getId() const = 0;
@@ -78,7 +78,7 @@ class H5_DLLCPP IdComponent {
         return ("IdComponent");
     }
 
-#endif // DOXYGEN_SHOULD_SKIP_THIS
+//#endif // DOXYGEN_SHOULD_SKIP_THIS
 
     // Destructor
     virtual ~IdComponent() = default;
