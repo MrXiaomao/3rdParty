@@ -15,7 +15,7 @@
  */
 #ifndef H5public_H
 #define H5public_H
-#ifndef H5_BUILT_AS_DYNAMIC_LIB
+#if !defined(H5_BUILT_AS_DYNAMIC_LIB) && !defined(HDF5_MSVC_STATIC_LINK)
 #define H5_BUILT_AS_DYNAMIC_LIB
 #endif
 
