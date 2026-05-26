@@ -98,7 +98,11 @@
 #define H5_DLLCPPVAR extern __attribute__((visibility("default")))
 #endif
 #else
-#if defined(_MSC_VER) /* MSVC Compiler Case */
+#if defined(_MSC_VER) && defined(HDF5_CPP_EMBEDDED_IN_APP)
+/* C++ 包装源码编入主程序：类定义不用 dllimport，C API 仍通过 hdf5.lib 链接 DLL */
+#define H5_DLLCPP
+#define H5_DLLCPPVAR extern
+#elif defined(_MSC_VER) /* MSVC Compiler Case */
 #define H5_DLLCPP    __declspec(dllimport)
 #define H5_DLLCPPVAR __declspec(dllimport)
 #elif (__GNUC__ >= 4) /* GCC 4.x has support for visibility options */
