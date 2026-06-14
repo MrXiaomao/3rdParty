@@ -1,4 +1,4 @@
- #ifndef QGOODWINDOWHELPER_H
+﻿#ifndef QGOODWINDOWHELPER_H
 #define QGOODWINDOWHELPER_H
 
 #ifdef Q_OS_WIN
@@ -15,7 +15,8 @@ class QGoodWindowHelper : public QGoodWindow
 public:
     explicit QGoodWindowHelper(QWidget *parent = nullptr);
     ~QGoodWindowHelper();
-    void setupUiHelper(QMainWindow*, bool isDarkTheme = true);
+    void setupUiHelper(QMainWindow*);
+    void setupUiHelper(QMainWindow*, bool isDarkTheme);
 
     void fixMenuBarWidth(void) {
         if (mMenuBar) {

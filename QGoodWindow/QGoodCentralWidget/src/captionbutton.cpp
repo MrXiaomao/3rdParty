@@ -1,4 +1,4 @@
-/*
+﻿/*
 The MIT License (MIT)
 
 Copyright © 2018-2023 Antonio Dias (https://github.com/antonypro)
@@ -95,7 +95,7 @@ void CaptionButton::drawIcons()
     {
     case IconType::Minimize:
     {
-        QPixmap icon = loadSVG(":/icons/minimize.svg", w, h);
+        QPixmap icon = loadSVG(":/icons/window_minimize.png", w, h);
 
         paintIcons(icon, m_icon_dark, &m_active_icon, &m_inactive_icon);
 
@@ -103,7 +103,7 @@ void CaptionButton::drawIcons()
     }
     case IconType::Restore:
     {
-        QPixmap icon = loadSVG(":/icons/restore.svg", w, h);
+        QPixmap icon = loadSVG(":/icons/window_restore.png", w, h);
 
         paintIcons(icon, m_icon_dark, &m_active_icon, &m_inactive_icon);
 
@@ -111,7 +111,7 @@ void CaptionButton::drawIcons()
     }
     case IconType::Maximize:
     {
-        QPixmap icon = loadSVG(":/icons/maximize.svg", w, h);
+        QPixmap icon = loadSVG(":/icons/window_maximize.png", w, h);
 
         paintIcons(icon, m_icon_dark, &m_active_icon, &m_inactive_icon);
 
@@ -119,7 +119,7 @@ void CaptionButton::drawIcons()
     }
     case IconType::Close:
     {
-        QPixmap icon = loadSVG(":/icons/close.svg", w, h);
+        QPixmap icon = loadSVG(":/icons/window_close.png", w, h);
 
         paintIcons(icon, m_icon_dark, &m_active_icon, &m_inactive_icon);
 

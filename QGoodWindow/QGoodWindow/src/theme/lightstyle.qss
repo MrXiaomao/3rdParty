@@ -62,13 +62,13 @@ QToolTip{
 
 /* 状态栏基础样式 */
 QStatusBar{
-  background-color:qlineargradient(x1:0,y1:0,x2:0,y2:1,stop:0 rgba(220,220,220,127),stop:1 rgba(200,200,200,75)); /* 背景：垂直渐变浅灰色（上深下浅） */
-  color:palette(text); /* 文本颜色：系统文本色 */
+  background-color:qlineargradient(x1:0,y1:0,x2:0,y2:1,stop:0 rgba(230,230,230,255),stop:1 rgba(245,245,245,255)); /* 背景：垂直渐变浅灰（上浅下稍深） */
+  color:palette(text); /* 文字颜色使用系统文本色 */
 }
 
 /* 状态栏内标签样式 */
 QStatusBar::item QLabel {
-  font-size: 16px; /* 字体大小：16px */
+  /* font-size: 12px; 字体大小：16px */
 }
 
 /* 菜单栏基础样式 */
@@ -86,20 +86,20 @@ QMenuBar::item{
 
 /* 菜单栏选项选中状态（鼠标悬停时） */
 QMenuBar::item:selected{
-  background-color:rgba(229,229,229,255); /* 背景色：浅灰色（RGB 229,229,229） */
+  background-color:rgba(220,220,220,255); /* 背景色：浅灰色不透明 */
 }
 
 /* 工具按钮悬停状态 */
 QToolButton:hover{
-  background-color:rgba(229,229,229,255); /* 背景色：浅灰色（与菜单栏选中状态一致） */
+  background-color:rgba(220,220,220,255); /* 悬停时背景色：浅灰色不透明 */
 }
 
 /* 菜单栏选项按下状态（鼠标点击时） */
 QMenuBar::item:pressed{
-  background-color:palette(highlight); /* 背景色：系统高亮色（如蓝色） */
-  color:rgba(255,255,255,255); /* 文本颜色：白色 */
-  border-left:1px solid rgba(220,220,220,127); /* 左侧边框：1px半透明浅灰色 */
-  border-right:1px solid rgba(220,220,220,127); /* 右侧边框：1px半透明浅灰色 */
+  background-color:palette(highlight); /* 背景色使用系统高亮色 */
+  color:rgba(255,255,255,255); /* 文字颜色为纯白色 */
+  border-left:1px solid rgba(200,200,200,127); /* 左侧边框：1px浅灰色半透明 */
+  border-right:1px solid rgba(200,200,200,127); /* 右侧边框：同上 */
 }
 
 /* 菜单基础样式 */
@@ -116,8 +116,8 @@ QMenu::item{
 
 /* 菜单项禁用状态 */
 QMenu::item:disabled{
-  background-color:rgba(175,175,175,127); /* 背景色：半透明中灰色 */
-  color:palette(disabled); /* 文本颜色：系统禁用色（如浅灰色） */
+  background-color:rgba(235,235,235,127); /* 背景色：极浅灰色半透明 */
+  color:palette(disabled); /* 文字颜色使用系统禁用色 */
 }
 
 /* 菜单项选中状态（鼠标悬停或键盘导航选中时） */
@@ -134,8 +134,8 @@ QMenu::icon {
 
 /* 菜单项中已选中的图标样式 */
 QMenu::icon:checked{
-  background-color:qlineargradient(x1:0,y1:1,x2:0,y2:0,stop:0 rgba(220,220,220,127),stop:1 rgba(200,200,200,75)); /* 背景：垂直渐变浅灰色（下深上浅） */
-  border:1px solid palette(highlight); /* 边框：1px系统高亮色 */
+  background-color:qlineargradient(x1:0,y1:1,x2:0,y2:0,stop:0 rgba(230,230,230,127),stop:1 rgba(240,240,240,75)); /* 背景：从上到下的渐变浅灰 */
+  border:1px solid palette(highlight); /* 边框使用系统高亮色 */
   border-radius:2px; /* 圆角：2px */
 }
 
@@ -175,26 +175,26 @@ QMenu::indicator:exclusive:unchecked{
 
 /* 顶部工具栏样式 */
 QToolBar::top{
-  background-color:qlineargradient(x1:0,y1:0,x2:0,y2:1,stop:0 rgba(220,220,220,127),stop:1 rgba(200,200,200,75)); /* 背景：垂直渐变浅灰色（上深下浅） */
-  border-bottom:3px solid qlineargradient(x1:0,y1:0,x2:0,y2:1,stop:0 rgba(220,220,220,127),stop:1 rgba(200,200,200,75)); /* 下边框：3px同背景渐变 */
+  background-color:qlineargradient(x1:0,y1:0,x2:0,y2:1,stop:0 rgba(230,230,230,255),stop:1 rgba(245,245,245,255)); /* 背景：垂直渐变浅灰（上浅下深） */
+  border-bottom:3px solid qlineargradient(x1:0,y1:0,x2:0,y2:1,stop:0 rgba(230,230,230,255),stop:1 rgba(245,245,245,255)); /* 底部边框：3px渐变浅灰 */
 }
 
 /* 底部工具栏样式 */
 QToolBar::bottom{
-  background-color:qlineargradient(x1:0,y1:1,x2:0,y2:0,stop:0 rgba(220,220,220,127),stop:1 rgba(200,200,200,75)); /* 背景：垂直渐变浅灰色（下深上浅） */
-  border-top:3px solid qlineargradient(x1:0,y1:1,x2:0,y2:0,stop:0 rgba(220,220,220,127),stop:1 rgba(200,200,200,75)); /* 上边框：3px同背景渐变 */
+  background-color:qlineargradient(x1:0,y1:1,x2:0,y2:0,stop:0 rgba(230,230,230,255),stop:1 rgba(245,245,245,255)); /* 背景：垂直渐变浅灰（下浅上深） */
+  border-top:3px solid qlineargradient(x1:0,y1:1,x2:0,y2:0,stop:0 rgba(230,230,230,255),stop:1 rgba(245,245,245,255)); /* 顶部边框：3px渐变浅灰 */
 }
 
 /* 左侧工具栏样式 */
 QToolBar::left{
-  background-color:qlineargradient(x1:0,y1:0,x2:1,y2:0,stop:0 rgba(220,220,220,127),stop:1 rgba(200,200,200,75)); /* 背景：水平渐变浅灰色（左深右浅） */
-  border-right:3px solid qlineargradient(x1:0,y1:0,x2:1,y2:0,stop:0 rgba(220,220,220,127),stop:1 rgba(200,200,200,75)); /* 右边框：3px同背景渐变 */
+  background-color:qlineargradient(x1:0,y1:0,x2:1,y2:0,stop:0 rgba(230,230,230,255),stop:1 rgba(245,245,245,255)); /* 背景：水平渐变浅灰（左浅右深） */
+  border-right:3px solid qlineargradient(x1:0,y1:0,x2:1,y2:0,stop:0 rgba(230,230,230,255),stop:1 rgba(245,245,245,255)); /* 右侧边框：3px渐变浅灰 */
 }
 
 /* 右侧工具栏样式 */
 QToolBar::right{
-  background-color:qlineargradient(x1:1,y1:0,x2:0,y2:0,stop:0 rgba(220,220,220,127),stop:1 rgba(200,200,200,75)); /* 背景：水平渐变浅灰色（右深左浅） */
-  border-left:3px solid qlineargradient(x1:1,y1:0,x2:0,y2:0,stop:0 rgba(220,220,220,127),stop:1 rgba(200,200,200,75)); /* 左边框：3px同背景渐变 */
+  background-color:qlineargradient(x1:1,y1:0,x2:0,y2:0,stop:0 rgba(230,230,230,255),stop:1 rgba(245,245,245,255)); /* 背景：水平渐变浅灰（右浅左深） */
+  border-left:3px solid qlineargradient(x1:1,y1:0,x2:0,y2:0,stop:0 rgba(230,230,230,255),stop:1 rgba(245,245,245,255)); /* 左侧边框：3px渐变浅灰 */
 }
 
 /* 主窗口中的分隔器样式 */
@@ -248,10 +248,10 @@ QMainWindow::separator:hover,QSplitter::handle:hover{
 
 /* 停靠窗口标题栏样式 */
 QDockWidget::title{
-  padding:4px; /* 内边距：标题栏内容与边框的间距 */
-  background-color:qlineargradient(x1:0,y1:1,x2:0,y2:0,stop:0 rgba(220,220,220,127),stop:1 rgba(200,200,200,75)); /* 背景：垂直渐变浅灰色（下深上浅） */
-  border:1px solid rgba(220,220,220,75); /* 边框：1px半透明白色 */
-  border-bottom:2px solid rgba(220,220,220,75); /* 下边框：2px同色（增强底部线条感） */
+  padding:4px; /* 内边距：4px */
+  background-color:qlineargradient(x1:0,y1:1,x2:0,y2:0,stop:0 rgba(230,230,230,127),stop:1 rgba(245,245,245,75)); /* 背景：垂直渐变浅灰（下浅上深） */
+  border:1px solid rgba(200,200,200,75); /* 边框：1px半透明浅灰色 */
+  border-bottom:2px solid rgba(200,200,200,75); /* 底部边框：2px半透明浅灰色 */
 }
 
 /* 停靠窗口基础样式 */
@@ -283,9 +283,9 @@ QDockWidget::float-button{
 
 /* 分组框基础样式 */
 QGroupBox{
-  background-color:rgba(200,200,200,50%); /* 背景：半透明白色（50%透明度） */
-  margin-top:27px; /* 顶部外边距：为标题预留空间 */
-  border:1px solid rgba(220,220,220,127); /* 边框：1px半透明白色 */
+  background-color:rgba(245,245,245,50%); /* 背景：半透明极浅灰色 */
+  margin-top:27px; /* 顶部外边距：27px（为标题预留空间） */
+  border:1px solid rgba(200,200,200,127); /* 边框：1px半透明浅灰色 */
   border-radius:4px; /* 圆角：4px */
 }
 
@@ -293,13 +293,13 @@ QGroupBox{
 QGroupBox::title{
   subcontrol-origin:margin; /* 子控件原点：从边距开始计算 */
   subcontrol-position:left top; /* 子控件位置：左上角 */
-  padding:4px 6px; /* 内边距：标题文字与边框的间距 */
-  margin-left:3px; /* 左边距：标题相对于分组框的偏移 */
-  background-color:qlineargradient(x1:0,y1:1,x2:0,y2:0,stop:0 rgba(220,220,220,127),stop:1 rgba(200,200,200,75)); /* 背景：同停靠窗口标题的渐变 */
-  border:1px solid rgba(220,220,220,75); /* 边框：同停靠窗口标题 */
-  border-bottom:2px solid rgb(127,127,127); /* 下边框：深灰色（增强标题与内容的分隔） */
-  border-top-left-radius:4px; /* 左上角圆角 */
-  border-top-right-radius:4px; /* 右上角圆角 */
+  padding:4px 6px; /* 内边距：上下4px，左右6px */
+  margin-left:3px; /* 左侧外边距：3px */
+  background-color:qlineargradient(x1:0,y1:1,x2:0,y2:0,stop:0 rgba(230,230,230,127),stop:1 rgba(245,245,245,75)); /* 背景：垂直渐变浅灰（下浅上深） */
+  border:1px solid rgba(200,200,200,75); /* 边框：1px半透明浅灰色 */
+  border-bottom:2px solid rgb(180,180,180); /* 底部边框：2px中浅灰色 */
+  border-top-left-radius:4px; /* 左上角圆角：4px */
+  border-top-right-radius:4px; /* 右上角圆角：4px */
 }
 
 /* 标签页容器样式 */
@@ -318,8 +318,8 @@ QTabWidget::tab-bar{
 /* 标签栏基础样式 */
 QTabBar{
   background-color:transparent; /* 背景透明 */
-  qproperty-drawBase:0; /* 禁用标签栏默认背景绘制 */
-  border-bottom:1px solid rgba(220,220,220,50%); /* 下边框：半透明白色 */
+  qproperty-drawBase:0; /* 禁用默认背景绘制 */
+  border-bottom:1px solid rgba(200,200,200,127); /* 底部边框：1px半透明浅灰色 */
 }
 
 /* 标签页样式 */

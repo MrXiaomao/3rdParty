@@ -35,3 +35,6 @@ HEADERS += \
     $$PWD/src/qgoodwindowhelper.h
 
 INCLUDEPATH += $$PWD #include <QGoodWindowHelper>
+
+include($$PWD/../QGoodWindow/QGoodWindow.pri)
+include($$PWD/../QGoodCentralWidget/QGoodCentralWidget.pri)

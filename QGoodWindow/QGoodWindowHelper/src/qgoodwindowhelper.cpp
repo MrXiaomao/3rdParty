@@ -5,6 +5,11 @@ QGoodWindowHelper::QGoodWindowHelper(QWidget *parent)
 
 }
 
+void QGoodWindowHelper::setupUiHelper(QMainWindow* centralWidget)
+{
+    this->setupUiHelper(centralWidget, QGoodWindow::isSystemThemeDark());
+}
+
 void QGoodWindowHelper::setupUiHelper(QMainWindow* centralWidget, bool isDarkTheme)
 {
     mCentralWidget = centralWidget;

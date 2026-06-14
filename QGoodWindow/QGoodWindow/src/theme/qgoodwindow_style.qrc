@@ -3,7 +3,7 @@
         <file>darkstyle.qss</file>
         <file>lightstyle.qss</file>
     </qresource>
-    <qresource prefix="qss_icons/dark">
+    <qresource prefix="/qss_icons/dark">
         <file>dark_icons/arrow_down.png</file>
         <file>dark_icons/arrow_down@2x.png</file>
         <file>dark_icons/arrow_down_disabled.png</file>
@@ -212,8 +212,24 @@
         <file>dark_icons/window_undock_focus@2x.png</file>
         <file>dark_icons/window_undock_pressed.png</file>
         <file>dark_icons/window_undock_pressed@2x.png</file>
+        <file>dark_icons/window_maximize.png</file>
+        <file>dark_icons/window_maximize@2x.png</file>
+        <file>dark_icons/window_maximize_disabled.png</file>
+        <file>dark_icons/window_maximize_disabled@2x.png</file>
+        <file>dark_icons/window_maximize_focus.png</file>
+        <file>dark_icons/window_maximize_focus@2x.png</file>
+        <file>dark_icons/window_maximize_pressed.png</file>
+        <file>dark_icons/window_maximize_pressed@2x.png</file>
+        <file>dark_icons/window_restore.png</file>
+        <file>dark_icons/window_restore@2x.png</file>
+        <file>dark_icons/window_restore_disabled.png</file>
+        <file>dark_icons/window_restore_disabled@2x.png</file>
+        <file>dark_icons/window_restore_focus.png</file>
+        <file>dark_icons/window_restore_focus@2x.png</file>
+        <file>dark_icons/window_restore_pressed.png</file>
+        <file>dark_icons/window_restore_pressed@2x.png</file>
     </qresource>
-        <qresource prefix="qss_icons/light">
+    <qresource prefix="/qss_icons/light">
         <file>light_icons/arrow_down.png</file>
         <file>light_icons/arrow_down@2x.png</file>
         <file>light_icons/arrow_down_disabled.png</file>
@@ -422,5 +438,21 @@
         <file>light_icons/window_undock_focus@2x.png</file>
         <file>light_icons/window_undock_pressed.png</file>
         <file>light_icons/window_undock_pressed@2x.png</file>
+        <file>light_icons/window_maximize.png</file>
+        <file>light_icons/window_maximize@2x.png</file>
+        <file>light_icons/window_maximize_disabled.png</file>
+        <file>light_icons/window_maximize_disabled@2x.png</file>
+        <file>light_icons/window_maximize_focus.png</file>
+        <file>light_icons/window_maximize_focus@2x.png</file>
+        <file>light_icons/window_maximize_pressed.png</file>
+        <file>light_icons/window_maximize_pressed@2x.png</file>
+        <file>light_icons/window_restore.png</file>
+        <file>light_icons/window_restore@2x.png</file>
+        <file>light_icons/window_restore_disabled.png</file>
+        <file>light_icons/window_restore_disabled@2x.png</file>
+        <file>light_icons/window_restore_focus.png</file>
+        <file>light_icons/window_restore_focus@2x.png</file>
+        <file>light_icons/window_restore_pressed.png</file>
+        <file>light_icons/window_restore_pressed@2x.png</file>
     </qresource>
 </RCC>

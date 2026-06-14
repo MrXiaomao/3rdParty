@@ -68,7 +68,7 @@ QStatusBar{
 
 /* 状态栏子项中的QLabel样式 */
 QStatusBar::item QLabel {
-  font-size: 16px; /* 字体大小设为16px */
+   /* font-size: 12px;字体大小设为16px */
 }
 
 /* 菜单栏（QMenuBar）基础样式 */
