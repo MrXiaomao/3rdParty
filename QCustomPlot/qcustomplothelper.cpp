@@ -1226,11 +1226,10 @@ void QCustomPlotHelper::exportData()
 
     QTextStream out(&file);
 #if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
-    out.setEncoding(QStringConverter::Utf8);
+    out.setEncoding(QStringConverter::System);
 #else
-    out.setCodec("UTF-8");
+    out.setCodec("GBK");
 #endif
-    out << "\xEF\xBB\xBF";
 
     for (int col = 0; col < graphs.size(); ++col) {
         if (col > 0)
