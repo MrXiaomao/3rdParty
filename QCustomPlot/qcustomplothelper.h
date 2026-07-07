@@ -173,6 +173,15 @@ public:
     Q_SLOT void exportGraphic();
 
     /**
+    * @function name: exportData
+    * @brief 导出曲线数据为 CSV
+    * @param[in]        none
+    * @param[out]       none
+    * @return           void
+    */
+    Q_SLOT void exportData();
+
+    /**
     * @function name: linearScale
     * @brief 线性缩放
     * @param[in]        none
@@ -234,6 +243,7 @@ private:
     quint32 mXAxisFixedRange = 300;//最近范围最值
     QAction *actClearMarker;// 清除标签
     QAction *actExportGraphic;// 导出图像
+    QAction *actExportData;// 导出数据
     QAction *actEnableStraightLine;// 启用参考线或基准线
     QAction *actEnableDataTracer;// 启用数据点标记
     QAction *actEnableRangeSelect;// 启用范围选取功能

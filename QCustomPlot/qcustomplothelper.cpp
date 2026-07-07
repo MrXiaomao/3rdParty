@@ -404,6 +404,8 @@ QCustomPlotHelper::QCustomPlotHelper(QCustomPlot* customPlot, QObject *parent)
     connect(actClearMarker, &QAction::triggered, this, &QCustomPlotHelper::clearMarker);
     actExportGraphic = new QAction(tr("导出图像..."), this);
     connect(actExportGraphic, &QAction::triggered, this, &QCustomPlotHelper::exportGraphic);
+    actExportData = new QAction(tr("导出数据..."), this);
+    connect(actExportData, &QAction::triggered, this, &QCustomPlotHelper::exportData);
 
     actLinearScale = new QAction(mIconChecked, tr("线性缩放"), this);
     connect(actLinearScale, &QAction::triggered, this, &QCustomPlotHelper::linearScale);
@@ -979,6 +981,7 @@ void QCustomPlotHelper::mouseRelease(QMouseEvent * event)
         contextMenu.addAction(actLogarithmicScale);
         contextMenu.addSeparator();
         contextMenu.addAction(actExportGraphic);
+        contextMenu.addAction(actExportData);
         contextMenu.exec(QCursor::pos());
         connect(&contextMenu, &QMenu::destroyed, [&](){
             container->deleteLater();
@@ -1149,7 +1152,23 @@ void QCustomPlotHelper::resetView()
     mCustomPlot->replot(QCustomPlot::rpQueuedReplot);
 }
 
+#include <QFileDialog>
 #include <QMessageBox>
+#include <QFile>
+#include <QTextStream>
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+#include <QStringConverter>
+#endif
+
+namespace {
+QString csvField(const QString &text)
+{
+    if (text.contains(',') || text.contains('"') || text.contains('\n'))
+        return '"' + QString(text).replace('"', "\"\"") + '"';
+    return text;
+}
+}
+
 void QCustomPlotHelper::exportGraphic()
 {
     QString filePath = QFileDialog::getSaveFileName(nullptr, tr("导出图像"), "", tr("图像文件 (*.png);;所有文件 (*.*)"));
@@ -1158,6 +1177,81 @@ void QCustomPlotHelper::exportGraphic()
             filePath += ".png";
         if (!mCustomPlot->savePng(filePath, 1920, 1080))
             QMessageBox::information(nullptr, tr("提示"), tr("导出失败！"));
+    }
+}
+
+void QCustomPlotHelper::exportData()
+{
+    QString filePath = QFileDialog::getSaveFileName(nullptr, tr("导出数据"), "", tr("CSV 文件 (*.csv);;所有文件 (*.*)"));
+    if (filePath.isEmpty())
+        return;
+
+    if (!filePath.endsWith(".csv", Qt::CaseInsensitive))
+        filePath += ".csv";
+
+    struct GraphInfo {
+        QString name;
+        QVector<double> keys;
+        QVector<double> values;
+    };
+    QList<GraphInfo> graphs;
+    int maxRows = 0;
+
+    for (int i = 0; i < mCustomPlot->graphCount(); ++i) {
+        QCPGraph *graph = mCustomPlot->graph(i);
+        if (!graph || !graph->visible())
+            continue;
+
+        GraphInfo info;
+        info.name = graph->name();
+        auto data = graph->data();
+        for (auto it = data->constBegin(); it != data->constEnd(); ++it) {
+            info.keys.append(it->key);
+            info.values.append(it->value);
+        }
+        maxRows = qMax(maxRows, info.keys.size());
+        graphs.append(info);
+    }
+
+    if (graphs.isEmpty()) {
+        QMessageBox::information(nullptr, tr("提示"), tr("没有可导出的曲线数据！"));
+        return;
+    }
+
+    QFile file(filePath);
+    if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
+        QMessageBox::information(nullptr, tr("提示"), tr("导出失败！"));
+        return;
+    }
+
+    QTextStream out(&file);
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+    out.setEncoding(QStringConverter::Utf8);
+#else
+    out.setCodec("UTF-8");
+#endif
+    out << "\xEF\xBB\xBF";
+
+    for (int col = 0; col < graphs.size(); ++col) {
+        if (col > 0)
+            out << ',';
+        out << csvField(graphs[col].name + "_X") << ',' << csvField(graphs[col].name + "_Y");
+    }
+    out << '\n';
+
+    for (int row = 0; row < maxRows; ++row) {
+        for (int col = 0; col < graphs.size(); ++col) {
+            if (col > 0)
+                out << ',';
+            if (row < graphs[col].keys.size()) {
+                out << QString::number(graphs[col].keys.at(row), 'g', 12)
+                    << ','
+                    << QString::number(graphs[col].values.at(row), 'g', 12);
+            } else {
+                out << ',';
+            }
+        }
+        out << '\n';
     }
 }
 
