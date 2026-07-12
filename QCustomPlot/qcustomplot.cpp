@@ -682,7 +682,9 @@ QCPPainter *QCPPaintBufferPixmap::startPainting()
   }
 
   QCPPainter *result = new QCPPainter(&mBuffer);
-#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
+#if QT_VERSION < QT_VERSION_CHECK(5, 14, 0)
+  result->setRenderHint(QPainter::HighQualityAntialiasing);
+#else
   result->setRenderHint(QPainter::Antialiasing);
 #endif
   return result;
@@ -11976,7 +11978,10 @@ bool QCPAbstractPlottable::addToLegend(QCPLegend *legend)
   
   if (!legend->hasItemWithPlottable(this))
   {
-    legend->addItem(new QCPPlottableLegendItem(legend, this));
+      if (legend->isCheckable())
+        legend->addItem(new QCheckableCPPlottableLegendItem(legend, this));
+      else
+        legend->addItem(new QCPPlottableLegendItem(legend, this));
     return true;
   } else
     return false;
@@ -19247,6 +19252,78 @@ QFont QCPPlottableLegendItem::getFont() const
   return mSelected ? mSelectedFont : mFont;
 }
 
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+QCheckableCPPlottableLegendItem::QCheckableCPPlottableLegendItem(QCPLegend *parent, QCPAbstractPlottable *plottable)
+    : QCPPlottableLegendItem(parent, plottable)
+{
+    this->setSelectable(true);
+    this->setAntialiased(true);
+    this->setMargins(QMargins(0, 0, 20, 0));// 左边被复选框占据了20像素，所以右边要预留20像素出来
+}
+
+QCheckableCPPlottableLegendItem::~QCheckableCPPlottableLegendItem()
+{
+
+}
+
+// 重写draw函数
+void QCheckableCPPlottableLegendItem::draw(QCPPainter *painter)
+{
+    if (!mPlottable) return;
+
+    // 保留原图例项的绘制逻辑，先画颜色标识和文字
+    painter->setFont(getFont());
+    painter->setPen(QPen(getTextColor()));
+    mCheckBoxRect = QRect(mRect.topLeft(), QSize(20,20));
+    QSize iconSize = mParentLegend->iconSize();
+    QRect textRect = painter->fontMetrics().boundingRect(0, 0, 0, iconSize.height(), Qt::TextDontClip, mPlottable->name());
+    QRect iconRect(mRect.topLeft(), iconSize);
+    iconRect.translate(mCheckBoxRect.width(), 0);
+    int textHeight = qMax(textRect.height(), iconSize.height());  // if text has smaller height than icon, center text vertically in icon height, else align tops
+    painter->drawText(mCheckBoxRect.width() + mRect.x()+iconSize.width()+mParentLegend->iconTextPadding(), mRect.y(), textRect.width(), textHeight, Qt::TextDontClip, mPlottable->name());
+    // draw icon:
+    painter->save();
+    painter->setClipRect(iconRect, Qt::IntersectClip);
+    mPlottable->drawLegendIcon(painter, iconRect);
+    painter->restore();
+    // draw icon border:
+    if (getIconBorderPen().style() != Qt::NoPen)
+    {
+      painter->setPen(getIconBorderPen());
+      painter->setBrush(Qt::NoBrush);
+      int halfPen = qCeil(painter->pen().widthF()*0.5)+1;
+      painter->setClipRect(mOuterRect.adjusted(-halfPen, -halfPen, halfPen, halfPen)); // extend default clip rect so thicker pens (especially during selection) are not clipped
+      painter->drawRect(iconRect);
+    }
+
+    // draw checkBox:
+    {
+        QStyleOptionButton opt;
+        opt.state = mChecked ? QStyle::State_On : QStyle::State_Off;
+        opt.rect = mCheckBoxRect;
+        qApp->style()->drawControl(QStyle::CE_CheckBox, &opt, painter);
+        return;
+    }
+}
+
+// 处理鼠标点击事件的函数实现
+void QCheckableCPPlottableLegendItem::mousePressEvent(QMouseEvent *event, const QVariant &details)
+{
+    if (mCheckBoxRect.contains(event->pos()))
+    {
+        // 切换复选框状态
+        mChecked = mChecked ? false : true;
+        mPlottable->setVisible(mChecked);
+        emit checkedChanged(mChecked); // 发出状态改变的信号
+
+        // 更新绘制，使复选框显示最新状态
+        mPlottable->parentPlot()->replot();
+    }
+
+    QCPPlottableLegendItem::mousePressEvent(event, details);
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /*! \internal
   
   Draws the item with \a painter. The size and position of the drawn legend item is defined by the
@@ -19382,6 +19459,7 @@ QCPLegend::QCPLegend() :
   setSelectedBrush(Qt::white);
   setTextColor(Qt::black);
   setSelectedTextColor(Qt::blue);
+  setCheckable(false);
 }
 
 QCPLegend::~QCPLegend()
@@ -19633,6 +19711,13 @@ void QCPLegend::setSelectedTextColor(const QColor &color)
   }
 }
 
+void QCPLegend::setCheckable(bool b)
+{
+    if (this->mCheckable == b)
+        return;
+
+    this->mCheckable = b;
+}
 /*!
   Returns the item with index \a i. If non-legend items were added to the legend, and the element
   at the specified cell index is not a QCPAbstractLegendItem, returns \c nullptr.

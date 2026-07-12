@@ -111,13 +111,13 @@ public:
     void setRangeSelectActionVisible(bool visible = true);
 
     /**
-    * @function name: setGraphCheckBox
-    * @brief 设置graph可选项
+    * @function name: setGraphCheckBoxList
+    * @brief 设置下拉列表式复选框
     * @param[in]        customPlot
     * @param[out]       none
     * @return           void
     */
-    void setGraphCheckBox(QCustomPlot* customPlot, const QCPAxisRect *axisRect = nullptr);
+    void setGraphCheckBoxList(QCustomPlot* customPlot, const QCPAxisRect *axisRect = nullptr);
 
     /**
     * @function name: enableStraightLine
@@ -255,7 +255,8 @@ private:
     bool mStraightLineActionVisible = true;
     bool mRangeSelectActionVisible = true;
 
-    QMap<QString, QList<QCheckBox*>> mChkAxisRect;
+    //QMap<QString, QList<QCheckBox*>> mChkAxisRect;
+    QMap<QString, QList<QComboBox*>> mCbbAxisRect;
 
     /**
     * @function name: 生成一个圆形的图标

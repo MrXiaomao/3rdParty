@@ -1005,31 +1005,47 @@ void QCustomPlotHelper::mouseRelease(QMouseEvent * event)
     customPlot->setProperty("left-clicked", false);
 }
 
-void QCustomPlotHelper::setGraphCheckBox(QCustomPlot* customPlot, const QCPAxisRect *axisRect)
+#include "qxtcheckcombobox.h"
+void QCustomPlotHelper::setGraphCheckBoxList(QCustomPlot* customPlot, const QCPAxisRect *axisRect)
 {
     // 隐藏图例
     customPlot->legend->setVisible(false);
     if (axisRect == nullptr)
         axisRect = customPlot->axisRect();
 
+    // 在你的主窗口构造函数里，customPlot初始化后加这几行
+    // 1. 在最顶层（overlay层上方）插入新图层
+    customPlot->addLayer("custom_widget_layer", customPlot->layer("overlay"));
+    // 2. 把这个图层设为缓冲模式，独立重绘不刷新其他绘图内容
+    customPlot->layer("custom_widget_layer")->setMode(QCPLayer::lmBuffered);
+    // 3. 把当前默认层切到这个新层，后续生成的QCPItemWidget自动落在这个层
+    customPlot->setCurrentLayer("custom_widget_layer");
+
     int graphCount = customPlot->graphCount(axisRect);
-    // 添加可选项
+
+    // 初始化QComboBox
+    QxtCheckComboBox *comboBox = new QxtCheckComboBox(customPlot);
+    comboBox->setMinimumWidth(180);
+    comboBox->setLayoutDirection(Qt::LeftToRight);
+
     for (int i=0; i<graphCount; ++i){
-        QCheckBox* checkBox = new QCheckBox(customPlot);
-        checkBox->setText(customPlot->graph(axisRect, i)->name());
-        checkBox->setObjectName(tr(""));
-        QIcon actionIcon = roundPixmap(QSize(16,16), customPlot->graph(i)->pen().color());
-        checkBox->setIcon(actionIcon);
-        checkBox->setChecked(customPlot->graph(axisRect, i)->visible());
-        connect(checkBox, &QCheckBox::stateChanged, [=](int state){
-            QCPGraph *graph = customPlot->graph(axisRect, i);
-            if (graph){
-                graph->setVisible(Qt::CheckState::Checked == state ? true : false);
-                customPlot->replot(QCustomPlot::rpQueuedReplot);
-            }
-        });
-        mChkAxisRect[axisRect->objectName()].push_back(checkBox);
-    }    
+        comboBox->addItem(customPlot->graph(axisRect, i)->name());
+    }
+    for(int i=0; i<comboBox->count(); i++){
+        comboBox->setItemData(i, Qt::Checked, Qt::CheckStateRole);
+        QIcon actionIcon = roundPixmap(QSize(16,16), customPlot->graph(axisRect, i)->pen().color());
+        comboBox->setItemIcon(i, actionIcon);
+        comboBox->setItemCheckState(i, Qt::Checked);
+    }
+    connect(qobject_cast<QStandardItemModel*>(comboBox->model()), &QStandardItemModel::itemChanged, this, [=](QStandardItem* item){
+        QCPGraph *graph = customPlot->graph(axisRect, item->row());
+        if (graph){
+            graph->setVisible(item->checkState() == Qt::Checked);
+            customPlot->replot(QCustomPlot::rpQueuedReplot);
+        }
+    });
+    comboBox->setDefaultText(QStringLiteral("图像通道列表(空)"));
+    mCbbAxisRect[axisRect->objectName()].push_back(comboBox);
 }
 
 void QCustomPlotHelper::afterLayout()
@@ -1041,19 +1057,21 @@ void QCustomPlotHelper::afterLayout()
 
     foreach (QCPAxisRect *axisRect, axisRects)
     {
-        if (mChkAxisRect.contains(axisRect->objectName())){
-            QList<QCheckBox*> checkBoxs = mChkAxisRect[axisRect->objectName()];
+        if (mCbbAxisRect.contains(axisRect->objectName())){
+            QList<QComboBox*> comboBoxs = mCbbAxisRect[axisRect->objectName()];
             // 布局改变之前重新设定位置
             {
                 int i = 0;
-                for (auto checkBox : checkBoxs){
+                for (auto comboBox : comboBoxs){
                     int h = 20;//checkBox->height();
-                    checkBox->move(axisRect->left() + 10, axisRect->topRight().y() + i++ * h + 5);
+                    if (comboBox->layoutDirection() == Qt::LeftToRight)
+                        comboBox->move(axisRect->left() + 10, axisRect->topRight().y() + i++ * h + 5);// 显示左上角
+                    else
+                        comboBox->move(axisRect->right() - comboBox->width() - 10, axisRect->topRight().y() + i++ * h + 5);// 显示右上角
                 }
             }
         }
     }
-
 
     if (mCustomPlot->property("enable-rangeSelect").toBool())
     {

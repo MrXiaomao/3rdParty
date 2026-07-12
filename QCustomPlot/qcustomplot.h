@@ -3606,7 +3606,8 @@ private:
   
   friend class QCustomPlot;
   friend class QCPAxis;
-  friend class QCPPlottableLegendItem;
+  friend class QCPPlottableLegendItem;  
+  friend class QCheckableCPPlottableLegendItem;
 };
 
 
@@ -3877,7 +3878,7 @@ public:
   void setAntialiasedElement(QCP::AntialiasedElement antialiasedElement, bool enabled=true);
   void setNotAntialiasedElements(const QCP::AntialiasedElements &notAntialiasedElements);
   void setNotAntialiasedElement(QCP::AntialiasedElement notAntialiasedElement, bool enabled=true);
-  void setAutoAddPlottableToLegend(bool on);
+  void setAutoAddPlottableToLegend(bool on);// 控制绘图项自动关联图例
   void setInteractions(const QCP::Interactions &interactions);
   void setInteraction(const QCP::Interaction &interaction, bool enabled=true);
   void setSelectionTolerance(int pixels);
@@ -5158,6 +5159,24 @@ protected:
   QFont getFont() const;
 };
 
+// 带复选框的图例元素
+class QCheckableCPPlottableLegendItem :public QCPPlottableLegendItem {
+    Q_OBJECT
+public:
+    explicit QCheckableCPPlottableLegendItem(QCPLegend *parent, QCPAbstractPlottable *plottable);
+    ~QCheckableCPPlottableLegendItem();
+
+protected:
+    virtual void draw(QCPPainter *painter) Q_DECL_OVERRIDE;
+    virtual void mousePressEvent(QMouseEvent *event, const QVariant &details) Q_DECL_OVERRIDE;
+
+signals:
+    void checkedChanged(bool checked);
+
+private:
+    bool mChecked = true;
+    QRect mCheckBoxRect;
+};
 
 class QCP_LIB_DECL QCPLegend : public QCPLayoutGrid
 {
@@ -5177,6 +5196,7 @@ class QCP_LIB_DECL QCPLegend : public QCPLayoutGrid
   Q_PROPERTY(QBrush selectedBrush READ selectedBrush WRITE setSelectedBrush)
   Q_PROPERTY(QFont selectedFont READ selectedFont WRITE setSelectedFont)
   Q_PROPERTY(QColor selectedTextColor READ selectedTextColor WRITE setSelectedTextColor)
+  Q_PROPERTY(bool checkable READ isCheckable WRITE setCheckable)
   /// \endcond
 public:
   /*!
@@ -5210,7 +5230,8 @@ public:
   QBrush selectedBrush() const { return mSelectedBrush; }
   QFont selectedFont() const { return mSelectedFont; }
   QColor selectedTextColor() const { return mSelectedTextColor; }
-  
+  bool isCheckable() const { return mCheckable; }
+
   // setters:
   void setBorderPen(const QPen &pen);
   void setBrush(const QBrush &brush);
@@ -5227,7 +5248,8 @@ public:
   void setSelectedBrush(const QBrush &brush);
   void setSelectedFont(const QFont &font);
   void setSelectedTextColor(const QColor &color);
-  
+  void setCheckable(bool b);//在 addGraph 之前调用
+
   // reimplemented virtual methods:
   virtual double selectTest(const QPointF &pos, bool onlySelectable, QVariant *details=nullptr) const Q_DECL_OVERRIDE;
   
@@ -5260,7 +5282,8 @@ protected:
   QBrush mSelectedBrush;
   QFont mSelectedFont;
   QColor mSelectedTextColor;
-  
+  bool mCheckable = false;
+
   // reimplemented virtual methods:
   virtual void parentPlotInitialized(QCustomPlot *parentPlot) Q_DECL_OVERRIDE;
   virtual QCP::Interaction selectionCategory() const Q_DECL_OVERRIDE;
