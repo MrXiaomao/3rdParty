@@ -1,568 +1,577 @@
-/* å•è¡Œæ–‡æœ¬è¾“å…¥æ¡†åŸºç¡€æ ·å¼ */
+/* µ¥ĞĞÎÄ±¾ÊäÈë¿ò»ù´¡ÑùÊ½ */
 QLineEdit{
-  color:palette(text); /* æ–‡æœ¬é¢œè‰²ï¼šç³»ç»Ÿæ–‡æœ¬è‰²ï¼ˆè·Ÿéšç³»ç»Ÿä¸»é¢˜ï¼‰ */
+  color:palette(text); /* ÎÄ±¾ÑÕÉ«£ºÏµÍ³ÎÄ±¾É«£¨¸úËæÏµÍ³Ö÷Ìâ£© */
 }
 
-/* å•è¡Œæ–‡æœ¬è¾“å…¥æ¡†ç©ºæ–‡æœ¬çŠ¶æ€ï¼ˆå½“å‰æ ·å¼ä¸é»˜è®¤ä¸€è‡´ï¼Œå¯èƒ½ç”¨äºé¢„ç•™æ‰©å±•ï¼‰ */
+/* µ¥ĞĞÎÄ±¾ÊäÈë¿ò¿ÕÎÄ±¾×´Ì¬£¨µ±Ç°ÑùÊ½ÓëÄ¬ÈÏÒ»ÖÂ£¬¿ÉÄÜÓÃÓÚÔ¤ÁôÀ©Õ¹£© */
 QLineEdit[text=""]{ 
-  color:palette(text); /* æ–‡æœ¬é¢œè‰²ï¼šç³»ç»Ÿæ–‡æœ¬è‰² */
+  color:palette(text); /* ÎÄ±¾ÑÕÉ«£ºÏµÍ³ÎÄ±¾É« */
 }
 
-/* è¡Œæ–‡æœ¬ç¼–è¾‘æ¡†åªè¯»å±æ€§æ ·å¼ */
+/* ĞĞÎÄ±¾±à¼­¿òÖ»¶ÁÊôĞÔÑùÊ½ */
 QLineEdit:read-only{
-  background:palette(window); /* æ–‡å­—é¢œè‰²ä½¿ç”¨ç³»ç»Ÿæ–‡æœ¬è‰² */
+  background:palette(window); /* ÎÄ×ÖÑÕÉ«Ê¹ÓÃÏµÍ³ÎÄ±¾É« */
 }
 
-/* è¡Œæ–‡æœ¬ç¼–è¾‘æ¡†ç¦ç”¨å±æ€§æ ·å¼ */
+/* ĞĞÎÄ±¾±à¼­¿ò½ûÓÃÊôĞÔÑùÊ½ */
 QLineEdit:disabled{
-  background:palette(base); /* æ–‡å­—é¢œè‰²ä½¿ç”¨ç³»ç»Ÿæ–‡æœ¬è‰² */
+  background:palette(base); /* ÎÄ×ÖÑÕÉ«Ê¹ÓÃÏµÍ³ÎÄ±¾É« */
 }
 
-/* å¤šè¡Œå¯Œæ–‡æœ¬ç¼–è¾‘æ¡†åŸºç¡€æ ·å¼ */
+/* ¶àĞĞ¸»ÎÄ±¾±à¼­¿ò»ù´¡ÑùÊ½ */
 QTextEdit{
-  color:palette(text); /* æ–‡æœ¬é¢œè‰²ï¼šç³»ç»Ÿæ–‡æœ¬è‰² */
-  border:0px solid palette(highlight); /* è¾¹æ¡†ï¼š2pxç³»ç»Ÿé«˜äº®è‰²å®çº¿ */
-  border-radius:0px; /* è¾¹æ¡†æ— åœ†è§’ï¼ˆç›´è§’ï¼‰ */
+  color:palette(text); /* ÎÄ±¾ÑÕÉ«£ºÏµÍ³ÎÄ±¾É« */
+  border:0px solid palette(highlight); /* ±ß¿ò£º2pxÏµÍ³¸ßÁÁÉ«ÊµÏß */
+  border-radius:0px; /* ±ß¿òÎŞÔ²½Ç£¨Ö±½Ç£© */
 }
 
-/* å¤šè¡Œå¯Œæ–‡æœ¬ç¼–è¾‘æ¡†åªè¯»å±æ€§æ ·å¼ */
+/* ¶àĞĞ¸»ÎÄ±¾±à¼­¿òÖ»¶ÁÊôĞÔÑùÊ½ */
 QTextEdit:read-only{
-  background:palette(window); /* æ–‡å­—é¢œè‰²ä½¿ç”¨ç³»ç»Ÿæ–‡æœ¬è‰² */
+  background:palette(window); /* ÎÄ×ÖÑÕÉ«Ê¹ÓÃÏµÍ³ÎÄ±¾É« */
 }
 
-/* å¤šè¡Œå¯Œæ–‡æœ¬ç¼–è¾‘æ¡†ç¦ç”¨å±æ€§æ ·å¼ */
+/* ¶àĞĞ¸»ÎÄ±¾±à¼­¿ò½ûÓÃÊôĞÔÑùÊ½ */
 QTextEdit:disabled{
-  background:palette(base); /* æ–‡å­—é¢œè‰²ä½¿ç”¨ç³»ç»Ÿæ–‡æœ¬è‰² */
+  background:palette(base); /* ÎÄ×ÖÑÕÉ«Ê¹ÓÃÏµÍ³ÎÄ±¾É« */
 }
 
-/* å¤šè¡Œå¯Œæ–‡æœ¬ç¼–è¾‘æ¡†ç©ºæ–‡æœ¬çŠ¶æ€ï¼ˆå½“å‰æ ·å¼ä¸é»˜è®¤ä¸€è‡´ï¼Œå¯èƒ½ç”¨äºé¢„ç•™æ‰©å±•ï¼‰ */
+/* ¶àĞĞ¸»ÎÄ±¾±à¼­¿ò¿ÕÎÄ±¾×´Ì¬£¨µ±Ç°ÑùÊ½ÓëÄ¬ÈÏÒ»ÖÂ£¬¿ÉÄÜÓÃÓÚÔ¤ÁôÀ©Õ¹£© */
 QTextEdit[text=""]{ 
-  color:palette(text); /* æ–‡æœ¬é¢œè‰²ï¼šç³»ç»Ÿæ–‡æœ¬è‰² */
-  border:0px solid palette(highlight); /* ä¿æŒè¾¹æ¡†æ ·å¼ä¸å˜ */
-  border-radius:0px; /* ä¿æŒç›´è§’è¾¹æ¡† */
+  color:palette(text); /* ÎÄ±¾ÑÕÉ«£ºÏµÍ³ÎÄ±¾É« */
+  border:0px solid palette(highlight); /* ±£³Ö±ß¿òÑùÊ½²»±ä */
+  border-radius:0px; /* ±£³ÖÖ±½Ç±ß¿ò */
 }
 
-/* å¤šè¡Œçº¯æ–‡æœ¬ç¼–è¾‘æ¡†åŸºç¡€æ ·å¼ */
+/* ¶àĞĞ´¿ÎÄ±¾±à¼­¿ò»ù´¡ÑùÊ½ */
 QPlainTextEdit{
-  color:palette(text); /* æ–‡æœ¬é¢œè‰²ï¼šç³»ç»Ÿæ–‡æœ¬è‰² */
+  color:palette(text); /* ÎÄ±¾ÑÕÉ«£ºÏµÍ³ÎÄ±¾É« */
 }
 
-/* å¤šè¡Œçº¯æ–‡æœ¬ç¼–è¾‘æ¡†ç©ºæ–‡æœ¬çŠ¶æ€ï¼ˆå½“å‰æ ·å¼ä¸é»˜è®¤ä¸€è‡´ï¼Œå¯èƒ½ç”¨äºé¢„ç•™æ‰©å±•ï¼‰ */
+/* ¶àĞĞ´¿ÎÄ±¾±à¼­¿ò¿ÕÎÄ±¾×´Ì¬£¨µ±Ç°ÑùÊ½ÓëÄ¬ÈÏÒ»ÖÂ£¬¿ÉÄÜÓÃÓÚÔ¤ÁôÀ©Õ¹£© */
 QPlainTextEdit[text=""]{ 
-  color:palette(text); /* æ–‡æœ¬é¢œè‰²ï¼šç³»ç»Ÿæ–‡æœ¬è‰² */
+  color:palette(text); /* ÎÄ±¾ÑÕÉ«£ºÏµÍ³ÎÄ±¾É« */
 }
 
-/* å·¥å…·æç¤ºæ ·å¼ */
+/* ¹¤¾ßÌáÊ¾ÑùÊ½ */
 QToolTip{
-  color:palette(text); /* æ–‡æœ¬é¢œè‰²ï¼šç³»ç»Ÿæ–‡æœ¬è‰² */
-  background-color:palette(base); /* èƒŒæ™¯è‰²ï¼šç³»ç»ŸåŸºç¡€è‰²ï¼ˆè·Ÿéšç³»ç»Ÿä¸»é¢˜ï¼‰ */
-  border:1px solid palette(highlight); /* è¾¹æ¡†ï¼š1pxç³»ç»Ÿé«˜äº®è‰² */
-  border-radius:0px; /* åœ†è§’ï¼š0pxï¼ˆç›´è§’ï¼‰ */
+  color:palette(text); /* ÎÄ±¾ÑÕÉ«£ºÏµÍ³ÎÄ±¾É« */
+  background-color:palette(base); /* ±³¾°É«£ºÏµÍ³»ù´¡É«£¨¸úËæÏµÍ³Ö÷Ìâ£© */
+  border:1px solid palette(highlight); /* ±ß¿ò£º1pxÏµÍ³¸ßÁÁÉ« */
+  border-radius:0px; /* Ô²½Ç£º0px£¨Ö±½Ç£© */
 }
 
-/* çŠ¶æ€æ åŸºç¡€æ ·å¼ */
+/* ×´Ì¬À¸»ù´¡ÑùÊ½ */
 QStatusBar{
-  background-color:qlineargradient(x1:0,y1:0,x2:0,y2:1,stop:0 rgba(230,230,230,255),stop:1 rgba(245,245,245,255)); /* èƒŒæ™¯ï¼šå‚ç›´æ¸å˜æµ…ç°ï¼ˆä¸Šæµ…ä¸‹ç¨æ·±ï¼‰ */
-  color:palette(text); /* æ–‡å­—é¢œè‰²ä½¿ç”¨ç³»ç»Ÿæ–‡æœ¬è‰² */
+  background-color:qlineargradient(x1:0,y1:0,x2:0,y2:1,stop:0 rgba(230,230,230,255),stop:1 rgba(245,245,245,255)); /* ±³¾°£º´¹Ö±½¥±äÇ³»Ò£¨ÉÏÇ³ÏÂÉÔÉî£© */
+  color:palette(text); /* ÎÄ×ÖÑÕÉ«Ê¹ÓÃÏµÍ³ÎÄ±¾É« */
 }
 
-/* çŠ¶æ€æ å†…æ ‡ç­¾æ ·å¼ */
+/* ×´Ì¬À¸ÄÚ±êÇ©ÑùÊ½ */
 QStatusBar::item QLabel {
-  /* font-size: 12px; å­—ä½“å¤§å°ï¼š16px */
+  /* font-size: 12px; ×ÖÌå´óĞ¡£º16px */
 }
 
-/* èœå•æ åŸºç¡€æ ·å¼ */
+/* ²Ëµ¥À¸»ù´¡ÑùÊ½ */
 QMenuBar{
-  background-color:transparent; /* èƒŒæ™¯é€æ˜ */
-  spacing:0px; /* èœå•é¡¹é—´è·ï¼š0px */
+  background-color:transparent; /* ±³¾°Í¸Ã÷ */
+  spacing:0px; /* ²Ëµ¥Ïî¼ä¾à£º0px */
 }
 
-/* èœå•é¡¹åŸºç¡€æ ·å¼ */
+/* ²Ëµ¥Ïî»ù´¡ÑùÊ½ */
 QMenuBar::item{
-  spacing:2px; /* èœå•é¡¹å†…é—´è·ï¼š2px */
-  padding:0px 4px; /* å†…è¾¹è·ï¼šä¸Šä¸‹0pxï¼Œå·¦å³4px */
-  background:transparent; /* èƒŒæ™¯é€æ˜ */
+  spacing:2px; /* ²Ëµ¥ÏîÄÚ¼ä¾à£º2px */
+  padding:0px 4px; /* ÄÚ±ß¾à£ºÉÏÏÂ0px£¬×óÓÒ4px */
+  background:transparent; /* ±³¾°Í¸Ã÷ */
 }
 
-/* èœå•æ é€‰é¡¹é€‰ä¸­çŠ¶æ€ï¼ˆé¼ æ ‡æ‚¬åœæ—¶ï¼‰ */
+/* ²Ëµ¥À¸Ñ¡ÏîÑ¡ÖĞ×´Ì¬£¨Êó±êĞüÍ£Ê±£© */
 QMenuBar::item:selected{
-  background-color:rgba(220,220,220,255); /* èƒŒæ™¯è‰²ï¼šæµ…ç°è‰²ä¸é€æ˜ */
+  background-color:rgba(220,220,220,255); /* ±³¾°É«£ºÇ³»ÒÉ«²»Í¸Ã÷ */
 }
 
-/* å·¥å…·æŒ‰é’®æ‚¬åœçŠ¶æ€ */
+/* ¹¤¾ß°´Å¥ĞüÍ£×´Ì¬ */
 QToolButton:hover{
-  background-color:rgba(220,220,220,255); /* æ‚¬åœæ—¶èƒŒæ™¯è‰²ï¼šæµ…ç°è‰²ä¸é€æ˜ */
+  background-color:rgba(220,220,220,255); /* ĞüÍ£Ê±±³¾°É«£ºÇ³»ÒÉ«²»Í¸Ã÷ */
 }
 
-/* èœå•æ é€‰é¡¹æŒ‰ä¸‹çŠ¶æ€ï¼ˆé¼ æ ‡ç‚¹å‡»æ—¶ï¼‰ */
+/* ²Ëµ¥À¸Ñ¡Ïî°´ÏÂ×´Ì¬£¨Êó±êµã»÷Ê±£© */
 QMenuBar::item:pressed{
-  background-color:palette(highlight); /* èƒŒæ™¯è‰²ä½¿ç”¨ç³»ç»Ÿé«˜äº®è‰² */
-  color:rgba(255,255,255,255); /* æ–‡å­—é¢œè‰²ä¸ºçº¯ç™½è‰² */
-  border-left:1px solid rgba(200,200,200,127); /* å·¦ä¾§è¾¹æ¡†ï¼š1pxæµ…ç°è‰²åŠé€æ˜ */
-  border-right:1px solid rgba(200,200,200,127); /* å³ä¾§è¾¹æ¡†ï¼šåŒä¸Š */
+  background-color:palette(highlight); /* ±³¾°É«Ê¹ÓÃÏµÍ³¸ßÁÁÉ« */
+  color:rgba(255,255,255,255); /* ÎÄ×ÖÑÕÉ«Îª´¿°×É« */
+  border-left:1px solid rgba(200,200,200,127); /* ×ó²à±ß¿ò£º1pxÇ³»ÒÉ«°ëÍ¸Ã÷ */
+  border-right:1px solid rgba(200,200,200,127); /* ÓÒ²à±ß¿ò£ºÍ¬ÉÏ */
 }
 
-/* èœå•åŸºç¡€æ ·å¼ */
+/* ²Ëµ¥»ù´¡ÑùÊ½ */
 QMenu{
-  background-color:palette(window); /* èƒŒæ™¯è‰²ï¼šç³»ç»Ÿçª—å£è‰²ï¼ˆå¦‚ç™½è‰²æˆ–æ·±è‰²ï¼‰ */
-  border:1px solid palette(shadow); /* è¾¹æ¡†ï¼š1pxç³»ç»Ÿé˜´å½±è‰²ï¼ˆå¦‚ç°è‰²ï¼‰ */
+  background-color:palette(window); /* ±³¾°É«£ºÏµÍ³´°¿ÚÉ«£¨Èç°×É«»òÉîÉ«£© */
+  border:1px solid palette(shadow); /* ±ß¿ò£º1pxÏµÍ³ÒõÓ°É«£¨Èç»ÒÉ«£© */
 }
 
-/* èœå•é¡¹åŸºç¡€æ ·å¼ */
+/* ²Ëµ¥Ïî»ù´¡ÑùÊ½ */
 QMenu::item{
-  padding:3px 15px 3px 15px; /* å†…è¾¹è·ï¼šä¸Šä¸‹3pxï¼Œå·¦å³15pxï¼ˆå¢å¤§ç‚¹å‡»åŒºåŸŸï¼‰ */
-  border:1px solid transparent; /* è¾¹æ¡†ï¼š1pxé€æ˜ï¼ˆé¢„ç•™é€‰ä¸­çŠ¶æ€è¾¹æ¡†ï¼‰ */
+  padding:3px 15px 3px 15px; /* ÄÚ±ß¾à£ºÉÏÏÂ3px£¬×óÓÒ15px£¨Ôö´óµã»÷ÇøÓò£© */
+  border:1px solid transparent; /* ±ß¿ò£º1pxÍ¸Ã÷£¨Ô¤ÁôÑ¡ÖĞ×´Ì¬±ß¿ò£© */
 }
 
-/* èœå•é¡¹ç¦ç”¨çŠ¶æ€ */
+/* ²Ëµ¥Ïî½ûÓÃ×´Ì¬ */
 QMenu::item:disabled{
-  background-color:rgba(235,235,235,127); /* èƒŒæ™¯è‰²ï¼šææµ…ç°è‰²åŠé€æ˜ */
-  color:palette(disabled); /* æ–‡å­—é¢œè‰²ä½¿ç”¨ç³»ç»Ÿç¦ç”¨è‰² */
+  background-color:rgba(235,235,235,127); /* ±³¾°É«£º¼«Ç³»ÒÉ«°ëÍ¸Ã÷ */
+  color:palette(disabled); /* ÎÄ×ÖÑÕÉ«Ê¹ÓÃÏµÍ³½ûÓÃÉ« */
 }
 
-/* èœå•é¡¹é€‰ä¸­çŠ¶æ€ï¼ˆé¼ æ ‡æ‚¬åœæˆ–é”®ç›˜å¯¼èˆªé€‰ä¸­æ—¶ï¼‰ */
+/* ²Ëµ¥ÏîÑ¡ÖĞ×´Ì¬£¨Êó±êĞüÍ£»ò¼üÅÌµ¼º½Ñ¡ÖĞÊ±£© */
 QMenu::item:selected{
-  border-color:rgba(147,191,236,127); /* è¾¹æ¡†è‰²ï¼šåŠé€æ˜æµ…è“è‰² */
-  background:palette(highlight); /* èƒŒæ™¯è‰²ï¼šç³»ç»Ÿé«˜äº®è‰² */
-  color:rgba(255,255,255,255); /* æ–‡æœ¬é¢œè‰²ï¼šç™½è‰² */
+  border-color:rgba(147,191,236,127); /* ±ß¿òÉ«£º°ëÍ¸Ã÷Ç³À¶É« */
+  background:palette(highlight); /* ±³¾°É«£ºÏµÍ³¸ßÁÁÉ« */
+  color:rgba(255,255,255,255); /* ÎÄ±¾ÑÕÉ«£º°×É« */
 }
 
-/* èœå•é¡¹å›¾æ ‡å·¦è¾¹è· */
+/* ²Ëµ¥ÏîÍ¼±ê×ó±ß¾à */
 QMenu::icon {
-  padding-left: 10px; /* å›¾æ ‡å·¦å†…è¾¹è·è®¾ä¸º10pxï¼ˆé»˜è®¤é€šå¸¸ä¸º0ï¼‰ */
+  padding-left: 10px; /* Í¼±ê×óÄÚ±ß¾àÉèÎª10px£¨Ä¬ÈÏÍ¨³£Îª0£© */
 }
 
-/* èœå•é¡¹ä¸­å·²é€‰ä¸­çš„å›¾æ ‡æ ·å¼ */
+/* ²Ëµ¥ÏîÖĞÒÑÑ¡ÖĞµÄÍ¼±êÑùÊ½ */
 QMenu::icon:checked{
-  background-color:qlineargradient(x1:0,y1:1,x2:0,y2:0,stop:0 rgba(230,230,230,127),stop:1 rgba(240,240,240,75)); /* èƒŒæ™¯ï¼šä»ä¸Šåˆ°ä¸‹çš„æ¸å˜æµ…ç° */
-  border:1px solid palette(highlight); /* è¾¹æ¡†ä½¿ç”¨ç³»ç»Ÿé«˜äº®è‰² */
-  border-radius:2px; /* åœ†è§’ï¼š2px */
+  background-color:qlineargradient(x1:0,y1:1,x2:0,y2:0,stop:0 rgba(230,230,230,127),stop:1 rgba(240,240,240,75)); /* ±³¾°£º´ÓÉÏµ½ÏÂµÄ½¥±äÇ³»Ò */
+  border:1px solid palette(highlight); /* ±ß¿òÊ¹ÓÃÏµÍ³¸ßÁÁÉ« */
+  border-radius:2px; /* Ô²½Ç£º2px */
 }
 
-/* èœå•é¡¹åˆ†éš”çº¿æ ·å¼ */
+/* ²Ëµ¥Ïî·Ö¸ôÏßÑùÊ½ */
 QMenu::separator{
-  height:1px; /* é«˜åº¦ï¼š1px */
-  background:palette(alternate-base); /* èƒŒæ™¯è‰²ï¼šç³»ç»Ÿäº¤æ›¿åŸºç¡€è‰²ï¼ˆå¦‚æµ…ç°è‰²ï¼‰ */
-  margin-left:2px; /* å·¦è¾¹è·ï¼š2px */
-  margin-right:2px; /* å³è¾¹è·ï¼š2px */
+  height:1px; /* ¸ß¶È£º1px */
+  background:palette(alternate-base); /* ±³¾°É«£ºÏµÍ³½»Ìæ»ù´¡É«£¨ÈçÇ³»ÒÉ«£© */
+  margin-left:2px; /* ×ó±ß¾à£º2px */
+  margin-right:2px; /* ÓÒ±ß¾à£º2px */
 }
 
-/* èœå•é¡¹æŒ‡ç¤ºå™¨ï¼ˆå¦‚å¤é€‰æ¡†ã€å•é€‰æŒ‰é’®ï¼‰åŸºç¡€æ ·å¼ */
+/* ²Ëµ¥ÏîÖ¸Ê¾Æ÷£¨Èç¸´Ñ¡¿ò¡¢µ¥Ñ¡°´Å¥£©»ù´¡ÑùÊ½ */
 QMenu::indicator{
-  width:15px; /* å®½åº¦ï¼š15px */
-  height:15px; /* é«˜åº¦ï¼š15px */
+  width:15px; /* ¿í¶È£º15px */
+  height:15px; /* ¸ß¶È£º15px */
 }
 
-/* éæ’ä»–æ€§èœå•é¡¹æŒ‡ç¤ºå™¨ï¼ˆå¤é€‰æ¡†ï¼‰é€‰ä¸­çŠ¶æ€ */
+/* ·ÇÅÅËûĞÔ²Ëµ¥ÏîÖ¸Ê¾Æ÷£¨¸´Ñ¡¿ò£©Ñ¡ÖĞ×´Ì¬ */
 QMenu::indicator:non-exclusive:checked{
-  padding-left:2px; /* å·¦å†…è¾¹è·ï¼š2pxï¼ˆè°ƒæ•´æŒ‡ç¤ºå™¨ä½ç½®ï¼‰ */
+  padding-left:2px; /* ×óÄÚ±ß¾à£º2px£¨µ÷ÕûÖ¸Ê¾Æ÷Î»ÖÃ£© */
 }
 
-/* éæ’ä»–æ€§èœå•é¡¹æŒ‡ç¤ºå™¨ï¼ˆå¤é€‰æ¡†ï¼‰æœªé€‰ä¸­çŠ¶æ€ */
+/* ·ÇÅÅËûĞÔ²Ëµ¥ÏîÖ¸Ê¾Æ÷£¨¸´Ñ¡¿ò£©Î´Ñ¡ÖĞ×´Ì¬ */
 QMenu::indicator:non-exclusive:unchecked{
-  padding-left:2px; /* å·¦å†…è¾¹è·ï¼š2pxï¼ˆä¿æŒä½ç½®ä¸€è‡´ï¼‰ */
+  padding-left:2px; /* ×óÄÚ±ß¾à£º2px£¨±£³ÖÎ»ÖÃÒ»ÖÂ£© */
 }
 
-/* æ’ä»–æ€§èœå•é¡¹æŒ‡ç¤ºå™¨ï¼ˆå•é€‰æŒ‰é’®ï¼‰é€‰ä¸­çŠ¶æ€ */
+/* ÅÅËûĞÔ²Ëµ¥ÏîÖ¸Ê¾Æ÷£¨µ¥Ñ¡°´Å¥£©Ñ¡ÖĞ×´Ì¬ */
 QMenu::indicator:exclusive:checked{
-  padding-left:2px; /* å·¦å†…è¾¹è·ï¼š2pxï¼ˆè°ƒæ•´æŒ‡ç¤ºå™¨ä½ç½®ï¼‰ */
+  padding-left:2px; /* ×óÄÚ±ß¾à£º2px£¨µ÷ÕûÖ¸Ê¾Æ÷Î»ÖÃ£© */
 }
 
-/* æ’ä»–æ€§èœå•é¡¹æŒ‡ç¤ºå™¨ï¼ˆå•é€‰æŒ‰é’®ï¼‰æœªé€‰ä¸­çŠ¶æ€ */
+/* ÅÅËûĞÔ²Ëµ¥ÏîÖ¸Ê¾Æ÷£¨µ¥Ñ¡°´Å¥£©Î´Ñ¡ÖĞ×´Ì¬ */
 QMenu::indicator:exclusive:unchecked{
-  padding-left:2px; /* å·¦å†…è¾¹è·ï¼š2pxï¼ˆä¿æŒä½ç½®ä¸€è‡´ï¼‰ */
+  padding-left:2px; /* ×óÄÚ±ß¾à£º2px£¨±£³ÖÎ»ÖÃÒ»ÖÂ£© */
 }
 
-/* é¡¶éƒ¨å·¥å…·æ æ ·å¼ */
+/* ¶¥²¿¹¤¾ßÀ¸ÑùÊ½ */
 QToolBar::top{
-  background-color:qlineargradient(x1:0,y1:0,x2:0,y2:1,stop:0 rgba(230,230,230,255),stop:1 rgba(245,245,245,255)); /* èƒŒæ™¯ï¼šå‚ç›´æ¸å˜æµ…ç°ï¼ˆä¸Šæµ…ä¸‹æ·±ï¼‰ */
-  border-bottom:3px solid qlineargradient(x1:0,y1:0,x2:0,y2:1,stop:0 rgba(230,230,230,255),stop:1 rgba(245,245,245,255)); /* åº•éƒ¨è¾¹æ¡†ï¼š3pxæ¸å˜æµ…ç° */
+  background-color:qlineargradient(x1:0,y1:0,x2:0,y2:1,stop:0 rgba(230,230,230,127),stop:1 rgba(245,245,245,75)); /* ±³¾°£º´¹Ö±½¥±äÇ³»Ò£¨ÉÏÇ³ÏÂÉî£© */
+  border-bottom:3px solid qlineargradient(x1:0,y1:0,x2:0,y2:1,stop:0 rgba(230,230,230,127),stop:1 rgba(245,245,245,75)); /* µ×²¿±ß¿ò£º3px½¥±äÇ³»Ò */
 }
 
-/* åº•éƒ¨å·¥å…·æ æ ·å¼ */
+/* µ×²¿¹¤¾ßÀ¸ÑùÊ½ */
 QToolBar::bottom{
-  background-color:qlineargradient(x1:0,y1:1,x2:0,y2:0,stop:0 rgba(230,230,230,255),stop:1 rgba(245,245,245,255)); /* èƒŒæ™¯ï¼šå‚ç›´æ¸å˜æµ…ç°ï¼ˆä¸‹æµ…ä¸Šæ·±ï¼‰ */
-  border-top:3px solid qlineargradient(x1:0,y1:1,x2:0,y2:0,stop:0 rgba(230,230,230,255),stop:1 rgba(245,245,245,255)); /* é¡¶éƒ¨è¾¹æ¡†ï¼š3pxæ¸å˜æµ…ç° */
+  background-color:qlineargradient(x1:0,y1:1,x2:0,y2:0,stop:0 rgba(230,230,230,127),stop:1 rgba(245,245,245,75)); /* ±³¾°£º´¹Ö±½¥±äÇ³»Ò£¨ÏÂÇ³ÉÏÉî£© */
+  border-top:3px solid qlineargradient(x1:0,y1:1,x2:0,y2:0,stop:0 rgba(230,230,230,127),stop:1 rgba(245,245,245,75)); /* ¶¥²¿±ß¿ò£º3px½¥±äÇ³»Ò */
 }
 
-/* å·¦ä¾§å·¥å…·æ æ ·å¼ */
+/* ×ó²à¹¤¾ßÀ¸ÑùÊ½ */
 QToolBar::left{
-  background-color:qlineargradient(x1:0,y1:0,x2:1,y2:0,stop:0 rgba(230,230,230,255),stop:1 rgba(245,245,245,255)); /* èƒŒæ™¯ï¼šæ°´å¹³æ¸å˜æµ…ç°ï¼ˆå·¦æµ…å³æ·±ï¼‰ */
-  border-right:3px solid qlineargradient(x1:0,y1:0,x2:1,y2:0,stop:0 rgba(230,230,230,255),stop:1 rgba(245,245,245,255)); /* å³ä¾§è¾¹æ¡†ï¼š3pxæ¸å˜æµ…ç° */
+  background-color:qlineargradient(x1:0,y1:0,x2:1,y2:0,stop:0 rgba(230,230,230,127),stop:1 rgba(245,245,245,75)); /* ±³¾°£ºË®Æ½½¥±äÇ³»Ò£¨×óÇ³ÓÒÉî£© */
+  border-right:3px solid qlineargradient(x1:0,y1:0,x2:1,y2:0,stop:0 rgba(230,230,230,127),stop:1 rgba(245,245,245,75)); /* ÓÒ²à±ß¿ò£º3px½¥±äÇ³»Ò */
 }
 
-/* å³ä¾§å·¥å…·æ æ ·å¼ */
+/* ÓÒ²à¹¤¾ßÀ¸ÑùÊ½ */
 QToolBar::right{
-  background-color:qlineargradient(x1:1,y1:0,x2:0,y2:0,stop:0 rgba(230,230,230,255),stop:1 rgba(245,245,245,255)); /* èƒŒæ™¯ï¼šæ°´å¹³æ¸å˜æµ…ç°ï¼ˆå³æµ…å·¦æ·±ï¼‰ */
-  border-left:3px solid qlineargradient(x1:1,y1:0,x2:0,y2:0,stop:0 rgba(230,230,230,255),stop:1 rgba(245,245,245,255)); /* å·¦ä¾§è¾¹æ¡†ï¼š3pxæ¸å˜æµ…ç° */
+  background-color:qlineargradient(x1:1,y1:0,x2:0,y2:0,stop:0 rgba(230,230,230,127),stop:1 rgba(245,245,245,75)); /* ±³¾°£ºË®Æ½½¥±äÇ³»Ò£¨ÓÒÇ³×óÉî£© */
+  border-left:3px solid qlineargradient(x1:1,y1:0,x2:0,y2:0,stop:0 rgba(230,230,230,127),stop:1 rgba(245,245,245,75)); /* ×ó²à±ß¿ò£º3px½¥±äÇ³»Ò */
 }
 
-/* ä¸»çª—å£ä¸­çš„åˆ†éš”å™¨æ ·å¼ */
+/* Ö÷´°¿ÚÖĞµÄ·Ö¸ôÆ÷ÑùÊ½ */
 QMainWindow::separator{
-  width:6px; /* æ°´å¹³åˆ†éš”å™¨å®½åº¦ */
-  height:5px; /* å‚ç›´åˆ†éš”å™¨é«˜åº¦ */
-  padding:2px; /* å†…è¾¹è·ï¼šåˆ†éš”å™¨ä¸å‘¨å›´å…ƒç´ çš„é—´è· */
+  width:6px; /* Ë®Æ½·Ö¸ôÆ÷¿í¶È */
+  height:5px; /* ´¹Ö±·Ö¸ôÆ÷¸ß¶È */
+  padding:2px; /* ÄÚ±ß¾à£º·Ö¸ôÆ÷ÓëÖÜÎ§ÔªËØµÄ¼ä¾à */
 }
 
-/* ç»„åˆæ¡†åŸºç¡€æ ·å¼ */
+/* ×éºÏ¿ò»ù´¡ÑùÊ½ */
 QComboBox {
-  combobox-popup: 0; /* ç¦ç”¨é»˜è®¤ä¸‹æ‹‰å¼¹å‡ºæ¡†æ ·å¼ï¼ˆéœ€è‡ªå®šä¹‰ä¸‹æ‹‰åˆ—è¡¨ï¼‰ */
+  combobox-popup: 0; /* ½ûÓÃÄ¬ÈÏÏÂÀ­µ¯³ö¿òÑùÊ½£¨Ğè×Ô¶¨ÒåÏÂÀ­ÁĞ±í£© */
 }
 
-/* ç»„åˆæ¡†ä¸‹æ‹‰åˆ—è¡¨è§†å›¾æ ·å¼ */
+/* ×éºÏ¿òÏÂÀ­ÁĞ±íÊÓÍ¼ÑùÊ½ */
 QComboBox QAbstractItemView {
-  border: 1px solid palette(shadow); /* ä¸‹æ‹‰åˆ—è¡¨è¾¹æ¡†ï¼š1pxç³»ç»Ÿé˜´å½±è‰² */
+  border: 1px solid palette(shadow); /* ÏÂÀ­ÁĞ±í±ß¿ò£º1pxÏµÍ³ÒõÓ°É« */
 }
 
-/* ç»„åˆæ¡†ä¸­é€‰ä¸­é¡¹çš„æ ·å¼ */
+/* ×éºÏ¿òÖĞÑ¡ÖĞÏîµÄÑùÊ½ */
 QComboBox:item:selected {
-  border: none; /* æ— é€‰ä¸­è¾¹æ¡† */
-  background:palette(highlight); /* èƒŒæ™¯è‰²ï¼šç³»ç»Ÿé«˜äº®è‰²ï¼ˆå¦‚è“è‰²ï¼‰ */
-  color:rgba(255,255,255,255); /* æ–‡å­—é¢œè‰²ï¼šçº¯ç™½è‰² */
+  border: none; /* ÎŞÑ¡ÖĞ±ß¿ò */
+  background:palette(highlight); /* ±³¾°É«£ºÏµÍ³¸ßÁÁÉ«£¨ÈçÀ¶É«£© */
+  color:rgba(255,255,255,255); /* ÎÄ×ÖÑÕÉ«£º´¿°×É« */
 }
 
-/* ç»„åˆæ¡†æŒ‡ç¤ºå™¨æ ·å¼ï¼ˆå¦‚ä¸‹æ‹‰ç®­å¤´ï¼‰ */
+/* ×éºÏ¿òÖ¸Ê¾Æ÷ÑùÊ½£¨ÈçÏÂÀ­¼ıÍ·£© */
 QComboBox::indicator{
-  background-color:transparent; /* èƒŒæ™¯é€æ˜ */
-  selection-background-color:transparent; /* é€‰ä¸­æ—¶èƒŒæ™¯é€æ˜ */
-  color:transparent; /* æ–‡å­—é€æ˜ */
-  selection-color:transparent; /* é€‰ä¸­æ—¶æ–‡å­—é€æ˜ */
+  background-color:transparent; /* ±³¾°Í¸Ã÷ */
+  selection-background-color:transparent; /* Ñ¡ÖĞÊ±±³¾°Í¸Ã÷ */
+  color:transparent; /* ÎÄ×ÖÍ¸Ã÷ */
+  selection-color:transparent; /* Ñ¡ÖĞÊ±ÎÄ×ÖÍ¸Ã÷ */
 }
 
-/* æ°´å¹³åˆ†å‰²å™¨æ‰‹æŸ„æ ·å¼ */
+/* Ë®Æ½·Ö¸îÆ÷ÊÖ±úÑùÊ½ */
 QSplitter::handle:horizontal{
-  background:palette(window); /* èƒŒæ™¯è‰²ï¼šç³»ç»Ÿçª—å£èƒŒæ™¯è‰²ï¼ˆå¦‚æµ…ç°è‰²ï¼‰ */
-  width:10px; /* æ‰‹æŸ„å®½åº¦ */
+  background:palette(window); /* ±³¾°É«£ºÏµÍ³´°¿Ú±³¾°É«£¨ÈçÇ³»ÒÉ«£© */
+  width:10px; /* ÊÖ±ú¿í¶È */
 }
 
-/* å‚ç›´åˆ†å‰²å™¨æ‰‹æŸ„æ ·å¼ */
+/* ´¹Ö±·Ö¸îÆ÷ÊÖ±úÑùÊ½ */
 QSplitter::handle:vertical{
-  background:palette(window); /* èƒŒæ™¯è‰²ï¼šç³»ç»Ÿçª—å£èƒŒæ™¯è‰² */
-  height:10px; /* æ‰‹æŸ„é«˜åº¦ */
+  background:palette(window); /* ±³¾°É«£ºÏµÍ³´°¿Ú±³¾°É« */
+  height:10px; /* ÊÖ±ú¸ß¶È */
 }
 
-/* åˆ†éš”å™¨å’Œåˆ†å‰²å™¨æ‰‹æŸ„çš„æ‚¬åœçŠ¶æ€ */
+/* ·Ö¸ôÆ÷ºÍ·Ö¸îÆ÷ÊÖ±úµÄĞüÍ£×´Ì¬ */
 QMainWindow::separator:hover,QSplitter::handle:hover{
-  background:palette(highlight); /* æ‚¬åœæ—¶èƒŒæ™¯è‰²ï¼šç³»ç»Ÿé«˜äº®è‰² */
+  background:palette(highlight); /* ĞüÍ£Ê±±³¾°É«£ºÏµÍ³¸ßÁÁÉ« */
 }
 
-/* åœé çª—å£æ ‡é¢˜æ æ ·å¼ */
+/* Í£¿¿´°¿Ú±êÌâÀ¸ÑùÊ½ */
 QDockWidget::title{
-  padding:4px; /* å†…è¾¹è·ï¼š4px */
-  background-color:qlineargradient(x1:0,y1:1,x2:0,y2:0,stop:0 rgba(230,230,230,127),stop:1 rgba(245,245,245,75)); /* èƒŒæ™¯ï¼šå‚ç›´æ¸å˜æµ…ç°ï¼ˆä¸‹æµ…ä¸Šæ·±ï¼‰ */
-  border:1px solid rgba(200,200,200,75); /* è¾¹æ¡†ï¼š1pxåŠé€æ˜æµ…ç°è‰² */
-  border-bottom:2px solid rgba(200,200,200,75); /* åº•éƒ¨è¾¹æ¡†ï¼š2pxåŠé€æ˜æµ…ç°è‰² */
+  padding:4px; /* ÄÚ±ß¾à£º4px */
+  background-color:qlineargradient(x1:0,y1:1,x2:0,y2:0,stop:0 rgba(230,230,230,127),stop:1 rgba(245,245,245,75)); /* ±³¾°£º´¹Ö±½¥±äÇ³»Ò£¨ÏÂÇ³ÉÏÉî£© */
+  border:1px solid rgba(200,200,200,75); /* ±ß¿ò£º1px°ëÍ¸Ã÷Ç³»ÒÉ« */
+  border-bottom:2px solid rgba(200,200,200,75); /* µ×²¿±ß¿ò£º2px°ëÍ¸Ã÷Ç³»ÒÉ« */
 }
 
-/* åœé çª—å£åŸºç¡€æ ·å¼ */
+/* Í£¿¿´°¿Ú»ù´¡ÑùÊ½ */
 QDockWidget{
-  titlebar-close-icon:url(":/qss_icons/light/light_icons/window_close.png"); /* å…³é—­æŒ‰é’®å›¾æ ‡è·¯å¾„ */
-  titlebar-normal-icon:url(":/qss_icons/light/light_icons/window_undock.png"); /* æµ®åŠ¨æŒ‰é’®å›¾æ ‡è·¯å¾„ */
+  titlebar-close-icon:url(":/qss_icons/light/light_icons/window_close.png"); /* ¹Ø±Õ°´Å¥Í¼±êÂ·¾¶ */
+  titlebar-normal-icon:url(":/qss_icons/light/light_icons/window_undock.png"); /* ¸¡¶¯°´Å¥Í¼±êÂ·¾¶ */
 }
 
-/* åœé çª—å£å…³é—­æŒ‰é’®ä¸æµ®åŠ¨æŒ‰é’®çš„ä½ç½®æ§åˆ¶ */
+/* Í£¿¿´°¿Ú¹Ø±Õ°´Å¥Óë¸¡¶¯°´Å¥µÄÎ»ÖÃ¿ØÖÆ */
 QDockWidget::close-button,QDockWidget::float-button{
-  subcontrol-position:top right; /* å­æ§ä»¶ä½ç½®ï¼šå³ä¸Šè§’ */
-  subcontrol-origin:margin; /* å­æ§ä»¶åŸç‚¹ï¼šä»è¾¹è·å¼€å§‹è®¡ç®— */
-  position:absolute; /* ç»å¯¹å®šä½ */
-  top:3px; /* è·ç¦»é¡¶éƒ¨3px */
-  bottom:0px; /* è·ç¦»åº•éƒ¨0px */
-  width:20px; /* æŒ‰é’®å®½åº¦ */
-  height:20px; /* æŒ‰é’®é«˜åº¦ */
+  subcontrol-position:top right; /* ×Ó¿Ø¼şÎ»ÖÃ£ºÓÒÉÏ½Ç */
+  subcontrol-origin:margin; /* ×Ó¿Ø¼şÔ­µã£º´Ó±ß¾à¿ªÊ¼¼ÆËã */
+  position:absolute; /* ¾ø¶Ô¶¨Î» */
+  top:3px; /* ¾àÀë¶¥²¿3px */
+  bottom:0px; /* ¾àÀëµ×²¿0px */
+  width:20px; /* °´Å¥¿í¶È */
+  height:20px; /* °´Å¥¸ß¶È */
 }
 
-/* å…³é—­æŒ‰é’®çš„ä½ç½®å¾®è°ƒ */
+/* ¹Ø±Õ°´Å¥µÄÎ»ÖÃÎ¢µ÷ */
 QDockWidget::close-button{
-  right:3px; /* è·ç¦»å³ä¾§3px */
+  right:3px; /* ¾àÀëÓÒ²à3px */
 }
 
-/* æµ®åŠ¨æŒ‰é’®çš„ä½ç½®å¾®è°ƒ */
+/* ¸¡¶¯°´Å¥µÄÎ»ÖÃÎ¢µ÷ */
 QDockWidget::float-button{
-  right:25px; /* è·ç¦»å³ä¾§25pxï¼ˆä¸å…³é—­æŒ‰é’®ä¿æŒé—´è·ï¼‰ */
+  right:25px; /* ¾àÀëÓÒ²à25px£¨Óë¹Ø±Õ°´Å¥±£³Ö¼ä¾à£© */
 }
 
-/* åˆ†ç»„æ¡†åŸºç¡€æ ·å¼ */
+/* ·Ö×é¿ò»ù´¡ÑùÊ½ */
 QGroupBox{
-  background-color:rgba(245,245,245,50%); /* èƒŒæ™¯ï¼šåŠé€æ˜ææµ…ç°è‰² */
-  margin-top:27px; /* é¡¶éƒ¨å¤–è¾¹è·ï¼š27pxï¼ˆä¸ºæ ‡é¢˜é¢„ç•™ç©ºé—´ï¼‰ */
-  border:1px solid rgba(200,200,200,127); /* è¾¹æ¡†ï¼š1pxåŠé€æ˜æµ…ç°è‰² */
-  border-radius:4px; /* åœ†è§’ï¼š4px */
+  background-color:rgba(245,245,245,50%); /* ±³¾°£º°ëÍ¸Ã÷¼«Ç³»ÒÉ« */
+  margin-top:27px; /* ¶¥²¿Íâ±ß¾à£º27px£¨Îª±êÌâÔ¤Áô¿Õ¼ä£© */
+  border:1px solid rgba(200,200,200,127); /* ±ß¿ò£º1px°ëÍ¸Ã÷Ç³»ÒÉ« */
+  border-radius:4px; /* Ô²½Ç£º4px */
 }
 
-/* åˆ†ç»„æ¡†æ ‡é¢˜æ ·å¼ */
+/* ·Ö×é¿ò±êÌâÑùÊ½ */
 QGroupBox::title{
-  subcontrol-origin:margin; /* å­æ§ä»¶åŸç‚¹ï¼šä»è¾¹è·å¼€å§‹è®¡ç®— */
-  subcontrol-position:left top; /* å­æ§ä»¶ä½ç½®ï¼šå·¦ä¸Šè§’ */
-  padding:4px 6px; /* å†…è¾¹è·ï¼šä¸Šä¸‹4pxï¼Œå·¦å³6px */
-  margin-left:3px; /* å·¦ä¾§å¤–è¾¹è·ï¼š3px */
-  background-color:qlineargradient(x1:0,y1:1,x2:0,y2:0,stop:0 rgba(230,230,230,127),stop:1 rgba(245,245,245,75)); /* èƒŒæ™¯ï¼šå‚ç›´æ¸å˜æµ…ç°ï¼ˆä¸‹æµ…ä¸Šæ·±ï¼‰ */
-  border:1px solid rgba(200,200,200,75); /* è¾¹æ¡†ï¼š1pxåŠé€æ˜æµ…ç°è‰² */
-  border-bottom:2px solid rgb(180,180,180); /* åº•éƒ¨è¾¹æ¡†ï¼š2pxä¸­æµ…ç°è‰² */
-  border-top-left-radius:4px; /* å·¦ä¸Šè§’åœ†è§’ï¼š4px */
-  border-top-right-radius:4px; /* å³ä¸Šè§’åœ†è§’ï¼š4px */
+  subcontrol-origin:margin; /* ×Ó¿Ø¼şÔ­µã£º´Ó±ß¾à¿ªÊ¼¼ÆËã */
+  subcontrol-position:left top; /* ×Ó¿Ø¼şÎ»ÖÃ£º×óÉÏ½Ç */
+  padding:4px 6px; /* ÄÚ±ß¾à£ºÉÏÏÂ4px£¬×óÓÒ6px */
+  margin-left:3px; /* ×ó²àÍâ±ß¾à£º3px */
+  background-color:qlineargradient(x1:0,y1:1,x2:0,y2:0,stop:0 rgba(230,230,230,127),stop:1 rgba(245,245,245,75)); /* ±³¾°£º´¹Ö±½¥±äÇ³»Ò£¨ÏÂÇ³ÉÏÉî£© */
+  border:1px solid rgba(200,200,200,75); /* ±ß¿ò£º1px°ëÍ¸Ã÷Ç³»ÒÉ« */
+  border-bottom:2px solid rgb(180,180,180); /* µ×²¿±ß¿ò£º2pxÖĞÇ³»ÒÉ« */
+  border-top-left-radius:4px; /* ×óÉÏ½ÇÔ²½Ç£º4px */
+  border-top-right-radius:4px; /* ÓÒÉÏ½ÇÔ²½Ç£º4px */
 }
 
-/* æ ‡ç­¾é¡µå®¹å™¨æ ·å¼ */
+/* ±êÇ©Ò³ÈİÆ÷ÑùÊ½ */
 QTabWidget::pane{
-  background-color:palette(disabled); /* èƒŒæ™¯ï¼šç³»ç»Ÿç¦ç”¨çŠ¶æ€é¢œè‰²ï¼ˆæµ…ç°è‰²ï¼‰ */
-  border-top:1px solid rgba(220,220,220,50%); /* ä¸Šè¾¹æ¡†ï¼šåŠé€æ˜ç™½è‰² */
+  background-color:palette(disabled); /* ±³¾°£ºÏµÍ³½ûÓÃ×´Ì¬ÑÕÉ«£¨Ç³»ÒÉ«£© */
+  border-top:1px solid rgba(220,220,220,50%); /* ÉÏ±ß¿ò£º°ëÍ¸Ã÷°×É« */
 }
 
-/* æ ‡ç­¾æ ä½ç½®æ§åˆ¶ */
+/* ±êÇ©À¸Î»ÖÃ¿ØÖÆ */
 QTabWidget::tab-bar{
-  alignment: left; /* æ ‡ç­¾æ å·¦å¯¹é½ */
-  left:3px; /* è·ç¦»å·¦ä¾§3px */
-  top:1px; /* è·ç¦»é¡¶éƒ¨1px */
+  alignment: left; /* ±êÇ©À¸×ó¶ÔÆë */
+  left:3px; /* ¾àÀë×ó²à3px */
+  top:1px; /* ¾àÀë¶¥²¿1px */
 }
 
-/* æ ‡ç­¾æ åŸºç¡€æ ·å¼ */
+/* ±êÇ©À¸»ù´¡ÑùÊ½ */
 QTabBar{
-  background-color:transparent; /* èƒŒæ™¯é€æ˜ */
-  qproperty-drawBase:0; /* ç¦ç”¨é»˜è®¤èƒŒæ™¯ç»˜åˆ¶ */
-  border-bottom:1px solid rgba(200,200,200,127); /* åº•éƒ¨è¾¹æ¡†ï¼š1pxåŠé€æ˜æµ…ç°è‰² */
+  background-color:transparent; /* ±³¾°Í¸Ã÷ */
+  qproperty-drawBase:0; /* ½ûÓÃÄ¬ÈÏ±³¾°»æÖÆ */
+  border-bottom:1px solid rgba(200,200,200,127); /* µ×²¿±ß¿ò£º1px°ëÍ¸Ã÷Ç³»ÒÉ« */
 }
 
-/* æ ‡ç­¾é¡µæ ·å¼ */
+/* ±êÇ©Ò³ÑùÊ½ */
 QTabBar::tab{
-  padding:4px 6px; /* å†…è¾¹è·ï¼šæ ‡ç­¾æ–‡å­—ä¸è¾¹æ¡†çš„é—´è· */
-  background-color:transparent; /* èƒŒæ™¯é€æ˜ */
-  background-color:qlineargradient(x1:0,y1:1,x2:0,y2:0,stop:0 rgba(220,220,220,127),stop:1 rgba(200,200,200,75)); /* èƒŒæ™¯ï¼šåŒåœé çª—å£æ ‡é¢˜çš„æ¸å˜ */
-  border:1px solid rgba(220,220,220,75); /* è¾¹æ¡†ï¼šåŒåœé çª—å£æ ‡é¢˜ */
-  border-top-left-radius:4px; /* å·¦ä¸Šè§’åœ†è§’ */
-  border-top-right-radius:4px; /* å³ä¸Šè§’åœ†è§’ */
+  padding:4px 6px; /* ÄÚ±ß¾à£º±êÇ©ÎÄ×ÖÓë±ß¿òµÄ¼ä¾à */
+  background-color:transparent; /* ±³¾°Í¸Ã÷ */
+  background-color:qlineargradient(x1:0,y1:1,x2:0,y2:0,stop:0 rgba(220,220,220,127),stop:1 rgba(200,200,200,75)); /* ±³¾°£ºÍ¬Í£¿¿´°¿Ú±êÌâµÄ½¥±ä */
+  border:1px solid rgba(220,220,220,75); /* ±ß¿ò£ºÍ¬Í£¿¿´°¿Ú±êÌâ */
+  border-top-left-radius:4px; /* ×óÉÏ½ÇÔ²½Ç */
+  border-top-right-radius:4px; /* ÓÒÉÏ½ÇÔ²½Ç */
 }
 
-/* æ ‡ç­¾é¡µé€‰ä¸­ä¸æ‚¬åœçŠ¶æ€ */
+/* ±êÇ©Ò³Ñ¡ÖĞÓëĞüÍ£×´Ì¬ */
 QTabBar::tab:selected,QTabBar::tab:hover{
-  background-color:transparent; /* èƒŒæ™¯é€æ˜ */
-  background-color:qlineargradient(x1:0,y1:0,x2:0,y2:1,stop:0 rgba(200,200,200,127),stop:1 rgba(200,200,200,50%)); /* èƒŒæ™¯ï¼šåå‘æ¸å˜ï¼ˆä¸Šæ·±ä¸‹æµ…ï¼‰ */
-  border-bottom-color:rgba(200,200,200,75%); /* ä¸‹è¾¹æ¡†é¢œè‰²ï¼šåŠé€æ˜ç™½è‰² */
+  background-color:transparent; /* ±³¾°Í¸Ã÷ */
+  background-color:qlineargradient(x1:0,y1:0,x2:0,y2:1,stop:0 rgba(200,200,200,127),stop:1 rgba(200,200,200,50%)); /* ±³¾°£º·´Ïò½¥±ä£¨ÉÏÉîÏÂÇ³£© */
+  border-bottom-color:rgba(200,200,200,75%); /* ÏÂ±ß¿òÑÕÉ«£º°ëÍ¸Ã÷°×É« */
 }
 
-/* æ ‡ç­¾é¡µé€‰ä¸­çŠ¶æ€çš„åº•éƒ¨é«˜äº® */
+/* ±êÇ©Ò³Ñ¡ÖĞ×´Ì¬µÄµ×²¿¸ßÁÁ */
 QTabBar::tab:selected{
-  border-bottom:2px solid palette(highlight); /* ä¸‹è¾¹æ¡†ï¼š2pxç³»ç»Ÿé«˜äº®è‰²ï¼ˆçªå‡ºé€‰ä¸­çŠ¶æ€ï¼‰ */
+  border-bottom:2px solid palette(highlight); /* ÏÂ±ß¿ò£º2pxÏµÍ³¸ßÁÁÉ«£¨Í»³öÑ¡ÖĞ×´Ì¬£© */
 }
 
-/* ç¦ç”¨çŠ¶æ€ä¸‹çš„æ ‡ç­¾é¡µé€‰ä¸­æ ·å¼ */
+/* ½ûÓÃ×´Ì¬ÏÂµÄ±êÇ©Ò³Ñ¡ÖĞÑùÊ½ */
 QTabBar::tab::selected:disabled{
-  border-bottom:2px solid rgb(127,127,127); /* ä¸‹è¾¹æ¡†ï¼šæ·±ç°è‰²ï¼ˆç¦ç”¨æ—¶çš„é€‰ä¸­çŠ¶æ€ï¼‰ */
+  border-bottom:2px solid rgb(127,127,127); /* ÏÂ±ß¿ò£ºÉî»ÒÉ«£¨½ûÓÃÊ±µÄÑ¡ÖĞ×´Ì¬£© */
 }
 
-/* æ ‡ç­¾é¡µå…³é—­æŒ‰é’®åŸºç¡€æ ·å¼ */
+/* ±êÇ©Ò³¹Ø±Õ°´Å¥»ù´¡ÑùÊ½ */
 QTabBar::close-button {
-  border:1px solid transparent; /* é€æ˜è¾¹æ¡† */
-  border-radius:2px; /* åœ†è§’ï¼š2px */
-  image: url(":/qss_icons/light/light_icons/window_close.png"); /* é»˜è®¤å…³é—­å›¾æ ‡ */
+  border:1px solid transparent; /* Í¸Ã÷±ß¿ò */
+  border-radius:2px; /* Ô²½Ç£º2px */
+  image: url(":/qss_icons/light/light_icons/window_close.png"); /* Ä¬ÈÏ¹Ø±ÕÍ¼±ê */
 }
 
-/* å…³é—­æŒ‰é’®æ‚¬åœçŠ¶æ€ */
+/* ¹Ø±Õ°´Å¥ĞüÍ£×´Ì¬ */
 QTabBar::close-button:hover {
-  background-color:qlineargradient(x1:0,y1:0,x2:0,y2:1,stop:0 rgba(176,176,176,255),stop:1 rgba(176,176,176,75)); /* èƒŒæ™¯ï¼šæµ…ç°è‰²æ¸å˜ */
-  border:1px solid palette(base); /* è¾¹æ¡†ï¼šç³»ç»ŸåŸºç¡€è‰² */
-  image: url(":/qss_icons/light/light_icons/window_close_focus.png"); /* æ‚¬åœå›¾æ ‡ */
+  background-color:qlineargradient(x1:0,y1:0,x2:0,y2:1,stop:0 rgba(176,176,176,255),stop:1 rgba(176,176,176,75)); /* ±³¾°£ºÇ³»ÒÉ«½¥±ä */
+  border:1px solid palette(base); /* ±ß¿ò£ºÏµÍ³»ù´¡É« */
+  image: url(":/qss_icons/light/light_icons/window_close_focus.png"); /* ĞüÍ£Í¼±ê */
 }
 
-/* å…³é—­æŒ‰é’®æŒ‰ä¸‹çŠ¶æ€ */
+/* ¹Ø±Õ°´Å¥°´ÏÂ×´Ì¬ */
 QTabBar::close-button:pressed {
-  background-color:qlineargradient(x1:0,y1:1,x2:0,y2:0,stop:0 rgba(220,220,220,127),stop:1 rgba(200,200,200,75)); /* èƒŒæ™¯ï¼šåŒåœé çª—å£æ ‡é¢˜çš„æ¸å˜ */
-  border:1px solid palette(base); /* è¾¹æ¡†ï¼šç³»ç»ŸåŸºç¡€è‰² */
-  image: url(":/qss_icons/light/light_icons/window_close_pressed.png"); /* æŒ‰ä¸‹å›¾æ ‡ */
+  background-color:qlineargradient(x1:0,y1:1,x2:0,y2:0,stop:0 rgba(220,220,220,127),stop:1 rgba(200,200,200,75)); /* ±³¾°£ºÍ¬Í£¿¿´°¿Ú±êÌâµÄ½¥±ä */
+  border:1px solid palette(base); /* ±ß¿ò£ºÏµÍ³»ù´¡É« */
+  image: url(":/qss_icons/light/light_icons/window_close_pressed.png"); /* °´ÏÂÍ¼±ê */
 }
 
-/* å¤é€‰æ¡†ä¸å•é€‰æŒ‰é’®çš„æŒ‡ç¤ºå™¨å¤§å°ç»Ÿä¸€ */
+/* ¸´Ñ¡¿òÓëµ¥Ñ¡°´Å¥µÄÖ¸Ê¾Æ÷´óĞ¡Í³Ò» */
 QCheckBox::indicator, QRadioButton::indicator {
-  width:18px; /* æŒ‡ç¤ºå™¨å®½åº¦ï¼š18px */
-  height:18px; /* æŒ‡ç¤ºå™¨é«˜åº¦ï¼š18px */
+  width:18px; /* Ö¸Ê¾Æ÷¿í¶È£º18px */
+  height:18px; /* Ö¸Ê¾Æ÷¸ß¶È£º18px */
 }
 
-/* å•é€‰æŒ‰é’®æŒ‡ç¤ºå™¨å°ºå¯¸ */
+/* µ¥Ñ¡°´Å¥Ö¸Ê¾Æ÷³ß´ç */
 QRadioButton::indicator{
-  width:18px; /* å®½åº¦ */
-  height:18px; /* é«˜åº¦ */
+  width:18px; /* ¿í¶È */
+  height:18px; /* ¸ß¶È */
 }
 
-/* æ ‘å½¢è§†å›¾ä¸è¡¨æ ¼è§†å›¾åŸºç¡€æ ·å¼ */
+QCheckBox::indicator:checked
+{
+	border-image: url(":/qss_icons/dark/dark_icons/checkbox_checked_pressed.png");
+}
+QCheckBox::indicator:unchecked
+{
+	border-image: url(":/qss_icons/dark/dark_icons/checkbox_unchecked_pressed.png");
+}
+
+/* Ê÷ĞÎÊÓÍ¼Óë±í¸ñÊÓÍ¼»ù´¡ÑùÊ½ */
 QTreeView, QTableView {
-  alternate-background-color:palette(window); /* äº¤æ›¿è¡ŒèƒŒæ™¯è‰²ï¼šç³»ç»Ÿçª—å£è‰²ï¼ˆé»˜è®¤æ— äº¤æ›¿ï¼Œéœ€é…åˆsetAlternatingRowColors(true)å¯ç”¨ï¼‰ */
-  background:palette(base); /* èƒŒæ™¯è‰²ï¼šç³»ç»ŸåŸºç¡€è‰²ï¼ˆé€šå¸¸ä¸ºæµ…ç°è‰²ï¼‰ */
+  alternate-background-color:palette(window); /* ½»ÌæĞĞ±³¾°É«£ºÏµÍ³´°¿ÚÉ«£¨Ä¬ÈÏÎŞ½»Ìæ£¬ĞèÅäºÏsetAlternatingRowColors(true)ÆôÓÃ£© */
+  background:palette(base); /* ±³¾°É«£ºÏµÍ³»ù´¡É«£¨Í¨³£ÎªÇ³»ÒÉ«£© */
 }
 
-/* è¡¨å¤´æ ·å¼ */
+/* ±íÍ·ÑùÊ½ */
 QTreeView QHeaderView::section, QTableView QHeaderView::section {
-  background-color:qlineargradient(x1:0,y1:1,x2:0,y2:0,stop:0 rgba(220,220,220,127),stop:1 rgba(200,200,200,75)); /* èƒŒæ™¯ï¼šå‚ç›´æ¸å˜æµ…ç°è‰²ï¼ˆä¸‹æ·±ä¸Šæµ…ï¼‰ */
-  border-style:none; /* æ— è¾¹æ¡† */
-  border-bottom:1px solid palette(dark); /* ä¸‹è¾¹æ¡†ï¼šç³»ç»Ÿæ·±è‰²ï¼ˆåˆ†éš”è¡¨å¤´ä¸å†…å®¹ï¼‰ */
-  padding-left:5px; /* å·¦ä¾§å†…è¾¹è·ï¼š5px */
-  padding-right:5px; /* å³ä¾§å†…è¾¹è·ï¼š5px */
+  background-color:qlineargradient(x1:0,y1:1,x2:0,y2:0,stop:0 rgba(220,220,220,127),stop:1 rgba(200,200,200,75)); /* ±³¾°£º´¹Ö±½¥±äÇ³»ÒÉ«£¨ÏÂÉîÉÏÇ³£© */
+  border-style:none; /* ÎŞ±ß¿ò */
+  border-bottom:1px solid palette(dark); /* ÏÂ±ß¿ò£ºÏµÍ³ÉîÉ«£¨·Ö¸ô±íÍ·ÓëÄÚÈİ£© */
+  padding-left:5px; /* ×ó²àÄÚ±ß¾à£º5px */
+  padding-right:5px; /* ÓÒ²àÄÚ±ß¾à£º5px */
 }
 
-/* ç¦ç”¨çŠ¶æ€ä¸‹çš„é€‰ä¸­é¡¹æ ·å¼ */
+/* ½ûÓÃ×´Ì¬ÏÂµÄÑ¡ÖĞÏîÑùÊ½ */
 QTreeView::item:selected:disabled, QTableView::item:selected:disabled {
-  background:rgb(80,80,80); /* èƒŒæ™¯ï¼šæ·±ç°è‰²ï¼ˆç¦ç”¨æ—¶çš„é€‰ä¸­çŠ¶æ€ï¼‰ */
+  background:rgb(80,80,80); /* ±³¾°£ºÉî»ÒÉ«£¨½ûÓÃÊ±µÄÑ¡ÖĞ×´Ì¬£© */
 }
 
-/* æ ‘è§†å›¾åˆ†æ”¯åŸºç¡€æ ·å¼ */
+/* Ê÷ÊÓÍ¼·ÖÖ§»ù´¡ÑùÊ½ */
 QTreeView::branch{
-  background-color:palette(base); /* èƒŒæ™¯è‰²ï¼šç³»ç»ŸåŸºç¡€è‰² */
+  background-color:palette(base); /* ±³¾°É«£ºÏµÍ³»ù´¡É« */
 }
 
-/* æ ‘è§†å›¾åˆ†æ”¯é—­åˆçŠ¶æ€ï¼ˆæ— å…„å¼ŸèŠ‚ç‚¹ï¼‰ */
+/* Ê÷ÊÓÍ¼·ÖÖ§±ÕºÏ×´Ì¬£¨ÎŞĞÖµÜ½Úµã£© */
 QTreeView::branch:has-children:!has-siblings:closed,
 QTreeView::branch:closed:has-children:has-siblings{
-  border-image:none; /* æ— è¾¹æ¡†å›¾ç‰‡ */
+  border-image:none; /* ÎŞ±ß¿òÍ¼Æ¬ */
 }
 
-/* æ ‘è§†å›¾åˆ†æ”¯æ‰“å¼€çŠ¶æ€ï¼ˆæ— å…„å¼ŸèŠ‚ç‚¹ï¼‰ */
+/* Ê÷ÊÓÍ¼·ÖÖ§´ò¿ª×´Ì¬£¨ÎŞĞÖµÜ½Úµã£© */
 QTreeView::branch:open:has-children:!has-siblings,
 QTreeView::branch:open:has-children:has-siblings{
-  border-image:none; /* æ— è¾¹æ¡†å›¾ç‰‡ */
+  border-image:none; /* ÎŞ±ß¿òÍ¼Æ¬ */
 }
 
-/* æ ‘è§†å›¾åˆ†æ”¯é€‰ä¸­/æ‚¬åœçŠ¶æ€ */
+/* Ê÷ÊÓÍ¼·ÖÖ§Ñ¡ÖĞ/ĞüÍ£×´Ì¬ */
 QTreeView:branch:selected, QTreeView:branch:hover {
-  background: url(":/qss_icons/dark/dark_icons/transparent.png"); /* èƒŒæ™¯é€æ˜ */
+  background: url(":/qss_icons/dark/dark_icons/transparent.png"); /* ±³¾°Í¸Ã÷ */
 }
 
-/* åˆ†æ”¯çº¿æ ·å¼ï¼ˆæ— å…„å¼ŸèŠ‚ç‚¹ä¸”ä¸ç›¸é‚»ï¼‰ */
+/* ·ÖÖ§ÏßÑùÊ½£¨ÎŞĞÖµÜ½ÚµãÇÒ²»ÏàÁÚ£© */
 QTreeView:branch:has-siblings:!adjoins-item {
-  border-image: url(":/qss_icons/light/light_icons/branch_line.png") 0; /* å‚ç›´çº¿å›¾æ ‡ */
+  border-image: url(":/qss_icons/light/light_icons/branch_line.png") 0; /* ´¹Ö±ÏßÍ¼±ê */
 }
 
-/* åˆ†æ”¯çº¿æ ·å¼ï¼ˆæœ‰å…„å¼ŸèŠ‚ç‚¹ä¸”ç›¸é‚»ï¼‰ */
+/* ·ÖÖ§ÏßÑùÊ½£¨ÓĞĞÖµÜ½ÚµãÇÒÏàÁÚ£© */
 QTreeView:branch:has-siblings:adjoins-item {
-  border-image: url(":/qss_icons/light/light_icons/branch_more.png") 0; /* åˆ†å‰çº¿å›¾æ ‡ */
+  border-image: url(":/qss_icons/light/light_icons/branch_more.png") 0; /* ·Ö²æÏßÍ¼±ê */
 }
 
-/* åˆ†æ”¯çº¿æ ·å¼ï¼ˆæ— å­èŠ‚ç‚¹ä¸”ç›¸é‚»ï¼‰ */
+/* ·ÖÖ§ÏßÑùÊ½£¨ÎŞ×Ó½ÚµãÇÒÏàÁÚ£© */
 QTreeView:branch:!has-children:!has-siblings:adjoins-item {
-  border-image: url(":/qss_icons/light/light_icons/branch_end.png") 0; /* æœ«ç«¯çº¿å›¾æ ‡ */
+  border-image: url(":/qss_icons/light/light_icons/branch_end.png") 0; /* Ä©¶ËÏßÍ¼±ê */
 }
 
-/* åˆ†æ”¯æŠ˜å çŠ¶æ€ï¼ˆæ— å…„å¼ŸèŠ‚ç‚¹/æœ‰å…„å¼ŸèŠ‚ç‚¹ï¼‰ */
+/* ·ÖÖ§ÕÛµş×´Ì¬£¨ÎŞĞÖµÜ½Úµã/ÓĞĞÖµÜ½Úµã£© */
 QTreeView::branch:has-children:!has-siblings:closed, 
 QTreeView::branch:closed:has-children:has-siblings {
-  border-image: none; /* æ— è¾¹æ¡† */
-  image: url(":/qss_icons/light/light_icons/branch_closed.png"); /* æŠ˜å ç®­å¤´å›¾æ ‡ */
+  border-image: none; /* ÎŞ±ß¿ò */
+  image: url(":/qss_icons/light/light_icons/branch_closed.png"); /* ÕÛµş¼ıÍ·Í¼±ê */
 }
 
-/* åˆ†æ”¯å±•å¼€çŠ¶æ€ï¼ˆæ— å…„å¼ŸèŠ‚ç‚¹/æœ‰å…„å¼ŸèŠ‚ç‚¹ï¼‰ */
+/* ·ÖÖ§Õ¹¿ª×´Ì¬£¨ÎŞĞÖµÜ½Úµã/ÓĞĞÖµÜ½Úµã£© */
 QTreeView::branch:open:has-children:!has-siblings, 
 QTreeView::branch:open:has-children:has-siblings {
-  border-image: none; /* æ— è¾¹æ¡† */
-  image: url(":/qss_icons/light/light_icons/branch_open.png"); /* å±•å¼€ç®­å¤´å›¾æ ‡ */
+  border-image: none; /* ÎŞ±ß¿ò */
+  image: url(":/qss_icons/light/light_icons/branch_open.png"); /* Õ¹¿ª¼ıÍ·Í¼±ê */
 }
 
-/* åˆ†æ”¯æŠ˜å çŠ¶æ€æ‚¬åœ */
+/* ·ÖÖ§ÕÛµş×´Ì¬ĞüÍ£ */
 QTreeView:branch:has-children:!has-siblings:closed:hover, 
 QTreeView:branch:closed:has-children:has-siblings:hover {
-  image: url(":/qss_icons/light/light_icons/branch_closed_focus.png"); /* æŠ˜å ç®­å¤´æ‚¬åœå›¾æ ‡ */
+  image: url(":/qss_icons/light/light_icons/branch_closed_focus.png"); /* ÕÛµş¼ıÍ·ĞüÍ£Í¼±ê */
 }
 
-/* åˆ†æ”¯å±•å¼€çŠ¶æ€æ‚¬åœ */
+/* ·ÖÖ§Õ¹¿ª×´Ì¬ĞüÍ£ */
 QTreeView:branch:open:has-children:!has-siblings:hover, 
 QTreeView:branch:open:has-children:has-siblings:hover {
-  image: url(":/qss_icons/light/light_icons/branch_open_focus.png"); /* å±•å¼€ç®­å¤´æ‚¬åœå›¾æ ‡ */
+  image: url(":/qss_icons/light/light_icons/branch_open_focus.png"); /* Õ¹¿ª¼ıÍ·ĞüÍ£Í¼±ê */
 }
 
-/* å‚ç›´æ»šåŠ¨æ¡åŸºç¡€æ ·å¼ */
+/* ´¹Ö±¹ö¶¯Ìõ»ù´¡ÑùÊ½ */
 QScrollBar:vertical {
-  background:palette(base); /* èƒŒæ™¯è‰²ï¼šç³»ç»ŸåŸºç¡€è‰² */
-  border-top-right-radius:1px; /* å³ä¸Šè§’åœ†è§’ï¼š1px */
-  border-bottom-right-radius:1px; /* å³ä¸‹è§’åœ†è§’ï¼š1px */
-  width:8px; /* æ»šåŠ¨æ¡å®½åº¦ï¼š8px */
-  margin:0px; /* å¤–è¾¹è·ï¼š0px */
+  background:palette(base); /* ±³¾°É«£ºÏµÍ³»ù´¡É« */
+  border-top-right-radius:1px; /* ÓÒÉÏ½ÇÔ²½Ç£º1px */
+  border-bottom-right-radius:1px; /* ÓÒÏÂ½ÇÔ²½Ç£º1px */
+  width:8px; /* ¹ö¶¯Ìõ¿í¶È£º8px */
+  margin:0px; /* Íâ±ß¾à£º0px */
 }
 
-/* å‚ç›´æ»šåŠ¨æ¡æ»‘å— */
+/* ´¹Ö±¹ö¶¯Ìõ»¬¿é */
 QScrollBar::handle:vertical {
-  background-color:palette(alternate-base); /* æ»‘å—èƒŒæ™¯è‰²ï¼šç³»ç»Ÿäº¤æ›¿åŸºç¡€è‰² */
-  border-radius:1px; /* åœ†è§’ï¼š1px */
-  min-height:20px; /* æœ€å°é«˜åº¦ï¼š20px */
-  margin:1px 2px 1px 2px; /* ä¸Šä¸‹å·¦å³è¾¹è·ï¼š1px/2px */
+  background-color:palette(alternate-base); /* »¬¿é±³¾°É«£ºÏµÍ³½»Ìæ»ù´¡É« */
+  border-radius:1px; /* Ô²½Ç£º1px */
+  min-height:20px; /* ×îĞ¡¸ß¶È£º20px */
+  margin:1px 2px 1px 2px; /* ÉÏÏÂ×óÓÒ±ß¾à£º1px/2px */
 }
 
-/* å‚ç›´æ»šåŠ¨æ¡æ»‘å—æ‚¬åœçŠ¶æ€ */
+/* ´¹Ö±¹ö¶¯Ìõ»¬¿éĞüÍ£×´Ì¬ */
 QScrollBar::handle:vertical:hover {
-  background-color:palette(highlight); /* æ»‘å—èƒŒæ™¯è‰²ï¼šç³»ç»Ÿé«˜äº®è‰² */
+  background-color:palette(highlight); /* »¬¿é±³¾°É«£ºÏµÍ³¸ßÁÁÉ« */
 }
 
-/* å‚ç›´æ»šåŠ¨æ¡çš„å¢åŠ /å‡å°‘æŒ‰é’®ï¼ˆéšè—ï¼‰ */
+/* ´¹Ö±¹ö¶¯ÌõµÄÔö¼Ó/¼õÉÙ°´Å¥£¨Òş²Ø£© */
 QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {
-  background:none; /* èƒŒæ™¯é€æ˜ */
-  height:0px; /* é«˜åº¦ï¼š0pxï¼ˆéšè—ï¼‰ */
-  subcontrol-position:right; /* å­æ§ä»¶ä½ç½®ï¼šå³ä¾§ */
-  subcontrol-origin:margin; /* å­æ§ä»¶åŸç‚¹ï¼šè¾¹è· */
+  background:none; /* ±³¾°Í¸Ã÷ */
+  height:0px; /* ¸ß¶È£º0px£¨Òş²Ø£© */
+  subcontrol-position:right; /* ×Ó¿Ø¼şÎ»ÖÃ£ºÓÒ²à */
+  subcontrol-origin:margin; /* ×Ó¿Ø¼şÔ­µã£º±ß¾à */
 }
 
-/* å‚ç›´æ»šåŠ¨æ¡å‡å°‘æŒ‰é’® */
+/* ´¹Ö±¹ö¶¯Ìõ¼õÉÙ°´Å¥ */
 QScrollBar::sub-line:vertical{
-  background:none; /* èƒŒæ™¯é€æ˜ */
-  height:0px; /* é«˜åº¦ï¼š0px */
-  subcontrol-position:left; /* å­æ§ä»¶ä½ç½®ï¼šå·¦ä¾§ */
-  subcontrol-origin:margin; /* å­æ§ä»¶åŸç‚¹ï¼šè¾¹è· */
+  background:none; /* ±³¾°Í¸Ã÷ */
+  height:0px; /* ¸ß¶È£º0px */
+  subcontrol-position:left; /* ×Ó¿Ø¼şÎ»ÖÃ£º×ó²à */
+  subcontrol-origin:margin; /* ×Ó¿Ø¼şÔ­µã£º±ß¾à */
 }
-/* æ°´å¹³æ»šåŠ¨æ¡åŸºç¡€æ ·å¼ */
+/* Ë®Æ½¹ö¶¯Ìõ»ù´¡ÑùÊ½ */
 QScrollBar:horizontal {
-  background:palette(base); /* èƒŒæ™¯è‰²ï¼šç³»ç»ŸåŸºç¡€è‰² */
-  height:8px; /* æ»šåŠ¨æ¡é«˜åº¦ï¼š8px */
-  margin:0px; /* å¤–è¾¹è·ï¼š0px */
+  background:palette(base); /* ±³¾°É«£ºÏµÍ³»ù´¡É« */
+  height:8px; /* ¹ö¶¯Ìõ¸ß¶È£º8px */
+  margin:0px; /* Íâ±ß¾à£º0px */
 }
 
-/* æ°´å¹³æ»šåŠ¨æ¡æ»‘å— */
+/* Ë®Æ½¹ö¶¯Ìõ»¬¿é */
 QScrollBar::handle:horizontal {
-  background-color:palette(alternate-base); /* æ»‘å—èƒŒæ™¯è‰²ï¼šç³»ç»Ÿäº¤æ›¿åŸºç¡€è‰² */
-  border-radius:1px; /* åœ†è§’ï¼š1px */
-  min-width:20px; /* æœ€å°å®½åº¦ï¼š20px */
-  margin:2px 1px 2px 1px; /* ä¸Šä¸‹å·¦å³è¾¹è·ï¼š2px/1px */
+  background-color:palette(alternate-base); /* »¬¿é±³¾°É«£ºÏµÍ³½»Ìæ»ù´¡É« */
+  border-radius:1px; /* Ô²½Ç£º1px */
+  min-width:20px; /* ×îĞ¡¿í¶È£º20px */
+  margin:2px 1px 2px 1px; /* ÉÏÏÂ×óÓÒ±ß¾à£º2px/1px */
 }
 
-/* æ°´å¹³æ»šåŠ¨æ¡æ»‘å—æ‚¬åœçŠ¶æ€ */
+/* Ë®Æ½¹ö¶¯Ìõ»¬¿éĞüÍ£×´Ì¬ */
 QScrollBar::handle:horizontal:hover {
-  background-color:palette(highlight); /* æ»‘å—èƒŒæ™¯è‰²ï¼šç³»ç»Ÿé«˜äº®è‰² */
+  background-color:palette(highlight); /* »¬¿é±³¾°É«£ºÏµÍ³¸ßÁÁÉ« */
 }
 
-/* æ°´å¹³æ»šåŠ¨æ¡çš„å¢åŠ /å‡å°‘æŒ‰é’®ï¼ˆéšè—ï¼‰ */
+/* Ë®Æ½¹ö¶¯ÌõµÄÔö¼Ó/¼õÉÙ°´Å¥£¨Òş²Ø£© */
 QScrollBar::add-line:horizontal, QScrollBar::sub-line:horizontal {
-  background:none; /* èƒŒæ™¯é€æ˜ */
-  width:0px; /* å®½åº¦ï¼š0pxï¼ˆéšè—ï¼‰ */
-  subcontrol-position:bottom; /* å­æ§ä»¶ä½ç½®ï¼šåº•éƒ¨ */
-  subcontrol-origin:margin; /* å­æ§ä»¶åŸç‚¹ï¼šè¾¹è· */
+  background:none; /* ±³¾°Í¸Ã÷ */
+  width:0px; /* ¿í¶È£º0px£¨Òş²Ø£© */
+  subcontrol-position:bottom; /* ×Ó¿Ø¼şÎ»ÖÃ£ºµ×²¿ */
+  subcontrol-origin:margin; /* ×Ó¿Ø¼şÔ­µã£º±ß¾à */
 }
 
-/* æ°´å¹³æ»šåŠ¨æ¡å‡å°‘æŒ‰é’® */
+/* Ë®Æ½¹ö¶¯Ìõ¼õÉÙ°´Å¥ */
 QScrollBar::sub-line:horizontal{
-  background:none; /* èƒŒæ™¯é€æ˜ */
-  width:0px; /* å®½åº¦ï¼š0px */
-  subcontrol-position:top; /* å­æ§ä»¶ä½ç½®ï¼šé¡¶éƒ¨ */
-  subcontrol-origin:margin; /* å­æ§ä»¶åŸç‚¹ï¼šè¾¹è· */
+  background:none; /* ±³¾°Í¸Ã÷ */
+  width:0px; /* ¿í¶È£º0px */
+  subcontrol-position:top; /* ×Ó¿Ø¼şÎ»ÖÃ£º¶¥²¿ */
+  subcontrol-origin:margin; /* ×Ó¿Ø¼şÔ­µã£º±ß¾à */
 }
 
-/* æ°´å¹³æ»‘å—åŸºç¡€æ ·å¼ */
+/* Ë®Æ½»¬¿é»ù´¡ÑùÊ½ */
 QSlider::handle:horizontal {
-  border-radius:4px; /* åœ†è§’ï¼š4px */
-  border:1px solid rgba(220,220,220,255); /* è¾¹æ¡†ï¼šç™½è‰²ï¼ˆ255é€æ˜åº¦ï¼‰ */
-  background-color:palette(alternate-base); /* èƒŒæ™¯è‰²ï¼šç³»ç»Ÿäº¤æ›¿åŸºç¡€è‰² */
-  min-height:20px; /* æœ€å°é«˜åº¦ï¼š20px */
-  margin:0 -4px; /* å·¦å³è´Ÿè¾¹è·ï¼š-4pxï¼ˆæ‰©å±•æ»‘å—ç‚¹å‡»åŒºåŸŸï¼‰ */
+  border-radius:4px; /* Ô²½Ç£º4px */
+  border:1px solid rgba(220,220,220,255); /* ±ß¿ò£º°×É«£¨255Í¸Ã÷¶È£© */
+  background-color:palette(alternate-base); /* ±³¾°É«£ºÏµÍ³½»Ìæ»ù´¡É« */
+  min-height:20px; /* ×îĞ¡¸ß¶È£º20px */
+  margin:0 -4px; /* ×óÓÒ¸º±ß¾à£º-4px£¨À©Õ¹»¬¿éµã»÷ÇøÓò£© */
 }
 
-/* æ°´å¹³æ»‘å—æ‚¬åœçŠ¶æ€ */
+/* Ë®Æ½»¬¿éĞüÍ£×´Ì¬ */
 QSlider::handle:horizontal:hover {
-  background:palette(highlight); /* èƒŒæ™¯è‰²ï¼šç³»ç»Ÿé«˜äº®è‰² */
+  background:palette(highlight); /* ±³¾°É«£ºÏµÍ³¸ßÁÁÉ« */
 }
 
-/* æ»‘å—å·²é€‰åŒºåŸŸï¼ˆå³ä¾§ï¼‰ */
+/* »¬¿éÒÑÑ¡ÇøÓò£¨ÓÒ²à£© */
 QSlider::add-page:horizontal {
-  background:palette(base); /* èƒŒæ™¯è‰²ï¼šç³»ç»ŸåŸºç¡€è‰² */
+  background:palette(base); /* ±³¾°É«£ºÏµÍ³»ù´¡É« */
 }
 
-/* æ»‘å—æœªé€‰åŒºåŸŸï¼ˆå·¦ä¾§ï¼‰ */
+/* »¬¿éÎ´Ñ¡ÇøÓò£¨×ó²à£© */
 QSlider::sub-page:horizontal {
-  background:palette(highlight); /* èƒŒæ™¯è‰²ï¼šç³»ç»Ÿé«˜äº®è‰² */
+  background:palette(highlight); /* ±³¾°É«£ºÏµÍ³¸ßÁÁÉ« */
 }
 
-/* ç¦ç”¨çŠ¶æ€ä¸‹çš„æ»‘å—æœªé€‰åŒºåŸŸ */
+/* ½ûÓÃ×´Ì¬ÏÂµÄ»¬¿éÎ´Ñ¡ÇøÓò */
 QSlider::sub-page:horizontal:disabled {
-  background:rgb(80,80,80); /* èƒŒæ™¯è‰²ï¼šæ·±ç°è‰²ï¼ˆç¦ç”¨æ—¶çš„é€‰ä¸­çŠ¶æ€ï¼‰ */
+  background:rgb(80,80,80); /* ±³¾°É«£ºÉî»ÒÉ«£¨½ûÓÃÊ±µÄÑ¡ÖĞ×´Ì¬£© */
 }

@@ -375,6 +375,14 @@ QCheckBox::indicator{
   width:18px; /* 宽度 */
   height:18px; /* 高度 */
 }
+QCheckBox::indicator:checked
+{
+	border-image: url(":/qss_icons/light/light_icons/checkbox_checked_pressed.png");
+}
+QCheckBox::indicator:unchecked
+{
+	border-image: url(":/qss_icons/light/light_icons/checkbox_unchecked_pressed.png");
+}
 
 /* 单选按钮指示器尺寸 */
 QRadioButton::indicator{
