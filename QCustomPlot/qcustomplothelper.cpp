@@ -17,6 +17,7 @@ XCPItemTracer::XCPItemTracer(QCustomPlot *customPlot, TracerType _type, QObject 
 
         mTracer = new QCPItemTracer(mCustomPlot);
         mTracer->setObjectName("mTracer");
+        mTracer->setLayer("overlay");
         mTracer->setStyle(QCPItemTracer::tsCircle);
         mTracer->setPen(penDefault);
         mTracer->setBrush(brushDefault);
@@ -25,8 +26,8 @@ XCPItemTracer::XCPItemTracer(QCustomPlot *customPlot, TracerType _type, QObject 
         mTracerText->setObjectName("mTracerText");
         mTracerText->setLayer("overlay");
         mTracerText->setClipToAxisRect(false);
-        mTracerText->setPadding(QMargins(5, 5, 5, 5));
-        mTracerText->setBrush(brushDefault);
+        mTracerText->setPadding(QMargins(6, 4, 6, 4));
+        mTracerText->setBrush(QBrush(QColor(255, 255, 255, 230)));
         mTracerText->setPen(penDefault);
         mTracerText->position->setParentAnchor(mTracer->position);
         mTracerText->setFont(QFont("Arial", 8, QFont::Weight::Thin));
@@ -120,7 +121,7 @@ void XCPItemTracer::setTextPen(const QPen &pen)
     if(mTracerText)
     {
         mTracerText->setPen(pen);
-        mTracerText->setBrush(Qt::NoBrush);
+        mTracerText->setBrush(QBrush(QColor(255, 255, 255, 230)));
         mTracerText->setColor(pen.color());
     }
 }
@@ -601,8 +602,10 @@ void QCustomPlotHelper::plottableClick(QCPAbstractPlottable *plottable, int data
             if(!mTracerData)
                 mTracerData = new XCPItemTracer(mCustomPlot, XCPItemTracer::DataTracer);
 
+            QColor fill = graph->pen().color();
+            fill.setAlpha(255);
             mTracerData->setPen(graph->pen());
-            mTracerData->setBrush(Qt::NoBrush);
+            mTracerData->setBrush(QBrush(fill));
             mTracerData->setTextPen(graph->pen());
             mTracerData->setVisible(true);
             mTracerData->updatePosition(axisRect, key, value);
@@ -770,8 +773,10 @@ void QCustomPlotHelper::mouseMove(QMouseEvent * event)
             XCPItemTracer *tracer = mDataTracers[i];
             if(tracer)
             {
+                QColor fill = customPlot->graph(axisRect, i)->pen().color();
+                fill.setAlpha(255);
                 tracer->setPen(customPlot->graph(axisRect, i)->pen());
-                tracer->setBrush(Qt::NoBrush);
+                tracer->setBrush(QBrush(fill));
                 tracer->setTextPen(customPlot->graph(axisRect, i)->pen());
                 tracer->setTextVisible(true);
                 tracer->updatePosition(axisRect, key, value);
