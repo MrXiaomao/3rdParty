@@ -5034,7 +5034,8 @@ void QCPLayoutInset::updateLayout()
       else if (al.testFlag(Qt::AlignBottom)) insetRect.moveBottom(rect().y()+rect().height());
       else insetRect.moveTop(int( rect().y()+rect().height()*0.5-finalMinSize.height()*0.5 )); // default to Qt::AlignVCenter
     }
-    mElements.at(i)->setOuterRect(insetRect);
+
+      mElements.at(i)->setOuterRect(insetRect);
   }
 }
 

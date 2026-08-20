@@ -56,34 +56,36 @@ void QxtCheckComboBoxPrivate::updateCheckedItems()
 {
     QStringList items = qxt_p().checkedItems();
 
-    QString fullText;
+    QString displayText;
     if (items.isEmpty())
-        fullText = defaultText;
+        displayText = defaultText;
     else
-        fullText = items.join(separator);
+        displayText = items.join(separator);
 
     // TODO: find a way to recalculate a meaningful size hint
 
     // 给悬浮Tooltip赋值完整的所有选中内容，用户鼠标一悬停就能看全
-    qxt_p().setToolTip(fullText);
+    qxt_p().setToolTip(displayText);
 
-    if (0){
-        // 计算下拉框编辑区的可用宽度，减去15px留边距避免和下拉按钮重叠
-        int displayWidth = qxt_p().lineEdit()->width() - 15;
-        // 超长文本自动截断加省略号，刚好适配控件宽度
-        QString displayText = elideTextToWidth(fullText, displayWidth);
-        qxt_p().setEditText(displayText);
-    }
-    else{
+    {
         // 计算完整文本渲染所需的像素宽度
         QFontMetrics fontMetrics(qxt_p().font());
-        int textTotalWidth = fontMetrics.horizontalAdvance(fullText);
+        int textTotalWidth = fontMetrics.horizontalAdvance(displayText);
         // 额外添加30px安全边距：预留下拉按钮、内边距的空间，避免文本被控件边缘截断
         int newControlWidth = textTotalWidth + 45;
 
         // 动态更新控件宽度，让文本可以完整展示
+        // 自动钳位到180~400区间内
+        if (newControlWidth > 400){
+            displayText = elideTextToWidth(displayText, 400);
+            newControlWidth = 400;
+        }
+        else if (newControlWidth < 100){
+            newControlWidth = 100;
+        }
+
         qxt_p().setFixedWidth(newControlWidth);
-        qxt_p().setEditText(fullText);
+        qxt_p().setEditText(displayText);
     }
 
     emit qxt_p().checkedItemsChanged(items);

@@ -402,9 +402,9 @@ QCustomPlotHelper::QCustomPlotHelper(QCustomPlot* customPlot, QObject *parent)
     connect(actResetView, &QAction::triggered, this, &QCustomPlotHelper::resetView);
     actClearMarker = new QAction(tr("清除标签"), this);
     connect(actClearMarker, &QAction::triggered, this, &QCustomPlotHelper::clearMarker);
-    actExportGraphic = new QAction(tr("导出图像..."), this);
+    actExportGraphic = new QAction(tr("导出图像...   "), this);
     connect(actExportGraphic, &QAction::triggered, this, &QCustomPlotHelper::exportGraphic);
-    actExportData = new QAction(tr("导出数据..."), this);
+    actExportData = new QAction(tr("导出数据...   "), this);
     connect(actExportData, &QAction::triggered, this, &QCustomPlotHelper::exportData);
 
     actLinearScale = new QAction(mIconChecked, tr("线性缩放"), this);
@@ -425,7 +425,7 @@ QCustomPlotHelper::QCustomPlotHelper(QCustomPlot* customPlot, QObject *parent)
     customPlot->setProperty("xAxisFixedRange", mXAxisFixedRange);
     customPlot->rescaleAxes(true);//设置试图自由缩放
     customPlot->setAntialiasedElements(QCP::aeAll);//设置所有图形元素使用抗锯齿渲染
-    customPlot->legend->setVisible(true);//设置图例可见
+    //customPlot->legend->setVisible(true);//设置图例可见
     customPlot->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom | QCP::iSelectPlottables);//设置图形可移动、缩放、选中
     customPlot->xAxis->setTickLabelRotation(-45);//x轴文字倾斜45°角，方便显示长文本
     // customPlot->yAxis->ticker()->setTickCount(5);
@@ -910,7 +910,7 @@ void QCustomPlotHelper::mouseRelease(QMouseEvent * event)
             return;
 
         QMenu contextMenu;
-        QMenu *subMenu = contextMenu.addMenu(tr("适应模式"));
+        QMenu *subMenu = new QMenu(tr("适应模式"));
         QWidgetAction* actFixedRange = new QWidgetAction(subMenu);
 
         QWidget* container = new QWidget(subMenu);
@@ -962,26 +962,70 @@ void QCustomPlotHelper::mouseRelease(QMouseEvent * event)
         actFixedRange->setDefaultWidget(container);
         subMenu->addAction(actFixedRange);
 
-        contextMenu.addSeparator();
-        if (mResetActionVisible)
-        {
+        /* 新菜单模式
+         *  恢复视图
+         *  点位标记
+         *  清除标签
+         *  -
+         *  导出图像
+         *  导出数据
+         *  -
+         *  更多功能 - 轴参考性
+         *            选择范围
+         *            -
+         *            线性缩放
+         *            对数缩放
+         *            -
+         *            适应模式（只有在线测量实时刷新才会用到，所以优先级最低）
+         */
+        if (1){ // 新菜单模式
             contextMenu.addAction(actResetView);
+            contextMenu.addAction(actEnableDataTracer);
+            if (mClearMarkerActionVisible)
+                contextMenu.addAction(actClearMarker);
+
             contextMenu.addSeparator();
+            contextMenu.addAction(actExportGraphic);
+            contextMenu.addAction(actExportData);
+
+            contextMenu.addSeparator();
+            QMenu *otherMenu = contextMenu.addMenu(tr("更多功能"));
+            if (mStraightLineActionVisible)
+                otherMenu->addAction(actEnableStraightLine);
+            if (mRangeSelectActionVisible)
+                otherMenu->addAction(actEnableRangeSelect);
+
+            otherMenu->addSeparator();
+            otherMenu->addAction(actLinearScale);
+            otherMenu->addAction(actLogarithmicScale);
+
+            otherMenu->addSeparator();
+            otherMenu->addMenu(subMenu);
         }
-        if (mClearMarkerActionVisible)
-            contextMenu.addAction(actClearMarker);
-        if (mStraightLineActionVisible)
-            contextMenu.addAction(actEnableStraightLine);
-        if (mRangeSelectActionVisible)
-            contextMenu.addAction(actEnableRangeSelect);
-        if (mClearMarkerActionVisible || mStraightLineActionVisible || mRangeSelectActionVisible)
+        else{ // 旧菜单模式
+            contextMenu.addMenu(subMenu);
             contextMenu.addSeparator();
-        contextMenu.addAction(actEnableDataTracer);
-        contextMenu.addAction(actLinearScale);
-        contextMenu.addAction(actLogarithmicScale);
-        contextMenu.addSeparator();
-        contextMenu.addAction(actExportGraphic);
-        contextMenu.addAction(actExportData);
+            if (mResetActionVisible)
+            {
+                contextMenu.addAction(actResetView);
+                contextMenu.addSeparator();
+            }
+            if (mClearMarkerActionVisible)
+                contextMenu.addAction(actClearMarker);
+            if (mStraightLineActionVisible)
+                contextMenu.addAction(actEnableStraightLine);
+            if (mRangeSelectActionVisible)
+                contextMenu.addAction(actEnableRangeSelect);
+            if (mClearMarkerActionVisible || mStraightLineActionVisible || mRangeSelectActionVisible)
+                contextMenu.addSeparator();
+            contextMenu.addAction(actEnableDataTracer);
+            contextMenu.addAction(actLinearScale);
+            contextMenu.addAction(actLogarithmicScale);
+            contextMenu.addSeparator();
+            contextMenu.addAction(actExportGraphic);
+            contextMenu.addAction(actExportData);
+        }
+
         contextMenu.exec(QCursor::pos());
         connect(&contextMenu, &QMenu::destroyed, [&](){
             container->deleteLater();
@@ -1026,7 +1070,12 @@ void QCustomPlotHelper::setGraphCheckBoxList(QCustomPlot* customPlot, const QCPA
     // 初始化QComboBox
     QxtCheckComboBox *comboBox = new QxtCheckComboBox(customPlot);
     comboBox->setMinimumWidth(180);
+    comboBox->setMaximumWidth(400);
+    comboBox->setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Preferred);
     comboBox->setLayoutDirection(Qt::LeftToRight);
+    // 开启内容自动适配模式
+    comboBox->setSizeAdjustPolicy(QComboBox::AdjustToContents);
+    comboBox->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed);
 
     for (int i=0; i<graphCount; ++i){
         comboBox->addItem(customPlot->graph(axisRect, i)->name());
@@ -1046,6 +1095,32 @@ void QCustomPlotHelper::setGraphCheckBoxList(QCustomPlot* customPlot, const QCPA
     });
     comboBox->setDefaultText(QStringLiteral("图像通道列表(空)"));
     mCbbAxisRect[axisRect->objectName()].push_back(comboBox);
+
+    // 隐藏图例
+    // customPlot->legend->setVisible(false);
+    // if (axisRect == nullptr)
+    //     axisRect = customPlot->axisRect();
+
+    // int graphCount = customPlot->graphCount(axisRect);
+    // // 添加可选项
+    // for (int i=0; i<graphCount; ++i){
+    //     QCheckBox* checkBox = new QCheckBox(customPlot);
+    //     checkBox->setText(customPlot->graph(axisRect, i)->name());
+    //     checkBox->setObjectName(tr(""));
+    //     QIcon actionIcon = roundPixmap(QSize(16,16), customPlot->graph(i)->pen().color());
+    //     checkBox->setIcon(actionIcon);
+    //     checkBox->setLayoutDirection(Qt::RightToLeft);
+    //     checkBox->setMinimumWidth(200);
+    //     checkBox->setChecked(customPlot->graph(axisRect, i)->visible());
+    //     connect(checkBox, &QCheckBox::stateChanged, [=](int state){
+    //         QCPGraph *graph = customPlot->graph(axisRect, i);
+    //         if (graph){
+    //             graph->setVisible(Qt::CheckState::Checked == state ? true : false);
+    //             customPlot->replot(QCustomPlot::rpQueuedReplot);
+    //         }
+    //     });
+    //     mChkAxisRect[axisRect->objectName()].push_back(checkBox);
+    // }
 }
 
 void QCustomPlotHelper::afterLayout()
@@ -1207,6 +1282,20 @@ void QCustomPlotHelper::exportData()
     if (!filePath.endsWith(".csv", Qt::CaseInsensitive))
         filePath += ".csv";
 
+    QCPAxisRect *axisRect = mCustomPlot->axisRect();
+    QList<QCPAxisRect*> axisRects = mCustomPlot->axisRects();
+    for (auto iter : axisRects)
+    {
+        if (iter == axisRect)
+            continue;
+
+        if (iter->rect().contains(QCursor::pos()))
+        {
+            axisRect = iter;
+            break;
+        }
+    }
+
     struct GraphInfo {
         QString name;
         QVector<double> keys;
@@ -1215,8 +1304,8 @@ void QCustomPlotHelper::exportData()
     QList<GraphInfo> graphs;
     int maxRows = 0;
 
-    for (int i = 0; i < mCustomPlot->graphCount(); ++i) {
-        QCPGraph *graph = mCustomPlot->graph(i);
+    for (int i = 0; i < mCustomPlot->graphCount(axisRect); ++i) {
+        QCPGraph *graph = mCustomPlot->graph(axisRect, i);
         if (!graph || !graph->visible())
             continue;
 
