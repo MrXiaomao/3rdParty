@@ -1,4 +1,4 @@
-﻿#include "qcustomplothelper.h"
+#include "qcustomplothelper.h"
 #include "WaveformStats.h"
 #include <QMouseEvent>
 
@@ -728,6 +728,15 @@ void QCustomPlotHelper::setStraightLineActionVisible(bool visible/* = true*/)
 void QCustomPlotHelper::setRangeSelectActionVisible(bool visible/* = true*/)
 {
     mRangeSelectActionVisible = visible;
+}
+
+void QCustomPlotHelper::setStatsOverlayDockPosition(QCPOverlayWidget::DockPosition pos)
+{
+    if (mStatsOverlay)
+    {
+        mStatsOverlay->setDockPosition(pos);
+        mCustomPlot->replot(QCustomPlot::rpQueuedReplot);
+    }
 }
 
 QPixmap QCustomPlotHelper::roundPixmap(QSize sz, QColor clrOut)

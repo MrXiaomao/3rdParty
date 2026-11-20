@@ -1,4 +1,4 @@
-﻿#ifndef QCUSTOMPLOTHELPER_H
+#ifndef QCUSTOMPLOTHELPER_H
 #define QCUSTOMPLOTHELPER_H
 
 #include <QObject>
@@ -110,6 +110,9 @@ public:
     void setClearMarkerActionVisible(bool visible = true);
     void setStraightLineActionVisible(bool visible = true);
     void setRangeSelectActionVisible(bool visible = true);
+
+    // 设置波形详情悬浮窗的停靠位置（坐标轴左上角/左下角/右上角/右下角）
+    void setStatsOverlayDockPosition(QCPOverlayWidget::DockPosition pos);
 
     /**
     * @function name: setGraphCheckBoxList

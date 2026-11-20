@@ -1,4 +1,4 @@
-﻿#ifndef QCPOVERLAYWIDGET_H
+#ifndef QCPOVERLAYWIDGET_H
 #define QCPOVERLAYWIDGET_H
 
 #include <QObject>
@@ -10,17 +10,26 @@ class QCPOverlayWidget : public QCPLayerable
 {
     Q_OBJECT
 public:
+    // 悬浮窗在坐标轴矩形内的停靠位置
+    enum DockPosition {
+        DockTopLeft,     // 左上角
+        DockTopRight,    // 右上角
+        DockBottomLeft,  // 左下角
+        DockBottomRight, // 右下角
+    };
+    Q_ENUM(DockPosition)
+
     explicit QCPOverlayWidget(QCustomPlot* parentPlot)
         : QCPLayerable(parentPlot, QStringLiteral("legend"))
     {
         recalcAutoSize();
     }
 
-    // 设置悬浮窗在视口中的相对锚点位置 0~1 对应画布宽高比例
-    void setViewportAnchor(qreal xRatio, qreal yRatio) {
-        m_xRatio = xRatio;
-        m_yRatio = yRatio;
+    // 设置悬浮窗停靠位置（相对于坐标轴矩形）
+    void setDockPosition(DockPosition pos) {
+        m_dockPos = pos;
     }
+    DockPosition dockPosition() const { return m_dockPos; }
 
     // 设置背景透明度 0~255
     void setBackgroundAlpha(int alpha) {
@@ -113,10 +122,30 @@ private:
         }
     }
 
-    // 计算悬浮窗在画布上的绝对像素坐标
+    // 计算悬浮窗在坐标轴矩形上的绝对像素坐标
     QPoint calcAbsPos() {
-        int px = parentPlot()->width() - m_autoWidth - 20;//* m_xRatio;
-        int py = parentPlot()->height() * m_yRatio;
+        const int MARGIN = 10;
+        QRect axisRect = parentPlot()->axisRect()->rect();
+        int px, py;
+        switch (m_dockPos) {
+        case DockTopLeft:
+            px = axisRect.left() + MARGIN;
+            py = axisRect.top() + MARGIN;
+            break;
+        case DockTopRight:
+            px = axisRect.right() - m_autoWidth - MARGIN;
+            py = axisRect.top() + MARGIN;
+            break;
+        case DockBottomLeft:
+            px = axisRect.left() + MARGIN;
+            py = axisRect.bottom() - m_autoHeight - MARGIN;
+            break;
+        case DockBottomRight:
+        default:
+            px = axisRect.right() - m_autoWidth - MARGIN;
+            py = axisRect.bottom() - m_autoHeight - MARGIN;
+            break;
+        }
         return QPoint(px, py);
     }
 
@@ -125,8 +154,7 @@ private:
         return QSize(m_autoWidth, m_autoHeight);
     }
 
-    qreal m_xRatio = 0.03;
-    qreal m_yRatio = 0.80;
+    DockPosition m_dockPos = DockBottomRight;
     int m_autoWidth = 200;
     int m_autoHeight = 50;
     int m_bgAlpha = 220;
