@@ -15508,6 +15508,7 @@ void QCustomPlot::rescaleAxes(bool onlyVisiblePlottables)
 */
 bool QCustomPlot::savePdf(const QString &fileName, int width, int height, QCP::ExportPen exportPen, const QString &pdfCreator, const QString &pdfTitle)
 {
+#ifdef QT_PRINTSUPPORT_LIB
   bool success = false;
 #ifdef QT_NO_PRINTER
   Q_UNUSED(fileName)
@@ -15567,6 +15568,16 @@ bool QCustomPlot::savePdf(const QString &fileName, int width, int height, QCP::E
   setViewport(oldViewport);
 #endif // QT_NO_PRINTER
   return success;
+#else
+  Q_UNUSED(fileName)
+  Q_UNUSED(exportPen)
+  Q_UNUSED(width)
+  Q_UNUSED(height)
+  Q_UNUSED(pdfCreator)
+  Q_UNUSED(pdfTitle)
+  qDebug() << Q_FUNC_INFO << "Qt was built without printer support (QT_NO_PRINTSUPPORT). PDF not created.";
+  return false;
+#endif // QT_PRINTSUPPORT_LIB
 }
 
 /*!
@@ -19310,7 +19321,7 @@ void QCheckableCPPlottableLegendItem::draw(QCPPainter *painter)
 // 处理鼠标点击事件的函数实现
 void QCheckableCPPlottableLegendItem::mousePressEvent(QMouseEvent *event, const QVariant &details)
 {
-    if (mCheckBoxRect.contains(event->pos()))
+    //if (mCheckBoxRect.contains(event->pos()))
     {
         // 切换复选框状态
         mChecked = mChecked ? false : true;
@@ -21489,7 +21500,7 @@ void QCPGraph::addData(const QVector<double> &keys, const QVector<double> &value
 */
 void QCPGraph::addData(double key, double value)
 {
-  mDataContainer->add(QCPGraphData(key, value));
+  mDataContainer->add(QCPGraphData(key, value, this->pen().color()));
 }
 
 void QCPGraph::addData(double key, double value, QColor colors)

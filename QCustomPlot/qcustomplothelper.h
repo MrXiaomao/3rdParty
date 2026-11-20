@@ -3,6 +3,7 @@
 
 #include <QObject>
 #include "qcustomplot.h"
+#include "QCPOverlayWidget.h"
 
 class XCPItemTracer : public QObject
 {
@@ -129,8 +130,8 @@ public:
     Q_SLOT void enableStraightLine(bool enable = true);
 
     /**
-     * @function name: enableDataTracer
-     * @brief 启用数据点标记
+     * @function name: enablePlotSeriesDataPicker/enablePlotSeriesDataMarker
+     * @brief 启用数据点标记/数据拾取
      */
     Q_SLOT void enableDataTracer(bool enable = true);
 
@@ -151,6 +152,15 @@ public:
     * @return           void
     */
     Q_SLOT void enableRangeSelect(bool enable = true);
+
+    /**
+    * @function name: showWaveformDetail
+    * @brief 显示波形详情
+    * @param[in]        none
+    * @param[out]       none
+    * @return           void
+    */
+    Q_SLOT void showWaveformDetail();
 
     /**
     * @function name: resetView
@@ -208,6 +218,7 @@ public:
     Q_SLOT void mousePress(QMouseEvent * event);
     Q_SLOT void mouseMove(QMouseEvent * event);
     Q_SLOT void mouseRelease(QMouseEvent * event);
+    Q_SLOT void beforeReplot();
     Q_SLOT void afterLayout();
 
     Q_SIGNAL void itemActived(QCPGraph *graph, double key, double value);//节点被鼠标点击激活
@@ -221,6 +232,7 @@ protected:
 
 private:
     QCustomPlot* mCustomPlot = Q_NULLPTR;
+    QMenu contextMenu;
 
     // 参考线
     XCPItemTracer *mTracerX = Q_NULLPTR;// x轴
@@ -247,8 +259,11 @@ private:
     QAction *actEnableStraightLine;// 启用参考线或基准线
     QAction *actEnableDataTracer;// 启用数据点标记
     QAction *actEnableRangeSelect;// 启用范围选取功能
+    QAction *actShowWaveformDetail;// 显示波形详情
     QAction *actLinearScale;// 线性缩放
     QAction *actLogarithmicScale;// 对数缩放
+
+    QCPOverlayWidget* mStatsOverlay;
 
     bool mResetActionVisible = true;
     bool mClearMarkerActionVisible = true;
@@ -269,6 +284,8 @@ private:
     */
     static QPixmap roundPixmap(QSize sz, QColor clrOut);//单圆
     static QPixmap dblroundPixmap(QSize sz, QColor clrIn, QColor clrOut);//双圆
+
+    void setupMenu();
 
 public:
     std::function<void(const QCPAxisRect*, bool&)> onContextMenu;

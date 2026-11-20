@@ -678,7 +678,6 @@ protected:
 
 /* including file 'src/layer.h'            */
 /* modified 2022-11-06T12:45:56, size 7038 */
-
 class QCP_LIB_DECL QCPLayer : public QObject
 {
   Q_OBJECT
@@ -3908,7 +3907,7 @@ public:
   // specialized interface for QCPGraph:
   QCPGraph *graph(int index) const;
   QCPGraph *graph(QString name) const;
-  QCPGraph *graph(const QCPAxisRect *axisRect, const int& index) const;
+  QCPGraph *graph(const QCPAxisRect *axisRect, const int& index = 0) const;
   QCPGraph *graph(const QCPAxisRect *axisRect, const QString& name) const;
   QCPGraph *graph() const;
   QCPGraph *addGraph(QCPAxis *keyAxis=nullptr, QCPAxis *valueAxis=nullptr);

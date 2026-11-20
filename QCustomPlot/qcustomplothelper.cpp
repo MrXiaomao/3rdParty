@@ -1,4 +1,5 @@
 ﻿#include "qcustomplothelper.h"
+#include "WaveformStats.h"
 #include <QMouseEvent>
 
 //////////////////////////////////////////////////////////////////////////////////
@@ -181,7 +182,29 @@ void XCPItemTracer::updatePosition(QCPAxisRect *axisRect, double xValue, double 
         mTracerText->position->setCoords(0, 15);
         mTracerArrow->start->setCoords(0, 15);
         mTracerArrow->end->setCoords(0, 0);
-        setText(QString::number(xValue, 'f', xNumberPrecision));
+
+        QString keyText = QString("%1").arg(xValue);
+        QSharedPointer<QCPAxisTicker> ticker = xAxis->ticker();
+        // 类型判断分支
+        if (auto dateTimeTicker = qSharedPointerDynamicCast<QCPAxisTickerDateTime>(ticker))
+        {
+            // QCPAxisTickerDateTime的原始key是Unix时间戳（秒为单位），直接转成QDateTime
+            keyText = QDateTime::fromMSecsSinceEpoch(qint64(xValue * 1000)).toString(dateTimeTicker->dateTimeFormat());
+        }
+        else if (auto timeTicker = qSharedPointerDynamicCast<QCPAxisTickerTime>(ticker))
+        {
+            keyText = QTime(0,0,0).addSecs(qRound(xValue)).toString(timeTicker->timeFormat());
+        }
+        else if (auto textTicker = qSharedPointerDynamicCast<QCPAxisTickerText>(ticker))
+        {
+            keyText = textTicker->ticks()[xValue];
+        }
+        else if (auto fixedTicker = qSharedPointerDynamicCast<QCPAxisTickerFixed>(ticker))
+        {
+            keyText = QString::number(xValue, 'f', xNumberPrecision);
+        }
+
+        setText(keyText);
         break;
     }
     case YAxisTracer:
@@ -202,7 +225,31 @@ void XCPItemTracer::updatePosition(QCPAxisRect *axisRect, double xValue, double 
         mTracer->position->setCoords(xValue, yValue);
         mTracerText->position->setCoords(20 + mOffset.x(), mOffset.y());
         mTracerArrow->start->setCoords(20 + mOffset.x(), mOffset.y() == 0 ? 0 : (mOffset.y() / 2 + 2));
-        setText(QString("x:%1,y:%2").arg(QString::number(xValue, 'f', xNumberPrecision)).arg(QString::number(yValue, 'f', yNumberPrecision)));
+
+        QString keyText = QString("%1").arg(xValue);
+        QSharedPointer<QCPAxisTicker> ticker = xAxis->ticker();
+        // 类型判断分支
+        if (auto dateTimeTicker = qSharedPointerDynamicCast<QCPAxisTickerDateTime>(ticker))
+        {
+            // QCPAxisTickerDateTime的原始key是Unix时间戳（秒为单位），直接转成QDateTime
+            keyText = QDateTime::fromMSecsSinceEpoch(qint64(xValue * 1000)).toString(dateTimeTicker->dateTimeFormat());
+            setText(keyText);
+        }
+        else if (auto timeTicker = qSharedPointerDynamicCast<QCPAxisTickerTime>(ticker))
+        {
+            keyText = QTime(0,0,0).addSecs(qRound(xValue)).toString(timeTicker->timeFormat());
+            setText(keyText);
+        }
+        else if (auto textTicker = qSharedPointerDynamicCast<QCPAxisTickerText>(ticker))
+        {
+            keyText = textTicker->ticks()[xValue];
+        }
+        else if (auto fixedTicker = qSharedPointerDynamicCast<QCPAxisTickerFixed>(ticker))
+        {
+            keyText = QString::number(xValue, 'f', xNumberPrecision);
+        }
+
+        setText(QString("x:%1,y:%2").arg(keyText, QString::number(yValue, 'f', yNumberPrecision)));
         break;
     }
     default:
@@ -376,16 +423,16 @@ void XCPItemStraightRect::setBrush(const QBrush &brush)
 
 void XCPItemStraightRect::refresh()
 {
-    return;//
-    if(mMaskRect)
-    {
-        QCPAxisRect *axisRect = mCustomPlot->axisRect();
-        QCPAxis* yAxis = axisRect->axis(QCPAxis::AxisType::atLeft);
-        QCPAxis* xAxis = axisRect->axis(QCPAxis::AxisType::atBottom);
+    // return;//
+    // if(mMaskRect)
+    // {
+    //     QCPAxisRect *axisRect = mCustomPlot->axisRect();
+    //     QCPAxis* yAxis = axisRect->axis(QCPAxis::AxisType::atLeft);
+    //     QCPAxis* xAxis = axisRect->axis(QCPAxis::AxisType::atBottom);
 
-        mMaskRect->topLeft->setCoords(mMaskRect->topLeft->key(), yAxis->range().upper);
-        mMaskRect->bottomRight->setCoords(mMaskRect->bottomRight->key(), yAxis->range().lower);
-    }
+    //     mMaskRect->topLeft->setCoords(mMaskRect->topLeft->key(), yAxis->range().upper);
+    //     mMaskRect->bottomRight->setCoords(mMaskRect->bottomRight->key(), yAxis->range().lower);
+    // }
 }
 
 //////////////////////////////////////////////////////////////////////////////////
@@ -396,29 +443,7 @@ QCustomPlotHelper::QCustomPlotHelper(QCustomPlot* customPlot, QObject *parent)
     , mDataTracers(QList<XCPItemTracer *>())
 {
     // 关联右键菜单事件
-    mIconUnchecked = QIcon(dblroundPixmap(QSize(12, 12), Qt::gray, Qt::gray));
-    mIconChecked = QIcon(dblroundPixmap(QSize(12, 12), Qt::green, Qt::green));
-
-    actResetView = new QAction(tr("恢复视图"), this);
-    connect(actResetView, &QAction::triggered, this, &QCustomPlotHelper::resetView);
-    actClearMarker = new QAction(tr("清除标签"), this);
-    connect(actClearMarker, &QAction::triggered, this, &QCustomPlotHelper::clearMarker);
-    actExportGraphic = new QAction(tr("导出图像...   "), this);
-    connect(actExportGraphic, &QAction::triggered, this, &QCustomPlotHelper::exportGraphic);
-    actExportData = new QAction(tr("导出数据...   "), this);
-    connect(actExportData, &QAction::triggered, this, &QCustomPlotHelper::exportData);
-
-    actLinearScale = new QAction(mIconChecked, tr("线性缩放"), this);
-    connect(actLinearScale, &QAction::triggered, this, &QCustomPlotHelper::linearScale);
-    actLogarithmicScale = new QAction(mIconUnchecked, tr("对数缩放"), this);
-    connect(actLogarithmicScale, &QAction::triggered, this, &QCustomPlotHelper::logarithmicScale);
-
-    actEnableStraightLine = new QAction(mIconUnchecked, tr("轴参考线"), this);
-    connect(actEnableStraightLine, &QAction::triggered, this, &QCustomPlotHelper::enableStraightLine);
-    actEnableDataTracer = new QAction(mIconUnchecked, tr("点位标记"), this);
-    connect(actEnableDataTracer, &QAction::triggered, this, &QCustomPlotHelper::enableDataTracer);
-    actEnableRangeSelect = new QAction(mIconUnchecked, tr("选择范围"), this);
-    connect(actEnableRangeSelect, &QAction::triggered, this, &QCustomPlotHelper::enableRangeSelect);
+    setupMenu();
 
     customPlot->setProperty("enableAutoScale", true);//图像启用自缩放功能
     customPlot->setProperty("enableFixedScale", false);//图像禁用自定义范围
@@ -443,6 +468,7 @@ QCustomPlotHelper::QCustomPlotHelper(QCustomPlot* customPlot, QObject *parent)
     connect(mCustomPlot, &QCustomPlot::mousePress, this, &QCustomPlotHelper::mousePress);
     connect(mCustomPlot, &QCustomPlot::mouseMove, this, &QCustomPlotHelper::mouseMove);
     connect(mCustomPlot, &QCustomPlot::mouseRelease, this, &QCustomPlotHelper::mouseRelease);
+    connect(mCustomPlot, &QCustomPlot::beforeReplot, this, &QCustomPlotHelper::beforeReplot);
     connect(mCustomPlot, &QCustomPlot::afterLayout, this, &QCustomPlotHelper::afterLayout);
 
     // 坐标轴同步缩放
@@ -452,6 +478,161 @@ QCustomPlotHelper::QCustomPlotHelper(QCustomPlot* customPlot, QObject *parent)
 
 QCustomPlotHelper::~QCustomPlotHelper()
 {
+
+}
+
+void QCustomPlotHelper::setupMenu()
+{
+    // mIconUnchecked = QIcon(dblroundPixmap(QSize(12, 12), Qt::gray, Qt::gray));
+    // mIconChecked = QIcon(dblroundPixmap(QSize(12, 12), Qt::green, Qt::green));
+    mIconUnchecked = QIcon(":/qss_icons/light/light_icons/radio_unchecked_disable.png");
+    mIconChecked = QIcon(":/qss_icons/light/light_icons/radio_checked_focus.png");
+
+    actResetView = new QAction(tr("恢复视图"), this);
+    connect(actResetView, &QAction::triggered, this, &QCustomPlotHelper::resetView);
+    actClearMarker = new QAction(tr("清除标签"), this);
+    connect(actClearMarker, &QAction::triggered, this, &QCustomPlotHelper::clearMarker);
+    actExportGraphic = new QAction(tr("导出图像...   "), this);
+    connect(actExportGraphic, &QAction::triggered, this, &QCustomPlotHelper::exportGraphic);
+    actExportData = new QAction(tr("导出数据...   "), this);
+    connect(actExportData, &QAction::triggered, this, &QCustomPlotHelper::exportData);
+
+    actLinearScale = new QAction(mIconChecked, tr("线性缩放"), this);
+    connect(actLinearScale, &QAction::triggered, this, &QCustomPlotHelper::linearScale);
+    actLogarithmicScale = new QAction(mIconUnchecked, tr("对数缩放"), this);
+    connect(actLogarithmicScale, &QAction::triggered, this, &QCustomPlotHelper::logarithmicScale);
+
+    actEnableStraightLine = new QAction(mIconUnchecked, tr("轴参考线 "), this);
+    connect(actEnableStraightLine, &QAction::triggered, this, &QCustomPlotHelper::enableStraightLine);
+    actEnableDataTracer = new QAction(mIconUnchecked, tr("点位标记"), this);
+    connect(actEnableDataTracer, &QAction::triggered, this, &QCustomPlotHelper::enableDataTracer);
+    actEnableRangeSelect = new QAction(mIconUnchecked, tr("选择范围"), this);
+    connect(actEnableRangeSelect, &QAction::triggered, this, &QCustomPlotHelper::enableRangeSelect);
+    actShowWaveformDetail = new QAction(tr("波形特征值"), this);
+    connect(actShowWaveformDetail, &QAction::triggered, this, &QCustomPlotHelper::showWaveformDetail);
+
+    // 创建悬浮窗实例
+    actShowWaveformDetail->setIcon(actShowWaveformDetail->property("isChecked").toBool() ? mIconChecked : mIconUnchecked);
+    mStatsOverlay = new QCPOverlayWidget(mCustomPlot);
+    mStatsOverlay->setVisible(false);
+
+    QMenu *subMenu = new QMenu(tr("适应模式"));
+    QWidgetAction* actFixedRange = new QWidgetAction(subMenu);
+
+    QWidget* container = new QWidget(subMenu);
+    QGridLayout* gridLayout = new QGridLayout(container);
+    gridLayout->setContentsMargins(5, 2, 5, 2); // 调整内边距
+    QCheckBox* checkBox1 = new QCheckBox(tr("自动适应"), container);
+    QCheckBox* checkBox2 = new QCheckBox(tr("限定范围"), container);
+
+    if (mCustomPlot->property("enableAutoScale").toBool())
+        checkBox1->setChecked(true);
+    else if (mCustomPlot->property("enableFixedScale").toBool())
+        checkBox2->setChecked(true);
+
+    QSpinBox* spinBoxFixed = new QSpinBox(container);
+    spinBoxFixed->setRange(60, 65536);
+    spinBoxFixed->setValue(mXAxisFixedRange);
+    connect(spinBoxFixed, qOverload<int>(&QSpinBox::valueChanged), this, [=](int value){
+        mXAxisFixedRange = value;
+        mCustomPlot->setProperty("xAxisFixedRange", mXAxisFixedRange);
+    });
+    connect(checkBox1, &QRadioButton::toggled, this, [=](bool checked){
+        mCustomPlot->setProperty("enableAutoScale", checked);
+        mCustomPlot->rescaleAxes(checked);//设置试图自由缩放
+        if (checked){
+            mCustomPlot->setProperty("enableFixedScale", false);
+            mCustomPlot->setProperty("enableManualScale", false);
+            checkBox2->setChecked(false);
+        }
+
+        emit autoScaleChanged(checked);
+    });
+    connect(checkBox2, &QRadioButton::toggled, this, [=](bool checked){
+        mCustomPlot->setProperty("enableFixedScale", checked);
+        if (checked){
+            mCustomPlot->setProperty("enableAutoScale", false);
+            mCustomPlot->setProperty("enableManualScale", false);
+            mCustomPlot->rescaleAxes(false);//设置试图自由缩放
+            checkBox1->setChecked(false);
+        }
+
+        emit fixedScaleChanged(checked);
+    });
+
+    gridLayout->addWidget(checkBox1, 0, 0);
+    gridLayout->addWidget(checkBox2, 1, 0);
+    gridLayout->addWidget(new QLabel(tr("显示最近记录数："), container), 1, 1);
+    gridLayout->addWidget(spinBoxFixed, 1, 2);
+
+    actFixedRange->setDefaultWidget(container);
+    subMenu->addAction(actFixedRange);
+
+    /* 新菜单模式
+         *  恢复视图
+         *  点位标记
+         *  清除标签
+         *  -
+         *  导出图像
+         *  导出数据
+         *  -
+         *  更多功能 - 轴参考线
+         *            选择范围
+         *            -
+         *            线性缩放
+         *            对数缩放
+         *            -
+         *            适应模式（只有在线测量实时刷新才会用到，所以优先级最低）
+         */
+    if (1){ // 新菜单模式
+        contextMenu.addAction(actResetView);
+        contextMenu.addAction(actEnableDataTracer);
+        if (mClearMarkerActionVisible)
+            contextMenu.addAction(actClearMarker);
+
+        contextMenu.addSeparator();
+        contextMenu.addAction(actExportGraphic);
+        contextMenu.addAction(actExportData);
+
+        contextMenu.addSeparator();
+        QMenu *otherMenu = contextMenu.addMenu(tr("更多功能"));
+
+        if (mStraightLineActionVisible)
+            otherMenu->addAction(actEnableStraightLine);
+        if (mRangeSelectActionVisible)
+            otherMenu->addAction(actEnableRangeSelect);
+
+        otherMenu->addSeparator();
+        otherMenu->addAction(actLinearScale);
+        otherMenu->addAction(actLogarithmicScale);
+
+        otherMenu->addSeparator();
+        otherMenu->addAction(actShowWaveformDetail);
+        otherMenu->addMenu(subMenu);
+    }
+    else{ // 旧菜单模式
+        contextMenu.addMenu(subMenu);
+        contextMenu.addSeparator();
+        if (mResetActionVisible)
+        {
+            contextMenu.addAction(actResetView);
+            contextMenu.addSeparator();
+        }
+        if (mClearMarkerActionVisible)
+            contextMenu.addAction(actClearMarker);
+        if (mStraightLineActionVisible)
+            contextMenu.addAction(actEnableStraightLine);
+        if (mRangeSelectActionVisible)
+            contextMenu.addAction(actEnableRangeSelect);
+        if (mClearMarkerActionVisible || mStraightLineActionVisible || mRangeSelectActionVisible)
+            contextMenu.addSeparator();
+        contextMenu.addAction(actEnableDataTracer);
+        contextMenu.addAction(actLinearScale);
+        contextMenu.addAction(actLogarithmicScale);
+        contextMenu.addSeparator();
+        contextMenu.addAction(actExportGraphic);
+        contextMenu.addAction(actExportData);
+    }
 
 }
 
@@ -596,7 +777,7 @@ void QCustomPlotHelper::plottableClick(QCPAbstractPlottable *plottable, int data
         double key = graph->dataMainKey(dataIndex); // 获取X轴的值
         double value = graph->dataMainValue(dataIndex); // 获取Y轴的值
 
-        if (customPlot->property("enable-dataTracer").toBool())
+        if (actEnableDataTracer->property("isChecked").toBool())
         {
             //标记点和标签
             if(!mTracerData)
@@ -621,7 +802,7 @@ void QCustomPlotHelper::mouseDoubleClick(QMouseEvent *event)
 {
     QCustomPlot* customPlot = qobject_cast<QCustomPlot*>(sender());
 
-    if (customPlot->property("enable-rangeSelect").toBool())
+    if (actEnableRangeSelect->property("isChecked").toBool())
     {
         // 缩放到指定范围
         if (mDragStraightRect)
@@ -666,13 +847,13 @@ void QCustomPlotHelper::mousePress(QMouseEvent * event)
         customPlot->setProperty("click-pos", event->pos());
 
         // 启用参考线或基准线
-        if (customPlot->property("enable-straightLine").toBool())
+        if (actEnableStraightLine->property("isChecked").toBool())
         {
 
         }
 
         // 启用范围选取功能
-        if (customPlot->property("enable-rangeSelect").toBool())
+        if (actEnableRangeSelect->property("isChecked").toBool())
         {
             customPlot->setProperty("graph-draging", false);
 
@@ -694,7 +875,7 @@ void QCustomPlotHelper::mouseMove(QMouseEvent * event)
     // 左键
     if (event->buttons() & Qt::LeftButton)
     {
-        if (!customPlot->property("enable-rangeSelect").toBool())
+        if (!actEnableRangeSelect->property("isChecked").toBool())
             customPlot->setCursor(Qt::SizeAllCursor);
         else
             customPlot->setCursor(Qt::ArrowCursor);
@@ -722,7 +903,7 @@ void QCustomPlotHelper::mouseMove(QMouseEvent * event)
     QCPAxis* xAxis = axisRect->axis(QCPAxis::AxisType::atBottom);
 
     // 启用参考线或基准线
-    if (customPlot->property("enable-straightLine").toBool())
+    if (actEnableStraightLine->property("isChecked").toBool())
     {
         //像素坐标转成实际的x,y轴的坐标
         float key = xAxis->pixelToCoord(event->pos().x());
@@ -791,7 +972,7 @@ void QCustomPlotHelper::mouseMove(QMouseEvent * event)
     }
 
     // 启用范围选取功能
-    if (customPlot->property("enable-rangeSelect").toBool())
+    if (actEnableRangeSelect->property("isChecked").toBool())
     {
         if (customPlot->property("left-clicked").toBool()){
             if (!customPlot->property("graph-draging").toBool())
@@ -870,7 +1051,7 @@ void QCustomPlotHelper::mouseRelease(QMouseEvent * event)
     // 左键
     if (event->button() == Qt::LeftButton)
     {
-        if (customPlot->property("enable-rangeSelect").toBool())
+        if (actEnableRangeSelect->property("isChecked").toBool())
         {
             QCPAxisRect *axisRect = mCustomPlot->axisRect();
             QList<QCPAxisRect*> axisRects = mCustomPlot->axisRects();
@@ -914,135 +1095,15 @@ void QCustomPlotHelper::mouseRelease(QMouseEvent * event)
         if (!allow)
             return;
 
-        QMenu contextMenu;
-        QMenu *subMenu = new QMenu(tr("适应模式"));
-        QWidgetAction* actFixedRange = new QWidgetAction(subMenu);
-
-        QWidget* container = new QWidget(subMenu);
-        QGridLayout* gridLayout = new QGridLayout(container);
-        gridLayout->setContentsMargins(5, 2, 5, 2); // 调整内边距
-        QCheckBox* checkBox1 = new QCheckBox(tr("自动适应"), container);
-        QCheckBox* checkBox2 = new QCheckBox(tr("限定范围"), container);
-
-        if (mCustomPlot->property("enableAutoScale").toBool())
-            checkBox1->setChecked(true);
-        else if (mCustomPlot->property("enableFixedScale").toBool())
-            checkBox2->setChecked(true);
-
-        QSpinBox* spinBoxFixed = new QSpinBox(container);
-        spinBoxFixed->setRange(60, 65536);
-        spinBoxFixed->setValue(mXAxisFixedRange);
-        connect(spinBoxFixed, qOverload<int>(&QSpinBox::valueChanged), this, [=](int value){
-            mXAxisFixedRange = value;
-            mCustomPlot->setProperty("xAxisFixedRange", mXAxisFixedRange);
-        });
-        connect(checkBox1, &QRadioButton::toggled, this, [=](bool checked){
-            mCustomPlot->setProperty("enableAutoScale", checked);
-            mCustomPlot->rescaleAxes(checked);//设置试图自由缩放
-            if (checked){
-                mCustomPlot->setProperty("enableFixedScale", false);
-                mCustomPlot->setProperty("enableManualScale", false);
-                checkBox2->setChecked(false);
-            }
-
-            emit autoScaleChanged(checked);
-        });
-        connect(checkBox2, &QRadioButton::toggled, this, [=](bool checked){
-            mCustomPlot->setProperty("enableFixedScale", checked);
-            if (checked){
-                mCustomPlot->setProperty("enableAutoScale", false);
-                mCustomPlot->setProperty("enableManualScale", false);
-                mCustomPlot->rescaleAxes(false);//设置试图自由缩放
-                checkBox1->setChecked(false);
-            }
-
-            emit fixedScaleChanged(checked);
-        });
-
-        gridLayout->addWidget(checkBox1, 0, 0);
-        gridLayout->addWidget(checkBox2, 1, 0);
-        gridLayout->addWidget(new QLabel(tr("显示最近记录数："), container), 1, 1);
-        gridLayout->addWidget(spinBoxFixed, 1, 2);
-
-        actFixedRange->setDefaultWidget(container);
-        subMenu->addAction(actFixedRange);
-
-        /* 新菜单模式
-         *  恢复视图
-         *  点位标记
-         *  清除标签
-         *  -
-         *  导出图像
-         *  导出数据
-         *  -
-         *  更多功能 - 轴参考性
-         *            选择范围
-         *            -
-         *            线性缩放
-         *            对数缩放
-         *            -
-         *            适应模式（只有在线测量实时刷新才会用到，所以优先级最低）
-         */
-        if (1){ // 新菜单模式
-            contextMenu.addAction(actResetView);
-            contextMenu.addAction(actEnableDataTracer);
-            if (mClearMarkerActionVisible)
-                contextMenu.addAction(actClearMarker);
-
-            contextMenu.addSeparator();
-            contextMenu.addAction(actExportGraphic);
-            contextMenu.addAction(actExportData);
-
-            contextMenu.addSeparator();
-            QMenu *otherMenu = contextMenu.addMenu(tr("更多功能"));
-            if (mStraightLineActionVisible)
-                otherMenu->addAction(actEnableStraightLine);
-            if (mRangeSelectActionVisible)
-                otherMenu->addAction(actEnableRangeSelect);
-
-            otherMenu->addSeparator();
-            otherMenu->addAction(actLinearScale);
-            otherMenu->addAction(actLogarithmicScale);
-
-            otherMenu->addSeparator();
-            otherMenu->addMenu(subMenu);
-        }
-        else{ // 旧菜单模式
-            contextMenu.addMenu(subMenu);
-            contextMenu.addSeparator();
-            if (mResetActionVisible)
-            {
-                contextMenu.addAction(actResetView);
-                contextMenu.addSeparator();
-            }
-            if (mClearMarkerActionVisible)
-                contextMenu.addAction(actClearMarker);
-            if (mStraightLineActionVisible)
-                contextMenu.addAction(actEnableStraightLine);
-            if (mRangeSelectActionVisible)
-                contextMenu.addAction(actEnableRangeSelect);
-            if (mClearMarkerActionVisible || mStraightLineActionVisible || mRangeSelectActionVisible)
-                contextMenu.addSeparator();
-            contextMenu.addAction(actEnableDataTracer);
-            contextMenu.addAction(actLinearScale);
-            contextMenu.addAction(actLogarithmicScale);
-            contextMenu.addSeparator();
-            contextMenu.addAction(actExportGraphic);
-            contextMenu.addAction(actExportData);
-        }
-
         contextMenu.exec(QCursor::pos());
-        connect(&contextMenu, &QMenu::destroyed, [&](){
-            container->deleteLater();
-        });
     }
 
-    if (customPlot->property("enable-straightLine").toBool())
+    if (actEnableStraightLine->property("isChecked").toBool())
     {
 
     }
 
-    if (customPlot->property("enable-rangeSelect").toBool()
+    if (actEnableRangeSelect->property("isChecked").toBool()
         && customPlot->property("left-clicked").toBool()
         && customPlot->property("graph-draging").toBool())
     {
@@ -1128,6 +1189,56 @@ void QCustomPlotHelper::setGraphCheckBoxList(QCustomPlot* customPlot, const QCPA
     // }
 }
 
+void QCustomPlotHelper::beforeReplot()
+{
+    QCustomPlot* customPlot = qobject_cast<QCustomPlot*>(sender());
+    if (!customPlot) return; // 必须做空指针防御，避免信号来自其他对象触发崩溃
+
+    if (customPlot->graphCount() == 0) return;
+
+    if (!actShowWaveformDetail->property("isChecked").toBool())
+        return;
+
+    // 1. 取出第一个波形的所有原始数据
+    QCPGraph* mainGraph = mCustomPlot->graph(0);
+    for (int i=0; i<mCustomPlot->graphCount(); ++i)
+    {
+        if (mCustomPlot->graph(i)->selected()){
+            mainGraph = mCustomPlot->graph(0);
+            break;
+        }
+    }
+    if (!mainGraph || mainGraph->data()->isEmpty()) return;
+
+    // 取当前轴范围
+    QCPRange xr = mCustomPlot->xAxis->range();
+    double xMin = xr.lower;
+    double xMax = xr.upper;
+    auto itBegin = mainGraph->data()->findBegin(xMin, true);           // 含等于 xMin 的点
+    auto itEnd   = mainGraph->data()->findEnd(xMax, true);             // 含等于 xMax 的点
+    QVector<double> data;
+    data.reserve(itEnd - itBegin);      // 注意：部分版本不是随机访问迭代器
+    for (auto it = itBegin; it != mainGraph->data()->constEnd() && it->key <= xMax; ++it)
+        data.append(it->value);
+
+    // 2. 调用你已经定义好的波形统计计算函数
+    auto stats = WaveformStats::calculate(data);
+
+    // 3. 把计算结果同步更新到你的悬浮信息Map里
+    if (mStatsOverlay) {
+        mStatsOverlay->clearAll();
+        mStatsOverlay->setText("点数：", QString::number(data.size()));
+        mStatsOverlay->setText("峰值：", QString::number(stats.max, 'f', 2));
+        mStatsOverlay->setText("谷值：", QString::number(stats.min, 'f', 2));
+        mStatsOverlay->setText("基线：", QString::number(stats.baseline, 'f', 2));
+        mStatsOverlay->setText("峰峰值：", QString::number(stats.peak2peak, 'f', 2));
+        //mStatsOverlay->setText("均方根有效值：", QString::number(stats.rms, 'f', 2));
+        mStatsOverlay->setText("平均值：", QString::number(stats.mean, 'f', 2));
+        mStatsOverlay->setText("标准差：", QString::number(stats.stdDev, 'f', 2));
+    }
+}
+
+
 void QCustomPlotHelper::afterLayout()
 {
     QCustomPlot* customPlot = qobject_cast<QCustomPlot*>(sender());
@@ -1153,7 +1264,7 @@ void QCustomPlotHelper::afterLayout()
         }
     }
 
-    if (mCustomPlot->property("enable-rangeSelect").toBool())
+    if (actEnableRangeSelect->property("isChecked").toBool())
     {
         if (mDragStraightRect)
         {
@@ -1164,11 +1275,11 @@ void QCustomPlotHelper::afterLayout()
 
 void QCustomPlotHelper::enableStraightLine(bool enable)
 {
-    if (mCustomPlot->property("enable-straightLine").toBool())
+    if (actEnableStraightLine->property("isChecked").toBool())
         enable = false;
     else
         enable = true;
-    mCustomPlot->setProperty("enable-straightLine", enable);
+    actEnableStraightLine->setProperty("isChecked", enable);
     actEnableStraightLine->setIcon(enable ? mIconChecked : mIconUnchecked);
 
     {
@@ -1186,11 +1297,11 @@ void QCustomPlotHelper::enableStraightLine(bool enable)
 
 void QCustomPlotHelper::enableDataTracer(bool enable/* = true*/)
 {
-    if (mCustomPlot->property("enable-dataTracer").toBool())
+    if (actEnableDataTracer->property("isChecked").toBool())
         enable = false;
     else
         enable = true;
-    mCustomPlot->setProperty("enable-dataTracer", enable);
+    actEnableDataTracer->setProperty("isChecked", enable);
     actEnableDataTracer->setIcon(enable ? mIconChecked : mIconUnchecked);
 
     {
@@ -1208,23 +1319,23 @@ void QCustomPlotHelper::clearMarker()
     mCustomPlot->replot(QCustomPlot::rpQueuedReplot);
 }
 
-void QCustomPlotHelper::enableRangeSelect(bool enable)
+void QCustomPlotHelper::enableRangeSelect(bool enable/* = true*/)
 {
-    if (mCustomPlot->property("enable-rangeSelect").toBool())
+    if (actEnableRangeSelect->property("isChecked").toBool())
         enable = false;
     else
         enable = true;
-    mCustomPlot->setProperty("enable-rangeSelect", enable);
+    actEnableRangeSelect->setProperty("isChecked", enable);
     actEnableRangeSelect->setIcon(enable ? mIconChecked : mIconUnchecked);
 
     if (mTracerDragLeftLine)
-        mTracerDragLeftLine->setVisible(enable);
+        mTracerDragLeftLine->setVisible(actEnableRangeSelect->property("isChecked").toBool());
     if (mTracerDragRightLine)
-        mTracerDragRightLine->setVisible(enable);
+        mTracerDragRightLine->setVisible(actEnableRangeSelect->property("isChecked").toBool());
     if (mDragStraightRect)
-        mDragStraightRect->setVisible(enable);
+        mDragStraightRect->setVisible(actEnableRangeSelect->property("isChecked").toBool());
 
-    if (!enable)
+    if (!actEnableRangeSelect->property("isChecked").toBool())
     {
         // 恢复值的颜色
         for (int i = 0; i < mCustomPlot->graphCount(); ++i)
@@ -1241,6 +1352,63 @@ void QCustomPlotHelper::enableRangeSelect(bool enable)
             graph->setData(keys, values, colors);
             mCustomPlot->replot(QCustomPlot::rpQueuedReplot);
         }
+    }
+}
+
+void QCustomPlotHelper::showWaveformDetail()
+{
+    bool isChecked = actShowWaveformDetail->property("isChecked").toBool();
+    actShowWaveformDetail->setProperty("isChecked", isChecked ? false : true);
+    actShowWaveformDetail->setIcon(!isChecked ? mIconChecked : mIconUnchecked);
+    mStatsOverlay->setVisible(!isChecked);
+
+    if (mStatsOverlay->visible()){
+        // 1. 取出第一个波形的所有原始数据
+        QCPGraph* mainGraph = mCustomPlot->graph(0);
+        for (int i=0; i<mCustomPlot->graphCount(); ++i)
+        {
+            if (mCustomPlot->graph(i)->selected()){
+                mainGraph = mCustomPlot->graph(0);
+                break;
+            }
+        }
+        if (!mainGraph || mainGraph->data()->isEmpty()) return;        
+
+        // 取当前轴范围
+        QCPRange xr = mCustomPlot->xAxis->range();
+        double xMin = xr.lower;
+        double xMax = xr.upper;
+        auto itBegin = mainGraph->data()->findBegin(xMin, true);           // 含等于 xMin 的点
+        auto itEnd   = mainGraph->data()->findEnd(xMax, true);             // 含等于 xMax 的点
+        QVector<double> data;
+        data.reserve(itEnd - itBegin);      // 注意：部分版本不是随机访问迭代器
+        for (auto it = itBegin; it != mainGraph->data()->constEnd() && it->key <= xMax; ++it)
+            data.append(it->value);
+
+        // 直接从QCustomPlot内部取出y轴采样数据，不用自己额外拷贝构造QVector
+        // QVector<double> data;
+        // data.reserve(mainGraph->data()->size());
+        // for (const auto& dataPoint : *mainGraph->data()) {
+        //     data.append(dataPoint.value);
+        // }
+
+        // 2. 调用你已经定义好的波形统计计算函数
+        auto stats = WaveformStats::calculate(data);
+
+        // 3. 把计算结果同步更新到你的悬浮信息Map里
+        if (mStatsOverlay) {
+            mStatsOverlay->clearAll();
+            mStatsOverlay->setText("点数：", QString::number(data.size()));
+            mStatsOverlay->setText("峰值：", QString::number(stats.max, 'f', 2));
+            mStatsOverlay->setText("谷值：", QString::number(stats.min, 'f', 2));
+            mStatsOverlay->setText("基线：", QString::number(stats.baseline, 'f', 2));
+            mStatsOverlay->setText("峰峰值：", QString::number(stats.peak2peak, 'f', 2));
+            //mStatsOverlay->setText("均方根有效值：", QString::number(stats.rms, 'f', 2));
+            mStatsOverlay->setText("平均值：", QString::number(stats.mean, 'f', 2));
+            mStatsOverlay->setText("标准差：", QString::number(stats.stdDev, 'f', 2));
+        }
+
+        mCustomPlot->replot(QCustomPlot::rpQueuedReplot);
     }
 }
 
@@ -1369,13 +1537,13 @@ void QCustomPlotHelper::exportData()
 
 void QCustomPlotHelper::linearScale(bool enable)
 {
-    if (mCustomPlot->property("enable-linearScale").toBool())
+    if (actLinearScale->property("isChecked").toBool())
         enable = false;
     else
         enable = true;
 
-    mCustomPlot->setProperty("enable-linearScale", enable);
-    mCustomPlot->setProperty("enable-logarithmicScale", !enable);
+    actLinearScale->setProperty("isChecked", enable);
+    actLogarithmicScale->setProperty("isChecked", !enable);
     actLinearScale->setIcon(mIconChecked);
     actLogarithmicScale->setIcon(mIconUnchecked);
 
@@ -1396,12 +1564,12 @@ void QCustomPlotHelper::linearScale(bool enable)
 
 void QCustomPlotHelper::logarithmicScale(bool enable)
 {
-    if (mCustomPlot->property("enable-logarithmicScale").toBool())
+    if (actLogarithmicScale->property("isChecked").toBool())
         enable = false;
     else
         enable = true;
-    mCustomPlot->setProperty("enable-logarithmicScale", enable);
-    mCustomPlot->setProperty("enable-linearScale", !enable);
+    actLogarithmicScale->setProperty("isChecked", enable);
+    actLinearScale->setProperty("isChecked", !enable);
     actLogarithmicScale->setIcon(mIconChecked);
     actLinearScale->setIcon(mIconUnchecked);
 

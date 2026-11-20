@@ -5,6 +5,8 @@ INCLUDEPATH += $$PWD
 DEFINES += QXT_STATIC
 
 HEADERS += $$PWD/qcustomplot.h \
+    $$PWD/QCPOverlayWidget.h \
+    $$PWD/WaveformStats.h \
     $$PWD/qcustomplothelper.h \
     $$PWD/qxtcheckcombobox.h \
     $$PWD/qxtcheckcombobox_p.h \
