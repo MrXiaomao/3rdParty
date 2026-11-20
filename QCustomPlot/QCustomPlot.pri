@@ -9,11 +9,8 @@ HEADERS += $$PWD/qcustomplot.h \
     $$PWD/WaveformStats.h \
     $$PWD/qcustomplothelper.h \
     $$PWD/qxtcheckcombobox.h \
-    $$PWD/qxtcheckcombobox_p.h \
-    $$PWD/qxtglobal.h \
-    $$PWD/qxtnamespace.h
-		   		
+    $$PWD/qxtcheckcombobox_p.h
+
 SOURCES += $$PWD/qcustomplot.cpp \
     $$PWD/qcustomplothelper.cpp \
-    $$PWD/qxtcheckcombobox.cpp \
-    $$PWD/qxtglobal.cpp
+    $$PWD/qxtcheckcombobox.cpp
