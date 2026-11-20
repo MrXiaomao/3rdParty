@@ -1,4 +1,4 @@
-﻿#ifndef QXTCHECKCOMBOBOX_H
+#ifndef QXTCHECKCOMBOBOX_H
 #define QXTCHECKCOMBOBOX_H
 
 #include <QComboBox>
@@ -37,6 +37,10 @@ public Q_SLOTS:
 
 Q_SIGNALS:
     void checkedItemsChanged(const QStringList& items);
+
+protected:
+    virtual void paintEvent(QPaintEvent* event) Q_DECL_OVERRIDE;
+    virtual void resizeEvent(QResizeEvent* event) Q_DECL_OVERRIDE;
 };
 
 #endif // QXTCHECKCOMBOBOX_H

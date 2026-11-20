@@ -1,9 +1,13 @@
-﻿#include "qxtcheckcombobox.h"
+#include "qxtcheckcombobox.h"
 #include "qxtcheckcombobox_p.h"
 #include <QLineEdit>
 #include <QKeyEvent>
+#include <QStylePainter>
+#include <QStyleOption>
 
-QxtCheckComboBoxPrivate::QxtCheckComboBoxPrivate() : containerMousePress(false)
+QxtCheckComboBoxPrivate::QxtCheckComboBoxPrivate()
+    : containerMousePress(false)
+    , displayLineEdit(nullptr)
 {
     separator = QLatin1String(",");
 }
@@ -43,14 +47,18 @@ bool QxtCheckComboBoxPrivate::eventFilter(QObject* receiver, QEvent* event)
     return false;
 }
 
-// 在类头文件的private区域声明：
-QString QxtCheckComboBoxPrivate::elideTextToWidth(const QString& sourceText, int availableWidth)
+void QxtCheckComboBoxPrivate::resetLineEditGeometry()
 {
-    QFontMetrics fontMetrics(qxt_p().font());
-    // 自动截断文本，末尾替换为省略号，Qt原生方法完美适配不同DPI缩放
-    return fontMetrics.elidedText(sourceText, Qt::ElideRight, availableWidth);
-}
+    QLineEdit* lineEdit = qxt_p().lineEdit();
+    if (!lineEdit)
+        return;
 
+    QStyleOptionComboBox opt;
+    qxt_p().initStyleOption(&opt);
+    QRect editRect = qxt_p().style()->subControlRect(
+        QStyle::CC_ComboBox, &opt, QStyle::SC_ComboBoxEditField, &qxt_p());
+    lineEdit->setGeometry(editRect);
+}
 
 void QxtCheckComboBoxPrivate::updateCheckedItems()
 {
@@ -62,34 +70,42 @@ void QxtCheckComboBoxPrivate::updateCheckedItems()
     else
         displayText = items.join(separator);
 
-    // TODO: find a way to recalculate a meaningful size hint
-
     // 给悬浮Tooltip赋值完整的所有选中内容，用户鼠标一悬停就能看全
     qxt_p().setToolTip(displayText);
 
+    // 收集每个勾选项的图标，按勾选顺序一一对应文本
+    QList<QxtCheckComboBoxLineEdit::DisplayItem> displayItems;
+    QAbstractItemModel* model = qxt_p().model();
+    if (model && !items.isEmpty())
     {
-        // 计算完整文本渲染所需的像素宽度
-        QFontMetrics fontMetrics(qxt_p().font());
-        int textTotalWidth = fontMetrics.horizontalAdvance(displayText);
-        // 额外添加30px安全边距：预留下拉按钮、内边距的空间，避免文本被控件边缘截断
-        int newControlWidth = textTotalWidth + 45;
-
-        // 动态更新控件宽度，让文本可以完整展示
-        // 自动钳位到180~400区间内
-        if (newControlWidth > 400){
-            displayText = elideTextToWidth(displayText, 400);
-            newControlWidth = 400;
+        QModelIndex start = model->index(0, qxt_p().modelColumn(), qxt_p().rootModelIndex());
+        QModelIndexList indexes = model->match(start, Qt::CheckStateRole, Qt::Checked, -1, Qt::MatchExactly);
+        for (const QModelIndex& index : indexes)
+        {
+            QxtCheckComboBoxLineEdit::DisplayItem item;
+            item.text = index.data(Qt::DisplayRole).toString();
+            item.icon = qvariant_cast<QIcon>(index.data(Qt::DecorationRole));
+            displayItems.append(item);
         }
-        else if (newControlWidth < 100){
-            newControlWidth = 100;
-        }
-
-        qxt_p().setFixedWidth(newControlWidth);
-        qxt_p().setEditText(displayText);
     }
 
-    emit qxt_p().checkedItemsChanged(items);
+    // 先设置内容，再按"图标+文本"的实际像素宽度自适应控件宽度，钳位到 100~400
+    if (displayLineEdit)
+        displayLineEdit->setDisplayItems(displayItems, separator, defaultText);
+    else
+        qxt_p().setEditText(displayText);
 
+    int contentWidth = displayLineEdit ? displayLineEdit->contentWidth() : 0;
+    int newControlWidth = contentWidth + 35;
+    if (newControlWidth > 400)
+        newControlWidth = 400;
+    else if (newControlWidth < 100)
+        newControlWidth = 100;
+    qxt_p().setFixedWidth(newControlWidth);
+    // setFixedWidth 在宽度未变时不会触发 resizeEvent，这里主动还原编辑区，去掉左侧图标留白
+    resetLineEditGeometry();
+
+    emit qxt_p().checkedItemsChanged(items);
 }
 
 void QxtCheckComboBoxPrivate::toggleCheckState(int index)
@@ -170,9 +186,10 @@ QxtCheckComboBox::QxtCheckComboBox(QWidget* parent) : QComboBox(parent)
     connect(model(), SIGNAL(rowsRemoved(const QModelIndex &, int, int)), &qxt_d(), SLOT(updateCheckedItems()));
 
     // read-only contents
-    QLineEdit* lineEdit = new QLineEdit(this);
+    QxtCheckComboBoxLineEdit* lineEdit = new QxtCheckComboBoxLineEdit(this);
     lineEdit->setReadOnly(true);
     setLineEdit(lineEdit);
+    qxt_d().displayLineEdit = lineEdit;
     lineEdit->disconnect(this);
     setInsertPolicy(QComboBox::NoInsert);
 
@@ -180,6 +197,34 @@ QxtCheckComboBox::QxtCheckComboBox(QWidget* parent) : QComboBox(parent)
     view()->window()->installEventFilter(&qxt_d());
     view()->viewport()->installEventFilter(&qxt_d());
     this->installEventFilter(&qxt_d());
+}
+
+/*!
+    \reimp
+ */
+void QxtCheckComboBox::paintEvent(QPaintEvent*)
+{
+    QStylePainter painter(this);
+    painter.setPen(palette().color(QPalette::Text));
+
+    QStyleOptionComboBox opt;
+    initStyleOption(&opt);
+    // 当前项图标与文本都由行编辑框自绘，这里清空，避免左侧额外出现一个当前项图标
+    opt.currentIcon = QIcon();
+    opt.currentText = QString();
+
+    painter.drawComplexControl(QStyle::CC_ComboBox, opt);
+    painter.drawControl(QStyle::CE_ComboBoxLabel, opt);
+}
+
+/*!
+    \reimp
+ */
+void QxtCheckComboBox::resizeEvent(QResizeEvent* event)
+{
+    QComboBox::resizeEvent(event);
+    // QComboBox 会按当前项图标缩窄行编辑框，这里还原为完整编辑区
+    qxt_d().resetLineEditGeometry();
 }
 
 /*!
