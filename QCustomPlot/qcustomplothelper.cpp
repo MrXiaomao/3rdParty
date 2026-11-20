@@ -1208,15 +1208,29 @@ void QCustomPlotHelper::beforeReplot()
     if (!actShowWaveformDetail->property("isChecked").toBool())
         return;
 
-    // 1. 取出第一个波形的所有原始数据
+    // 1. 取出第一个波形
     QCPGraph* mainGraph = mCustomPlot->graph(0);
+
+    // 获取第一个所选波形
     for (int i=0; i<mCustomPlot->graphCount(); ++i)
     {
         if (mCustomPlot->graph(i)->selected()){
-            mainGraph = mCustomPlot->graph(0);
+            mainGraph = mCustomPlot->graph(i);
             break;
         }
     }
+
+    // 获取第一个可视波形
+    if (!mainGraph || mainGraph->data()->isEmpty()){
+        for (int i=0; i<mCustomPlot->graphCount(); ++i)
+        {
+            if (mCustomPlot->graph(i)->visible()){
+                mainGraph = mCustomPlot->graph(i);
+                break;
+            }
+        }
+    }
+
     if (!mainGraph || mainGraph->data()->isEmpty()) return;
 
     // 取当前轴范围
@@ -1372,15 +1386,29 @@ void QCustomPlotHelper::showWaveformDetail()
     mStatsOverlay->setVisible(!isChecked);
 
     if (mStatsOverlay->visible()){
-        // 1. 取出第一个波形的所有原始数据
+        // 1. 取出第一个波形
         QCPGraph* mainGraph = mCustomPlot->graph(0);
+
+        // 获取第一个所选波形
         for (int i=0; i<mCustomPlot->graphCount(); ++i)
         {
             if (mCustomPlot->graph(i)->selected()){
-                mainGraph = mCustomPlot->graph(0);
+                mainGraph = mCustomPlot->graph(i);
                 break;
             }
         }
+
+        // 获取第一个可视波形
+        if (!mainGraph || mainGraph->data()->isEmpty()){
+            for (int i=0; i<mCustomPlot->graphCount(); ++i)
+            {
+                if (mCustomPlot->graph(i)->visible()){
+                    mainGraph = mCustomPlot->graph(i);
+                    break;
+                }
+            }
+        }
+
         if (!mainGraph || mainGraph->data()->isEmpty()) return;        
 
         // 取当前轴范围
