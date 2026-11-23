@@ -1,13 +1,22 @@
 #include "qcustomplothelper.h"
 #include "WaveformStats.h"
+#include "qxtcheckcombobox.h"
 #include <QMouseEvent>
+#include <QToolTip>
+#include <QFileDialog>
+#include <QMessageBox>
+#include <QFile>
+#include <QTextStream>
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+#include <QStringConverter>
+#endif
 
 //////////////////////////////////////////////////////////////////////////////////
-XCPItemTracer::XCPItemTracer(QCustomPlot *customPlot, TracerType _type, QObject *parent)
+XCPValueMarker::XCPValueMarker(QCustomPlot *customPlot, Anchor anchor, QObject *parent)
     : QObject(parent)
     , mOffset(QPoint(0, 0))
     , mCustomPlot(customPlot)
-    , mTracerType(_type)
+    , mAnchor(anchor)
 {
     {
         QColor clrDefault(Qt::red);
@@ -16,70 +25,69 @@ XCPItemTracer::XCPItemTracer(QCustomPlot *customPlot, TracerType _type, QObject 
         //        penDefault.setBrush(brushDefault);
         penDefault.setWidthF(0.5);
 
-        mTracer = new QCPItemTracer(mCustomPlot);
-        mTracer->setObjectName("mTracer");
-        mTracer->setLayer("overlay");
-        mTracer->setStyle(QCPItemTracer::tsCircle);
-        mTracer->setPen(penDefault);
-        mTracer->setBrush(brushDefault);
+        mPointItem = new QCPItemTracer(mCustomPlot);
+        mPointItem->setObjectName("mPointItem");
+        mPointItem->setLayer("overlay");
+        mPointItem->setStyle(QCPItemTracer::tsCircle);
+        mPointItem->setPen(penDefault);
+        mPointItem->setBrush(brushDefault);
 
-        mTracerText = new QCPItemText(mCustomPlot);
-        mTracerText->setObjectName("mTracerText");
-        mTracerText->setLayer("overlay");
-        mTracerText->setClipToAxisRect(false);
-        mTracerText->setPadding(QMargins(6, 4, 6, 4));
-        mTracerText->setBrush(QBrush(QColor(255, 255, 255, 230)));
-        mTracerText->setPen(penDefault);
-        mTracerText->position->setParentAnchor(mTracer->position);
-        mTracerText->setFont(QFont("Arial", 8, QFont::Weight::Thin));
-        mTracerText->setColor(clrDefault);
-        mTracerText->setText("");
+        mLabelItem = new QCPItemText(mCustomPlot);
+        mLabelItem->setObjectName("mLabelItem");
+        mLabelItem->setLayer("overlay");
+        mLabelItem->setClipToAxisRect(false);
+        mLabelItem->setPadding(QMargins(6, 4, 6, 4));
+        mLabelItem->setBrush(QBrush(QColor(255, 255, 255, 230)));
+        mLabelItem->setPen(penDefault);
+        mLabelItem->position->setParentAnchor(mPointItem->position);
+        mLabelItem->setFont(QFont("Arial", 8, QFont::Weight::Thin));
+        mLabelItem->setColor(clrDefault);
+        mLabelItem->setText("");
 
-        mTracerArrow = new QCPItemLine(mCustomPlot);
-        mTracerArrow->setObjectName("mTracerArrow");
-        QPen  arrowPen(clrDefault, 1);
-        mTracerArrow->setPen(penDefault);
-        mTracerArrow->setLayer("overlay");
-        mTracerArrow->setClipToAxisRect(false);
-        mTracerArrow->setHead(QCPLineEnding::esSpikeArrow);//设置头部为箭头形状
+        mLeadLine = new QCPItemLine(mCustomPlot);
+        mLeadLine->setObjectName("mLeadLine");
+        mLeadLine->setPen(penDefault);
+        mLeadLine->setLayer("overlay");
+        mLeadLine->setClipToAxisRect(false);
+        mLeadLine->setHead(QCPLineEnding::esSpikeArrow);//设置头部为箭头形状
 
-        switch (mTracerType)
+        switch (mAnchor)
         {
-        case XAxisTracer:
+        case AtXAxis:
         {
-            mTracer->position->setTypeX(QCPItemPosition::ptPlotCoords);
-            mTracer->position->setTypeY(QCPItemPosition::ptAxisRectRatio);
-            mTracer->setSize(7);
-            mTracerText->setPositionAlignment(Qt::AlignTop | Qt::AlignHCenter);
+            mPointItem->position->setTypeX(QCPItemPosition::ptPlotCoords);
+            mPointItem->position->setTypeY(QCPItemPosition::ptAxisRectRatio);
+            mPointItem->setSize(7);
+            mLabelItem->setPositionAlignment(Qt::AlignTop | Qt::AlignHCenter);
 
-            mTracerArrow->end->setParentAnchor(mTracer->position);
-            mTracerArrow->start->setParentAnchor(mTracerArrow->end);
-            mTracerArrow->start->setCoords(0, 20);//偏移量
+            mLeadLine->end->setParentAnchor(mPointItem->position);
+            mLeadLine->start->setParentAnchor(mLeadLine->end);
+            mLeadLine->start->setCoords(0, 20);//偏移量
             break;
         }
-        case YAxisTracer:
+        case AtYAxis:
         {
-            mTracer->position->setTypeX(QCPItemPosition::ptAxisRectRatio);
-            mTracer->position->setTypeY(QCPItemPosition::ptPlotCoords);
-            mTracer->setSize(7);
-            mTracerText->setPositionAlignment(Qt::AlignRight | Qt::AlignHCenter);
+            mPointItem->position->setTypeX(QCPItemPosition::ptAxisRectRatio);
+            mPointItem->position->setTypeY(QCPItemPosition::ptPlotCoords);
+            mPointItem->setSize(7);
+            mLabelItem->setPositionAlignment(Qt::AlignRight | Qt::AlignHCenter);
 
-            mTracerArrow->end->setParentAnchor(mTracer->position);
-            mTracerArrow->start->setParentAnchor(mTracerText->position);
-            mTracerArrow->start->setCoords(-20, 0);//偏移量
+            mLeadLine->end->setParentAnchor(mPointItem->position);
+            mLeadLine->start->setParentAnchor(mLabelItem->position);
+            mLeadLine->start->setCoords(-20, 0);//偏移量
             break;
         }
-        case DataTracer:
+        case AtDataPoint:
         {
-            mTracer->position->setTypeX(QCPItemPosition::ptPlotCoords);
-            mTracer->position->setTypeY(QCPItemPosition::ptPlotCoords);
-            mTracer->setSize(5);
+            mPointItem->position->setTypeX(QCPItemPosition::ptPlotCoords);
+            mPointItem->position->setTypeY(QCPItemPosition::ptPlotCoords);
+            mPointItem->setSize(5);
 
-            mTracerText->setPositionAlignment(Qt::AlignLeft | Qt::AlignVCenter);
+            mLabelItem->setPositionAlignment(Qt::AlignLeft | Qt::AlignVCenter);
 
-            mTracerArrow->end->setParentAnchor(mTracer->position);
-            mTracerArrow->start->setParentAnchor(mTracerArrow->end);
-            mTracerArrow->start->setCoords(20 + mOffset.x(), mOffset.y());
+            mLeadLine->end->setParentAnchor(mPointItem->position);
+            mLeadLine->start->setParentAnchor(mLeadLine->end);
+            mLeadLine->start->setCoords(20 + mOffset.x(), mOffset.y());
             break;
         }
         default:
@@ -90,166 +98,164 @@ XCPItemTracer::XCPItemTracer(QCustomPlot *customPlot, TracerType _type, QObject 
     }
 }
 
-XCPItemTracer::~XCPItemTracer()
+XCPValueMarker::~XCPValueMarker()
 {
     if(mCustomPlot)
     {
-        if (mTracer)
-            mCustomPlot->removeItem(mTracer);
-        if (mTracerText)
-            mCustomPlot->removeItem(mTracerText);
-        if (mTracerArrow)
-            mCustomPlot->removeItem(mTracerArrow);
+        if (mPointItem)
+            mCustomPlot->removeItem(mPointItem);
+        if (mLabelItem)
+            mCustomPlot->removeItem(mLabelItem);
+        if (mLeadLine)
+            mCustomPlot->removeItem(mLeadLine);
     }
 }
 
-void XCPItemTracer::setPen(const QPen &pen)
+void XCPValueMarker::setPen(const QPen &pen)
 {
-    if(mTracer)
-        mTracer->setPen(pen);
-    if(mTracerArrow)
-        mTracerArrow->setPen(pen);
+    if(mPointItem)
+        mPointItem->setPen(pen);
+    if(mLeadLine)
+        mLeadLine->setPen(pen);
 }
 
-void XCPItemTracer::setBrush(const QBrush &brush)
+void XCPValueMarker::setBrush(const QBrush &brush)
 {
-    if(mTracer)
-        mTracer->setBrush(brush);
+    if(mPointItem)
+        mPointItem->setBrush(brush);
 }
 
-void XCPItemTracer::setTextPen(const QPen &pen)
+void XCPValueMarker::setTextPen(const QPen &pen)
 {
-    if(mTracerText)
+    if(mLabelItem)
     {
-        mTracerText->setPen(pen);
-        mTracerText->setBrush(QBrush(QColor(255, 255, 255, 230)));
-        mTracerText->setColor(pen.color());
+        mLabelItem->setPen(pen);
+        mLabelItem->setBrush(QBrush(QColor(255, 255, 255, 230)));
+        mLabelItem->setColor(pen.color());
     }
 }
 
-void XCPItemTracer::setText(const QString &text)
+void XCPValueMarker::setText(const QString &text)
 {
-    if(mTracerText)
-        mTracerText->setText(text);
+    if(mLabelItem)
+        mLabelItem->setText(text);
 }
 
-void XCPItemTracer::setVisible(bool visible)
+void XCPValueMarker::setVisible(bool visible)
 {
-    setTracerVisible(visible);
-    setTextVisible(visible);
+    setPointVisible(visible);
+    setLabelVisible(visible);
 }
 
-void XCPItemTracer::setTracerVisible(bool visible)
+void XCPValueMarker::setPointVisible(bool visible)
 {
-    mTracerVisible = visible;
-    if(mTracer)
-        mTracer->setVisible(mTracerVisible);
+    mPointVisible = visible;
+    if(mPointItem)
+        mPointItem->setVisible(mPointVisible);
 }
 
-void XCPItemTracer::setTextVisible(bool visible)
+void XCPValueMarker::setLabelVisible(bool visible)
 {
-    mTextVisible = visible;
-    if(mTracerText)
-        mTracerText->setVisible(mTextVisible);
-    if(mTracerArrow)
-        mTracerArrow->setVisible(mTextVisible);
+    mLabelVisible = visible;
+    if(mLabelItem)
+        mLabelItem->setVisible(mLabelVisible);
+    if(mLeadLine)
+        mLeadLine->setVisible(mLabelVisible);
 }
 
-void XCPItemTracer::setOffset(QPoint offset)
+void XCPValueMarker::setOffset(QPoint offset)
 {
     mOffset = offset;
 }
 
-void XCPItemTracer::updatePosition(QCPAxisRect *axisRect, double xValue, double yValue)
+void XCPValueMarker::updatePosition(QCPAxisRect *axisRect, double key, double value)
 {
-    if (!mTextVisible && !mTracerVisible)
+    if (!mLabelVisible && !mPointVisible)
         return;
 
     QCPAxis* xAxis = axisRect->axis(QCPAxis::AxisType::atBottom);
     QCPAxis* yAxis = axisRect->axis(QCPAxis::AxisType::atLeft);
-    if (yValue > yAxis->range().upper)
-        yValue = yAxis->range().upper;
+    if (value > yAxis->range().upper)
+        value = yAxis->range().upper;
 
     int xNumberPrecision = 1;//xAxis->numberPrecision();
     int yNumberPrecision = 1;//yAxis->numberPrecision();
-    switch (mTracerType)
+    switch (mAnchor)
     {
-    case XAxisTracer:
+    case AtXAxis:
     {
-        mTracer->position->setAxisRect(axisRect);
-        mTracer->position->setAxes(xAxis, yAxis);
-        mTracer->position->setCoords(xValue, 1);
-        mTracerText->position->setCoords(0, 15);
-        mTracerArrow->start->setCoords(0, 15);
-        mTracerArrow->end->setCoords(0, 0);
+        mPointItem->position->setAxisRect(axisRect);
+        mPointItem->position->setAxes(xAxis, yAxis);
+        mPointItem->position->setCoords(key, 1);
+        mLabelItem->position->setCoords(0, 15);
+        mLeadLine->start->setCoords(0, 15);
+        mLeadLine->end->setCoords(0, 0);
 
-        QString keyText = QString("%1").arg(xValue);
+        QString keyText = QString("%1").arg(key);
         QSharedPointer<QCPAxisTicker> ticker = xAxis->ticker();
         // 类型判断分支
         if (auto dateTimeTicker = qSharedPointerDynamicCast<QCPAxisTickerDateTime>(ticker))
         {
             // QCPAxisTickerDateTime的原始key是Unix时间戳（秒为单位），直接转成QDateTime
-            keyText = QDateTime::fromMSecsSinceEpoch(qint64(xValue * 1000)).toString(dateTimeTicker->dateTimeFormat());
+            keyText = QDateTime::fromMSecsSinceEpoch(qint64(key * 1000)).toString(dateTimeTicker->dateTimeFormat());
         }
         else if (auto timeTicker = qSharedPointerDynamicCast<QCPAxisTickerTime>(ticker))
         {
-            keyText = QTime(0,0,0).addSecs(qRound(xValue)).toString(timeTicker->timeFormat());
+            keyText = QTime(0,0,0).addSecs(qRound(key)).toString(timeTicker->timeFormat());
         }
         else if (auto textTicker = qSharedPointerDynamicCast<QCPAxisTickerText>(ticker))
         {
-            keyText = textTicker->ticks()[xValue];
+            keyText = textTicker->ticks()[key];
         }
         else if (auto fixedTicker = qSharedPointerDynamicCast<QCPAxisTickerFixed>(ticker))
         {
-            keyText = QString::number(xValue, 'f', xNumberPrecision);
+            keyText = QString::number(key, 'f', xNumberPrecision);
         }
 
         setText(keyText);
         break;
     }
-    case YAxisTracer:
+    case AtYAxis:
     {
-        mTracer->position->setAxisRect(axisRect);
-        mTracer->position->setAxes(xAxis, yAxis);
-        mTracer->position->setCoords(0, yValue);
-        mTracerText->position->setCoords(-20, 0);
-        //        mTracerArrow->start->setCoords(20, 0);
-        //        mTracerArrow->end->setCoords(0, 0);
-        setText(QString::number(yValue, 'f', yNumberPrecision));
+        mPointItem->position->setAxisRect(axisRect);
+        mPointItem->position->setAxes(xAxis, yAxis);
+        mPointItem->position->setCoords(0, value);
+        mLabelItem->position->setCoords(-20, 0);
+        //        mLeadLine->start->setCoords(20, 0);
+        //        mLeadLine->end->setCoords(0, 0);
+        setText(QString::number(value, 'f', yNumberPrecision));
         break;
     }
-    case DataTracer:
+    case AtDataPoint:
     {
-        mTracer->position->setAxisRect(axisRect);
-        mTracer->position->setAxes(xAxis, yAxis);
-        mTracer->position->setCoords(xValue, yValue);
-        mTracerText->position->setCoords(20 + mOffset.x(), mOffset.y());
-        mTracerArrow->start->setCoords(20 + mOffset.x(), mOffset.y() == 0 ? 0 : (mOffset.y() / 2 + 2));
+        mPointItem->position->setAxisRect(axisRect);
+        mPointItem->position->setAxes(xAxis, yAxis);
+        mPointItem->position->setCoords(key, value);
+        mLabelItem->position->setCoords(20 + mOffset.x(), mOffset.y());
+        mLeadLine->start->setCoords(20 + mOffset.x(), mOffset.y() == 0 ? 0 : (mOffset.y() / 2 + 2));
 
-        QString keyText = QString("%1").arg(xValue);
+        QString keyText = QString("%1").arg(key);
         QSharedPointer<QCPAxisTicker> ticker = xAxis->ticker();
         // 类型判断分支
         if (auto dateTimeTicker = qSharedPointerDynamicCast<QCPAxisTickerDateTime>(ticker))
         {
             // QCPAxisTickerDateTime的原始key是Unix时间戳（秒为单位），直接转成QDateTime
-            keyText = QDateTime::fromMSecsSinceEpoch(qint64(xValue * 1000)).toString(dateTimeTicker->dateTimeFormat());
-            setText(keyText);
+            keyText = QDateTime::fromMSecsSinceEpoch(qint64(key * 1000)).toString(dateTimeTicker->dateTimeFormat());
         }
         else if (auto timeTicker = qSharedPointerDynamicCast<QCPAxisTickerTime>(ticker))
         {
-            keyText = QTime(0,0,0).addSecs(qRound(xValue)).toString(timeTicker->timeFormat());
-            setText(keyText);
+            keyText = QTime(0,0,0).addSecs(qRound(key)).toString(timeTicker->timeFormat());
         }
         else if (auto textTicker = qSharedPointerDynamicCast<QCPAxisTickerText>(ticker))
         {
-            keyText = textTicker->ticks()[xValue];
+            keyText = textTicker->ticks()[key];
         }
         else if (auto fixedTicker = qSharedPointerDynamicCast<QCPAxisTickerFixed>(ticker))
         {
-            keyText = QString::number(xValue, 'f', xNumberPrecision);
+            keyText = QString::number(key, 'f', xNumberPrecision);
         }
 
-        setText(QString("x:%1,y:%2").arg(keyText, QString::number(yValue, 'f', yNumberPrecision)));
+        setText(QString("x:%1,y:%2").arg(keyText, QString::number(value, 'f', yNumberPrecision)));
         break;
     }
     default:
@@ -257,113 +263,118 @@ void XCPItemTracer::updatePosition(QCPAxisRect *axisRect, double xValue, double 
     }
 
     //设置裁剪区域，超出边界就不显示了
-    mTracer->setClipToAxisRect(true);
-    mTracer->setClipAxisRect(axisRect);
-    mTracerText->setClipToAxisRect(true);
-    mTracerText->setClipAxisRect(axisRect);
-    mTracerArrow->setClipToAxisRect(true);
-    mTracerArrow->setClipAxisRect(axisRect);
+    mPointItem->setClipToAxisRect(true);
+    mPointItem->setClipAxisRect(axisRect);
+    mLabelItem->setClipToAxisRect(true);
+    mLabelItem->setClipAxisRect(axisRect);
+    mLeadLine->setClipToAxisRect(true);
+    mLeadLine->setClipAxisRect(axisRect);
 }
 
 //////////////////////////////////////////////////////////////////////////////////
-XCPItemTracerLine::XCPItemTracerLine(QCustomPlot *customPlot, LineType _type, QObject *parent)
+XCPReferenceLine::XCPReferenceLine(QCustomPlot *customPlot, Orientation orientation, QObject *parent)
     : QObject(parent)
     , mCustomPlot(customPlot)
-    , mLineType(_type)
+    , mOrientation(orientation)
 {
     initLine();
 }
 
-XCPItemTracerLine::~XCPItemTracerLine()
+XCPReferenceLine::~XCPReferenceLine()
 {
     if(mCustomPlot)
     {
-        if (mStraightLineV)
-            mCustomPlot->removeItem(mStraightLineV);
-        if (mStraightLineH)
-            mCustomPlot->removeItem(mStraightLineH);
+        if (mVerticalLine)
+            mCustomPlot->removeItem(mVerticalLine);
+        if (mHorizontalLine)
+            mCustomPlot->removeItem(mHorizontalLine);
     }
 }
 
-void XCPItemTracerLine::initLine()
+void XCPReferenceLine::initLine()
 {
     if(mCustomPlot)
     {
         QPen linesPen(Qt::red, 1, Qt::DashLine);
 
-        if(VerticalLine == mLineType || Both == mLineType)
+        if(Vertical == mOrientation || Crosshair == mOrientation)
         {
-            mStraightLineV = new QCPItemStraightLine(mCustomPlot);//垂直线
-            mStraightLineV->setLayer("overlay");
-            mStraightLineV->setPen(linesPen);
-            mStraightLineV->setClipToAxisRect(true);
-            mStraightLineV->point1->setCoords(0, 0);
-            mStraightLineV->point2->setCoords(0, 0);
+            mVerticalLine = new QCPItemStraightLine(mCustomPlot);//垂直线
+            mVerticalLine->setLayer("overlay");
+            mVerticalLine->setPen(linesPen);
+            mVerticalLine->setClipToAxisRect(true);
+            mVerticalLine->point1->setCoords(0, 0);
+            mVerticalLine->point2->setCoords(0, 0);
         }
 
-        if(HorizonLine == mLineType || Both == mLineType)
+        if(Horizontal == mOrientation || Crosshair == mOrientation)
         {
-            mStraightLineH = new QCPItemStraightLine(mCustomPlot);//水平线
-            mStraightLineH->setLayer("overlay");
-            mStraightLineH->setPen(linesPen);
-            mStraightLineH->setClipToAxisRect(true);
-            mStraightLineH->point1->setCoords(0, 0);
-            mStraightLineH->point2->setCoords(0, 0);
+            mHorizontalLine = new QCPItemStraightLine(mCustomPlot);//水平线
+            mHorizontalLine->setLayer("overlay");
+            mHorizontalLine->setPen(linesPen);
+            mHorizontalLine->setClipToAxisRect(true);
+            mHorizontalLine->point1->setCoords(0, 0);
+            mHorizontalLine->point2->setCoords(0, 0);
         }
     }
 }
 
-void XCPItemTracerLine::updatePosition(QCPAxisRect *axisRect, double xValue, double yValue)
+void XCPReferenceLine::updatePosition(QCPAxisRect *axisRect, double key, double value)
 {
     QCPAxis* yAxis = axisRect->axis(QCPAxis::AxisType::atLeft);
     QCPAxis* xAxis = axisRect->axis(QCPAxis::AxisType::atBottom);
 
-    if(VerticalLine == mLineType || Both == mLineType)
+    if(Vertical == mOrientation || Crosshair == mOrientation)
     {
-        if(mStraightLineV)
+        if(mVerticalLine)
         {
-            mStraightLineV->point1->setCoords(xValue, yAxis->range().lower);
-            mStraightLineV->point2->setCoords(xValue, yAxis->range().upper);
+            mVerticalLine->point1->setCoords(key, yAxis->range().lower);
+            mVerticalLine->point2->setCoords(key, yAxis->range().upper);
         }
     }
 
-    if(HorizonLine == mLineType || Both == mLineType)
+    if(Horizontal == mOrientation || Crosshair == mOrientation)
     {
-        if(mStraightLineH)
+        if(mHorizontalLine)
         {
-            mStraightLineH->point1->setCoords(xAxis->range().lower, yValue);
-            mStraightLineH->point2->setCoords(xAxis->range().upper, yValue);
+            mHorizontalLine->point1->setCoords(xAxis->range().lower, value);
+            mHorizontalLine->point2->setCoords(xAxis->range().upper, value);
         }
     }
 
     //设置裁剪区域，超出边界就不显示了
-    mStraightLineH->point1->setAxisRect(axisRect);
-    mStraightLineH->point2->setAxisRect(axisRect);
-    mStraightLineH->point1->setAxes(xAxis, yAxis);
-    mStraightLineH->point2->setAxes(xAxis, yAxis);
-    mStraightLineV->point1->setAxisRect(axisRect);
-    mStraightLineV->point2->setAxisRect(axisRect);
-    mStraightLineV->point1->setAxes(xAxis, yAxis);
-    mStraightLineV->point2->setAxes(xAxis, yAxis);
-    mStraightLineH->setClipToAxisRect(true);
-    mStraightLineH->setClipAxisRect(axisRect);
-    mStraightLineV->setClipToAxisRect(true);
-    mStraightLineV->setClipAxisRect(axisRect);
+    if (mHorizontalLine)
+    {
+        mHorizontalLine->point1->setAxisRect(axisRect);
+        mHorizontalLine->point2->setAxisRect(axisRect);
+        mHorizontalLine->point1->setAxes(xAxis, yAxis);
+        mHorizontalLine->point2->setAxes(xAxis, yAxis);
+        mHorizontalLine->setClipToAxisRect(true);
+        mHorizontalLine->setClipAxisRect(axisRect);
+    }
+    if (mVerticalLine)
+    {
+        mVerticalLine->point1->setAxisRect(axisRect);
+        mVerticalLine->point2->setAxisRect(axisRect);
+        mVerticalLine->point1->setAxes(xAxis, yAxis);
+        mVerticalLine->point2->setAxes(xAxis, yAxis);
+        mVerticalLine->setClipToAxisRect(true);
+        mVerticalLine->setClipAxisRect(axisRect);
+    }
 }
 
-void XCPItemTracerLine::setVisible(bool visible)
+void XCPReferenceLine::setVisible(bool visible)
 {
-    if(mStraightLineV)
-        mStraightLineV->setVisible(visible);
-    if(mStraightLineH)
-        mStraightLineH->setVisible(visible);
+    if(mVerticalLine)
+        mVerticalLine->setVisible(visible);
+    if(mHorizontalLine)
+        mHorizontalLine->setVisible(visible);
 }
 
 //////////////////////////////////////////////////////////////////////////////////
-XCPItemStraightRect::XCPItemStraightRect(QCustomPlot *customPlot, StraightType _type, QObject *parent)
+XCPRangeMask::XCPRangeMask(QCustomPlot *customPlot, QObject *parent)
     : QObject(parent)
     , mCustomPlot(customPlot)
-    , mStraightType(_type)
 {
     mMaskRect = new QCPItemRect(mCustomPlot);
     mMaskRect->setLayer("overlay");
@@ -374,7 +385,7 @@ XCPItemStraightRect::XCPItemStraightRect(QCustomPlot *customPlot, StraightType _
     mMaskRect->bottomRight->setCoords(0, 0);
 }
 
-XCPItemStraightRect::~XCPItemStraightRect()
+XCPRangeMask::~XCPRangeMask()
 {
     if(mCustomPlot)
     {
@@ -383,56 +394,36 @@ XCPItemStraightRect::~XCPItemStraightRect()
     }
 }
 
-void XCPItemStraightRect::setRange(QCPAxisRect *axisRect, const QCPRange& range)
+void XCPRangeMask::setRange(QCPAxisRect *axisRect, const QCPRange& range)
 {
     if(mMaskRect)
     {
         QCPAxis* yAxis = axisRect->axis(QCPAxis::AxisType::atLeft);
-        QCPAxis* xAxis = axisRect->axis(QCPAxis::AxisType::atBottom);
-
-        if (VerticalStraight == mStraightType)
-        {
-            mMaskRect->topLeft->setCoords(range.lower, yAxis->range().upper);
-            mMaskRect->bottomRight->setCoords(range.upper, yAxis->range().lower);
-        }
-        else
-        {
-            mMaskRect->topLeft->setCoords(xAxis->range().lower, range.lower);
-            mMaskRect->bottomRight->setCoords(xAxis->range().upper, range.upper);
-        }
+        mMaskRect->topLeft->setCoords(range.lower, yAxis->range().upper);
+        mMaskRect->bottomRight->setCoords(range.upper, yAxis->range().lower);
 
         this->mRange = range;
     }
 }
 
-QCPRange XCPItemStraightRect::range() const
+QCPRange XCPRangeMask::range() const
 {
     return this->mRange;
 }
 
-void XCPItemStraightRect::setVisible(bool visible)
+void XCPRangeMask::setVisible(bool visible)
 {
     if(mMaskRect)
         mMaskRect->setVisible(visible);
 }
 
-void XCPItemStraightRect::setBrush(const QBrush &brush)
+void XCPRangeMask::setBrush(const QBrush &brush)
 {
     mMaskRect->setBrush(brush);
 }
 
-void XCPItemStraightRect::refresh()
+void XCPRangeMask::refresh()
 {
-    // return;//
-    // if(mMaskRect)
-    // {
-    //     QCPAxisRect *axisRect = mCustomPlot->axisRect();
-    //     QCPAxis* yAxis = axisRect->axis(QCPAxis::AxisType::atLeft);
-    //     QCPAxis* xAxis = axisRect->axis(QCPAxis::AxisType::atBottom);
-
-    //     mMaskRect->topLeft->setCoords(mMaskRect->topLeft->key(), yAxis->range().upper);
-    //     mMaskRect->bottomRight->setCoords(mMaskRect->bottomRight->key(), yAxis->range().lower);
-    // }
 }
 
 //////////////////////////////////////////////////////////////////////////////////
@@ -440,7 +431,7 @@ void XCPItemStraightRect::refresh()
 QCustomPlotHelper::QCustomPlotHelper(QCustomPlot* customPlot, QObject *parent)
     : QObject(parent)
     , mCustomPlot(customPlot)
-    , mDataTracers(QList<XCPItemTracer *>())
+    , mDataTracers(QList<XCPValueMarker *>())
 {
     // 关联右键菜单事件
     setupMenu();
@@ -490,7 +481,20 @@ QCustomPlotHelper::QCustomPlotHelper(QCustomPlot* customPlot, QObject *parent)
 
 QCustomPlotHelper::~QCustomPlotHelper()
 {
+    // 释放未挂父对象的 tracer 包装对象（其 QCP item 由图表托管，此处通过 removeItem 移除）
+    qDeleteAll(mDataTracers);
+    mDataTracers.clear();
 
+    for (const DataMarker &marker : mDataMarkers)
+        delete marker.tracer;
+    mDataMarkers.clear();
+
+    delete mTracerX;      mTracerX = nullptr;
+    delete mTracerY;      mTracerY = nullptr;
+    delete mTracerCrossLine; mTracerCrossLine = nullptr;
+    delete mTracerDragLeftLine;  mTracerDragLeftLine = nullptr;
+    delete mTracerDragRightLine; mTracerDragRightLine = nullptr;
+    delete mDragStraightRect; mDragStraightRect = nullptr;
 }
 
 void QCustomPlotHelper::setupMenu()
@@ -510,23 +514,23 @@ void QCustomPlotHelper::setupMenu()
     connect(actExportData, &QAction::triggered, this, &QCustomPlotHelper::exportData);
 
     actLinearScale = new QAction(mIconChecked, tr("线性缩放"), this);
-    connect(actLinearScale, &QAction::triggered, this, &QCustomPlotHelper::linearScale);
+    connect(actLinearScale, &QAction::triggered, this, [this](){ linearScale(true); });
     actLogarithmicScale = new QAction(mIconUnchecked, tr("对数缩放"), this);
-    connect(actLogarithmicScale, &QAction::triggered, this, &QCustomPlotHelper::logarithmicScale);
+    connect(actLogarithmicScale, &QAction::triggered, this, [this](){ logarithmicScale(true); });
 
     actEnableStraightLine = new QAction(mIconUnchecked, tr("轴参考线 "), this);
-    connect(actEnableStraightLine, &QAction::triggered, this, &QCustomPlotHelper::enableStraightLine);
-    actEnableDataTracer = new QAction(mIconUnchecked, tr("点位标记"), this);
-    connect(actEnableDataTracer, &QAction::triggered, this, &QCustomPlotHelper::enableDataTracer);
+    connect(actEnableStraightLine, &QAction::triggered, this, [this](){ enableStraightLine(!actEnableStraightLine->property("isChecked").toBool()); });
+    actEnableAtDataPoint = new QAction(mIconUnchecked, tr("点位标记"), this);
+    connect(actEnableAtDataPoint, &QAction::triggered, this, [this](){ enableAtDataPoint(!actEnableAtDataPoint->property("isChecked").toBool()); });
     actEnableRangeSelect = new QAction(mIconUnchecked, tr("选择范围"), this);
-    connect(actEnableRangeSelect, &QAction::triggered, this, &QCustomPlotHelper::enableRangeSelect);
+    connect(actEnableRangeSelect, &QAction::triggered, this, [this](){ enableRangeSelect(!actEnableRangeSelect->property("isChecked").toBool()); });
     actShowWaveformDetail = new QAction(tr("波形特征值"), this);
     connect(actShowWaveformDetail, &QAction::triggered, this, &QCustomPlotHelper::showWaveformDetail);
 
     // 创建悬浮窗实例
     actShowWaveformDetail->setIcon(actShowWaveformDetail->property("isChecked").toBool() ? mIconChecked : mIconUnchecked);
-    mStatsOverlay = new QCPOverlayWidget(mCustomPlot);
-    mStatsOverlay->setVisible(false);
+    mStatsPanel = new QCPWaveformStatsPanel(mCustomPlot);
+    mStatsPanel->setVisible(false);
 
     QMenu *subMenu = new QMenu(tr("适应模式"));
     QWidgetAction* actFixedRange = new QWidgetAction(subMenu);
@@ -596,58 +600,42 @@ void QCustomPlotHelper::setupMenu()
          *            -
          *            适应模式（只有在线测量实时刷新才会用到，所以优先级最低）
          */
-    if (1){ // 新菜单模式
-        contextMenu.addAction(actResetView);
-        contextMenu.addAction(actEnableDataTracer);
-        if (mClearMarkerActionVisible)
-            contextMenu.addAction(actClearMarker);
+    contextMenu.addAction(actResetView);
+    contextMenu.addAction(actEnableAtDataPoint);
+    if (mClearMarkerActionVisible)
+        contextMenu.addAction(actClearMarker);
 
-        contextMenu.addSeparator();
-        contextMenu.addAction(actExportGraphic);
-        contextMenu.addAction(actExportData);
+    contextMenu.addSeparator();
+    contextMenu.addAction(actExportGraphic);
+    contextMenu.addAction(actExportData);
 
-        contextMenu.addSeparator();
-        QMenu *otherMenu = contextMenu.addMenu(tr("更多功能"));
+    contextMenu.addSeparator();
+    QMenu *otherMenu = contextMenu.addMenu(tr("更多功能"));
 
-        if (mStraightLineActionVisible)
-            otherMenu->addAction(actEnableStraightLine);
-        if (mRangeSelectActionVisible)
-            otherMenu->addAction(actEnableRangeSelect);
+    if (mStraightLineActionVisible)
+        otherMenu->addAction(actEnableStraightLine);
+    if (mRangeSelectActionVisible)
+        otherMenu->addAction(actEnableRangeSelect);
 
-        otherMenu->addSeparator();
-        otherMenu->addAction(actLinearScale);
-        otherMenu->addAction(actLogarithmicScale);
+    otherMenu->addSeparator();
+    otherMenu->addAction(actLinearScale);
+    otherMenu->addAction(actLogarithmicScale);
 
-        otherMenu->addSeparator();
-        otherMenu->addAction(actShowWaveformDetail);
-        otherMenu->addMenu(subMenu);
-    }
-    else{ // 旧菜单模式
-        contextMenu.addMenu(subMenu);
-        contextMenu.addSeparator();
-        if (mResetActionVisible)
-        {
-            contextMenu.addAction(actResetView);
-            contextMenu.addSeparator();
-        }
-        if (mClearMarkerActionVisible)
-            contextMenu.addAction(actClearMarker);
-        if (mStraightLineActionVisible)
-            contextMenu.addAction(actEnableStraightLine);
-        if (mRangeSelectActionVisible)
-            contextMenu.addAction(actEnableRangeSelect);
-        if (mClearMarkerActionVisible || mStraightLineActionVisible || mRangeSelectActionVisible)
-            contextMenu.addSeparator();
-        contextMenu.addAction(actEnableDataTracer);
-        contextMenu.addAction(actLinearScale);
-        contextMenu.addAction(actLogarithmicScale);
-        contextMenu.addSeparator();
-        contextMenu.addAction(actExportGraphic);
-        contextMenu.addAction(actExportData);
-    }
-
+    otherMenu->addSeparator();
+    otherMenu->addAction(actShowWaveformDetail);
+    otherMenu->addMenu(subMenu);
 }
 
+QCPAxisRect *QCustomPlotHelper::axisRectAt(const QPoint &pos) const
+{
+    QCPAxisRect *axisRect = mCustomPlot->axisRect();
+    for (QCPAxisRect *rect : mCustomPlot->axisRects())
+    {
+        if (rect != axisRect && rect->rect().contains(pos))
+            return rect;
+    }
+    return axisRect;
+}
 void QCustomPlotHelper::setLabel(const QString &strX, const QString &strY)
 {
     QCPAxisRect *axisRect = mCustomPlot->axisRect();
@@ -663,7 +651,6 @@ QCPGraph *QCustomPlotHelper::addLineGraph(QCPAxis *keyAxis, QCPAxis *valueAxis)
     QCPGraph * graph = mCustomPlot->addGraph(keyAxis, valueAxis);
     //graph->setAntialiased(true);
     graph->setLineStyle(QCPGraph::lsLine);
-    graph->setSelectable(QCP::SelectionType::stSingleData);
     graph->setSelectable(QCP::SelectionType::stSingleData);
     return graph;
 }
@@ -742,11 +729,11 @@ void QCustomPlotHelper::setRangeSelectActionVisible(bool visible/* = true*/)
     mRangeSelectActionVisible = visible;
 }
 
-void QCustomPlotHelper::setStatsOverlayDockPosition(QCPOverlayWidget::DockPosition pos)
+void QCustomPlotHelper::setStatsPanelDockPosition(QCPWaveformStatsPanel::DockPosition pos)
 {
-    if (mStatsOverlay)
+    if (mStatsPanel)
     {
-        mStatsOverlay->setDockPosition(pos);
+        mStatsPanel->setDockPosition(pos);
         mCustomPlot->replot(QCustomPlot::rpQueuedReplot);
     }
 }
@@ -798,7 +785,7 @@ void QCustomPlotHelper::plottableClick(QCPAbstractPlottable *plottable, int data
         double key = graph->dataMainKey(dataIndex); // 获取X轴的值
         double value = graph->dataMainValue(dataIndex); // 获取Y轴的值
 
-        if (actEnableDataTracer->property("isChecked").toBool())
+        if (actEnableAtDataPoint->property("isChecked").toBool())
         {
             // toggle: clicking a marked point again cancels its marker
             int markerIndex = -1;
@@ -816,14 +803,14 @@ void QCustomPlotHelper::plottableClick(QCPAbstractPlottable *plottable, int data
 
             if (markerIndex >= 0)
             {
-                XCPItemTracer *tracer = mDataMarkers[markerIndex].tracer;
+                XCPValueMarker *tracer = mDataMarkers[markerIndex].tracer;
                 if (tracer)
                     delete tracer;   // destructor removes the related items from the plot
                 mDataMarkers.removeAt(markerIndex);
             }
             else
             {
-                XCPItemTracer *tracer = new XCPItemTracer(mCustomPlot, XCPItemTracer::DataTracer);
+                XCPValueMarker *tracer = new XCPValueMarker(mCustomPlot, XCPValueMarker::AtDataPoint);
                 QColor fill = graph->pen().color();
                 fill.setAlpha(255);
                 tracer->setPen(graph->pen());
@@ -901,19 +888,7 @@ void QCustomPlotHelper::mouseDoubleClick(QMouseEvent *event)
             mTracerDragRightLine->setVisible(false);
             mDragStraightRect->setVisible(false);
 
-            QCPAxisRect *axisRect = mCustomPlot->axisRect();
-            QList<QCPAxisRect*> axisRects = mCustomPlot->axisRects();
-            for (auto iter : axisRects)
-            {
-                if (iter == axisRect)
-                    continue;
-
-                if (iter->rect().contains(event->pos()))
-                {
-                    axisRect = iter;
-                    break;
-                }
-            }
+            QCPAxisRect *axisRect = axisRectAt(event->pos());
 
             QCPAxis* yAxis = axisRect->axis(QCPAxis::AxisType::atLeft);
             QCPAxis* xAxis = axisRect->axis(QCPAxis::AxisType::atBottom);
@@ -936,16 +911,11 @@ void QCustomPlotHelper::mousePress(QMouseEvent * event)
         customPlot->setProperty("left-clicked", true);
         customPlot->setProperty("click-pos", event->pos());
 
-        // 启用参考线或基准线
-        if (actEnableStraightLine->property("isChecked").toBool())
-        {
-
-        }
 
         // 启用范围选取功能
         if (actEnableRangeSelect->property("isChecked").toBool())
         {
-            customPlot->setProperty("graph-draging", false);
+            customPlot->setProperty("graph-dragging", false);
 
             // 先禁用鼠标拖拽功能，防止正在拖动的时候图像发生移动
             customPlot->setInteraction(QCP::iRangeDrag, false);
@@ -975,19 +945,7 @@ void QCustomPlotHelper::mouseMove(QMouseEvent * event)
     {
     }
 
-    QCPAxisRect *axisRect = mCustomPlot->axisRect();
-    QList<QCPAxisRect*> axisRects = mCustomPlot->axisRects();
-    for (auto iter : axisRects)
-    {
-        if (iter == axisRect)
-            continue;
-
-        if (iter->rect().contains(event->pos()))
-        {
-            axisRect = iter;
-            break;
-        }
-    }
+    QCPAxisRect *axisRect = axisRectAt(event->pos());
 
     QCPAxis* yAxis = axisRect->axis(QCPAxis::AxisType::atLeft);
     QCPAxis* xAxis = axisRect->axis(QCPAxis::AxisType::atBottom);
@@ -996,66 +954,65 @@ void QCustomPlotHelper::mouseMove(QMouseEvent * event)
     if (actEnableStraightLine->property("isChecked").toBool())
     {
         //像素坐标转成实际的x,y轴的坐标
-        float key = xAxis->pixelToCoord(event->pos().x());
-        float value = yAxis->pixelToCoord(event->pos().y());
+        double key = xAxis->pixelToCoord(event->pos().x());
+        double value = yAxis->pixelToCoord(event->pos().y());
 
         if(Q_NULLPTR == mTracerX)
         {
-            mTracerX = new XCPItemTracer(customPlot, XCPItemTracer::XAxisTracer);//x轴
-            mTracerX->setTextVisible(false);//轴线上不显示值
+            mTracerX = new XCPValueMarker(customPlot, XCPValueMarker::AtXAxis);//x轴
+            mTracerX->setLabelVisible(false);//轴线上不显示值
         }
         mTracerX->updatePosition(axisRect, key, value);
 
         if(Q_NULLPTR == mTracerY)
         {
-            mTracerY = new XCPItemTracer(customPlot, XCPItemTracer::YAxisTracer);//y轴
-            mTracerY->setTextVisible(false);//轴线上不显示值
+            mTracerY = new XCPValueMarker(customPlot, XCPValueMarker::AtYAxis);//y轴
+            mTracerY->setLabelVisible(false);//轴线上不显示值
         }
         mTracerY->updatePosition(axisRect, key, value);
 
-        int nTracerCount = mDataTracers.count();
-        int nGraphCount = customPlot->graphCount(axisRect);
-        if(nTracerCount < nGraphCount)
+        int tracerCount = mDataTracers.count();
+        int graphCount = customPlot->graphCount(axisRect);
+        if(tracerCount < graphCount)
         {
             // 根据线条的个数，调整可显示数据点的个数
-            for(int i = nTracerCount; i < nGraphCount; ++i)
+            for(int i = tracerCount; i < graphCount; ++i)
             {
-                XCPItemTracer *tracer = new XCPItemTracer(customPlot, XCPItemTracer::DataTracer);
+                XCPValueMarker *tracer = new XCPValueMarker(customPlot, XCPValueMarker::AtDataPoint);
                 tracer->setOffset(QPoint(0, -20));//加个偏移量，让值显示在右上角，免得被横线遮挡
                 mDataTracers.append(tracer);
             }
         }
 
-        else if(nTracerCount > nGraphCount)
+        else if(tracerCount > graphCount)
         {
-            // 将超出线条个数的数据点隐藏起来
-            for(int i = nGraphCount; i < nTracerCount; ++i)
+            // 释放超出曲线数量的 tracer，避免列表无限增长
+            for(int i = tracerCount - 1; i >= graphCount; --i)
             {
-                XCPItemTracer *tracer = mDataTracers[i];
-                if(tracer)
-                {
-                    tracer->setTextVisible(false);
-                }
+                XCPValueMarker *tracer = mDataTracers.takeAt(i);
+                delete tracer;
             }
         }
 
-        for (int i = 0; i < nGraphCount; ++i)
+        for (int i = 0; i < graphCount; ++i)
         {
-            XCPItemTracer *tracer = mDataTracers[i];
-            if(tracer)
+            XCPValueMarker *tracer = mDataTracers[i];
+            QCPGraph *graph = customPlot->graph(axisRect, i);
+            if (tracer && graph)
             {
-                QColor fill = customPlot->graph(axisRect, i)->pen().color();
+                const QPen pen = graph->pen();
+                QColor fill = pen.color();
                 fill.setAlpha(255);
-                tracer->setPen(customPlot->graph(axisRect, i)->pen());
+                tracer->setPen(pen);
                 tracer->setBrush(QBrush(fill));
-                tracer->setTextPen(customPlot->graph(axisRect, i)->pen());
-                tracer->setTextVisible(true);
+                tracer->setTextPen(pen);
+                tracer->setLabelVisible(true);
                 tracer->updatePosition(axisRect, key, value);
             }
         }
 
         if(Q_NULLPTR == mTracerCrossLine)
-            mTracerCrossLine = new XCPItemTracerLine(customPlot, XCPItemTracerLine::Both);//直线
+            mTracerCrossLine = new XCPReferenceLine(customPlot, XCPReferenceLine::Crosshair);//直线
         mTracerCrossLine->updatePosition(axisRect, key, value);
 
         customPlot->replot(QCustomPlot::rpQueuedReplot);//曲线重绘
@@ -1065,16 +1022,16 @@ void QCustomPlotHelper::mouseMove(QMouseEvent * event)
     if (actEnableRangeSelect->property("isChecked").toBool())
     {
         if (customPlot->property("left-clicked").toBool()){
-            if (!customPlot->property("graph-draging").toBool())
+            if (!customPlot->property("graph-dragging").toBool())
             {
                 // 设置鼠标拖拽开始
-                customPlot->setProperty("graph-draging", true);
+                customPlot->setProperty("graph-dragging", true);
 
                 // 记录拖拽起始点值
                 double key = xAxis->pixelToCoord(event->pos().x());
 
                 if(Q_NULLPTR == mTracerDragLeftLine)
-                    mTracerDragLeftLine = new XCPItemTracerLine(customPlot, XCPItemTracerLine::Both);
+                    mTracerDragLeftLine = new XCPReferenceLine(customPlot, XCPReferenceLine::Crosshair);
                 mTracerDragLeftLine->updatePosition(axisRect, key, yAxis->range().lower);
                 mTracerDragLeftLine->setProperty("key", key);
                 customPlot->setCursor(Qt::SplitHCursor);
@@ -1084,20 +1041,20 @@ void QCustomPlotHelper::mouseMove(QMouseEvent * event)
             {
                 double key = xAxis->pixelToCoord(event->pos().x());
                 if(Q_NULLPTR == mTracerDragRightLine)
-                    mTracerDragRightLine = new XCPItemTracerLine(customPlot, XCPItemTracerLine::Both);//直线
+                    mTracerDragRightLine = new XCPReferenceLine(customPlot, XCPReferenceLine::Crosshair);//直线
                 mTracerDragRightLine->updatePosition(axisRect, key, yAxis->range().lower);
                 mTracerDragRightLine->setProperty("key", key);
 
                 //框选完毕，将选中的点颜色更新
-                double key_from = mTracerDragLeftLine->property("key").toDouble();
-                double key_to = mTracerDragRightLine->property("key").toDouble();
-                double key_temp = key_from;
-                key_from = qMin(key_from, key_to);
-                key_to = qMax(key_temp, key_to);
+                double keyFrom = mTracerDragLeftLine->property("key").toDouble();
+                double keyTo = mTracerDragRightLine->property("key").toDouble();
+                double keyTemp = keyFrom;
+                keyFrom = qMin(keyFrom, keyTo);
+                keyTo = qMax(keyTemp, keyTo);
 
                 if(Q_NULLPTR == mDragStraightRect)
-                    mDragStraightRect = new XCPItemStraightRect(customPlot);//蒙版
-                mDragStraightRect->setRange(axisRect, QCPRange(key_from, key_to));
+                    mDragStraightRect = new XCPRangeMask(customPlot);//蒙版
+                mDragStraightRect->setRange(axisRect, QCPRange(keyFrom, keyTo));
                 mDragStraightRect->setVisible(true);
 
                 for (int i = 0; i < mCustomPlot->graphCount(axisRect); ++i)
@@ -1109,8 +1066,8 @@ void QCustomPlotHelper::mouseMove(QMouseEvent * event)
                     const QColor clrSelected = clrNormal.darker();
                     for (QCPGraphDataContainer::iterator it = graphData->begin(); it != graphData->end(); ++it)
                     {
-                        const bool inRange = (qFuzzyCompare(it->key, key_from) || it->key >= key_from)
-                                          && (qFuzzyCompare(it->key, key_to) || it->key <= key_to);
+                        const bool inRange = (qFuzzyCompare(it->key, keyFrom) || it->key >= keyFrom)
+                                          && (qFuzzyCompare(it->key, keyTo) || it->key <= keyTo);
                         it->color = inRange ? clrSelected : clrNormal;
                     }
                 }
@@ -1128,7 +1085,6 @@ void QCustomPlotHelper::mouseMove(QMouseEvent * event)
     }
 }
 
-#include <QToolTip>
 void QCustomPlotHelper::mouseRelease(QMouseEvent * event)
 {
     QCustomPlot* customPlot = qobject_cast<QCustomPlot*>(sender());
@@ -1138,19 +1094,7 @@ void QCustomPlotHelper::mouseRelease(QMouseEvent * event)
     {
         if (actEnableRangeSelect->property("isChecked").toBool())
         {
-            QCPAxisRect *axisRect = mCustomPlot->axisRect();
-            QList<QCPAxisRect*> axisRects = mCustomPlot->axisRects();
-            for (auto iter : axisRects)
-            {
-                if (iter == axisRect)
-                    continue;
-
-                if (iter->rect().contains(event->pos()))
-                {
-                    axisRect = iter;
-                    break;
-                }
-            }
+            QCPAxisRect *axisRect = axisRectAt(event->pos());
 
             if (mDragStraightRect)
                 emit selectRangeChanged(axisRect, mDragStraightRect->range());
@@ -1159,19 +1103,7 @@ void QCustomPlotHelper::mouseRelease(QMouseEvent * event)
     // 右键
     else if (event->button() == Qt::RightButton)
     {
-        QCPAxisRect *axisRect = mCustomPlot->axisRect();
-        QList<QCPAxisRect*> axisRects = mCustomPlot->axisRects();
-        for (auto iter : axisRects)
-        {
-            if (iter == axisRect)
-                continue;
-
-            if (iter->rect().contains(event->pos()))
-            {
-                axisRect = iter;
-                break;
-            }
-        }
+        QCPAxisRect *axisRect = axisRectAt(event->pos());
 
         // 检查是否允许弹出右键菜单
         bool allow = true;
@@ -1183,14 +1115,10 @@ void QCustomPlotHelper::mouseRelease(QMouseEvent * event)
         contextMenu.exec(QCursor::pos());
     }
 
-    if (actEnableStraightLine->property("isChecked").toBool())
-    {
-
-    }
 
     if (actEnableRangeSelect->property("isChecked").toBool()
         && customPlot->property("left-clicked").toBool()
-        && customPlot->property("graph-draging").toBool())
+        && customPlot->property("graph-dragging").toBool())
     {
         QToolTip::showText(event->globalPos(), tr("双击可缩放至可视范围。"), customPlot);
     }
@@ -1200,7 +1128,6 @@ void QCustomPlotHelper::mouseRelease(QMouseEvent * event)
     customPlot->setProperty("left-clicked", false);
 }
 
-#include "qxtcheckcombobox.h"
 void QCustomPlotHelper::setGraphCheckBoxList(QCustomPlot* customPlot, const QCPAxisRect *axisRect)
 {
     // 隐藏图例
@@ -1228,13 +1155,10 @@ void QCustomPlotHelper::setGraphCheckBoxList(QCustomPlot* customPlot, const QCPA
     comboBox->setSizeAdjustPolicy(QComboBox::AdjustToContents);
     comboBox->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed);
 
-    for (int i=0; i<graphCount; ++i){
-        comboBox->addItem(customPlot->graph(axisRect, i)->name());
-    }
-    for(int i=0; i<comboBox->count(); i++){
-        comboBox->setItemData(i, Qt::Checked, Qt::CheckStateRole);
-        QIcon actionIcon = roundPixmap(QSize(16,16), customPlot->graph(axisRect, i)->pen().color());
-        comboBox->setItemIcon(i, actionIcon);
+    for (int i = 0; i < graphCount; ++i){
+        QCPGraph *graph = customPlot->graph(axisRect, i);
+        comboBox->addItem(graph->name());
+        comboBox->setItemIcon(i, roundPixmap(QSize(16,16), graph->pen().color()));
         comboBox->setItemCheckState(i, Qt::Checked);
     }
     connect(qobject_cast<QStandardItemModel*>(comboBox->model()), &QStandardItemModel::itemChanged, this, [=](QStandardItem* item){
@@ -1246,32 +1170,68 @@ void QCustomPlotHelper::setGraphCheckBoxList(QCustomPlot* customPlot, const QCPA
     });
     comboBox->setDefaultText(QStringLiteral("图像通道列表(空)"));
     mCbbAxisRect[axisRect->objectName()].push_back(comboBox);
+}
 
-    // 隐藏图例
-    // customPlot->legend->setVisible(false);
-    // if (axisRect == nullptr)
-    //     axisRect = customPlot->axisRect();
+void QCustomPlotHelper::updateWaveformDetail()
+{
+    if (!mStatsPanel) return;
 
-    // int graphCount = customPlot->graphCount(axisRect);
-    // // 添加可选项
-    // for (int i=0; i<graphCount; ++i){
-    //     QCheckBox* checkBox = new QCheckBox(customPlot);
-    //     checkBox->setText(customPlot->graph(axisRect, i)->name());
-    //     checkBox->setObjectName(tr(""));
-    //     QIcon actionIcon = roundPixmap(QSize(16,16), customPlot->graph(i)->pen().color());
-    //     checkBox->setIcon(actionIcon);
-    //     checkBox->setLayoutDirection(Qt::RightToLeft);
-    //     checkBox->setMinimumWidth(200);
-    //     checkBox->setChecked(customPlot->graph(axisRect, i)->visible());
-    //     connect(checkBox, &QCheckBox::stateChanged, [=](int state){
-    //         QCPGraph *graph = customPlot->graph(axisRect, i);
-    //         if (graph){
-    //             graph->setVisible(Qt::CheckState::Checked == state ? true : false);
-    //             customPlot->replot(QCustomPlot::rpQueuedReplot);
-    //         }
-    //     });
-    //     mChkAxisRect[axisRect->objectName()].push_back(checkBox);
-    // }
+    const int graphCount = mCustomPlot->graphCount();
+    if (graphCount == 0) return;
+
+    // 一次遍历：优先所选波形，否则取首个可视波形
+    QCPGraph *mainGraph = mCustomPlot->graph(0);
+    for (int i = 0; i < graphCount; ++i)
+    {
+        QCPGraph *g = mCustomPlot->graph(i);
+        if (g && g->selected()) { mainGraph = g; break; }
+    }
+    if (!mainGraph || mainGraph->data()->isEmpty())
+    {
+        for (int i = 0; i < graphCount; ++i)
+        {
+            QCPGraph *g = mCustomPlot->graph(i);
+            if (g && g->visible() && !g->data()->isEmpty()) { mainGraph = g; break; }
+        }
+    }
+    if (!mainGraph || mainGraph->data()->isEmpty()) return;
+
+    const QCPRange xr = mCustomPlot->xAxis->range();
+    auto dataPtr = mainGraph->data();
+    const int dataCount = dataPtr->size();
+    const double firstKey = dataCount > 0 ? dataPtr->constBegin()->key : 0;
+    const double lastKey = dataCount > 0 ? (dataPtr->constEnd() - 1)->key : 0;
+
+    // 数据、范围均未变化则跳过计算
+    if (mStatsValid && mStatsGraph == mainGraph && mStatsDataCount == dataCount
+        && qFuzzyCompare(mStatsFirstKey, firstKey) && qFuzzyCompare(mStatsLastKey, lastKey)
+        && qFuzzyCompare(mStatsXRange.lower, xr.lower) && qFuzzyCompare(mStatsXRange.upper, xr.upper))
+        return;
+
+    mStatsGraph = mainGraph;
+    mStatsDataCount = dataCount;
+    mStatsFirstKey = firstKey;
+    mStatsLastKey = lastKey;
+    mStatsXRange = xr;
+    mStatsValid = true;
+
+    auto itBegin = dataPtr->findBegin(xr.lower, true);
+    auto itEnd = dataPtr->findEnd(xr.upper, true);
+    QVector<double> data;
+    data.reserve(itEnd - itBegin);
+    for (auto it = itBegin; it != dataPtr->constEnd() && it->key <= xr.upper; ++it)
+        data.append(it->value);
+
+    auto stats = WaveformStats::calculate(data);
+
+    mStatsPanel->clearAll();
+    mStatsPanel->addText("点数：", QString::number(data.size()));
+    mStatsPanel->addText("峰值：", QString::number(stats.max, 'f', 2));
+    mStatsPanel->addText("谷值：", QString::number(stats.min, 'f', 2));
+    mStatsPanel->addText("基线：", QString::number(stats.baseline, 'f', 2));
+    mStatsPanel->addText("峰峰值：", QString::number(stats.peak2peak, 'f', 2));
+    mStatsPanel->addText("平均值：", QString::number(stats.mean, 'f', 2));
+    mStatsPanel->addText("标准差：", QString::number(stats.stdDev, 'f', 2));
 }
 
 void QCustomPlotHelper::beforeReplot()
@@ -1284,57 +1244,7 @@ void QCustomPlotHelper::beforeReplot()
     if (!actShowWaveformDetail->property("isChecked").toBool())
         return;
 
-    // 1. 取出第一个波形
-    QCPGraph* mainGraph = mCustomPlot->graph(0);
-
-    // 获取第一个所选波形
-    for (int i=0; i<mCustomPlot->graphCount(); ++i)
-    {
-        if (mCustomPlot->graph(i)->selected()){
-            mainGraph = mCustomPlot->graph(i);
-            break;
-        }
-    }
-
-    // 获取第一个可视波形
-    if (!mainGraph || mainGraph->data()->isEmpty()){
-        for (int i=0; i<mCustomPlot->graphCount(); ++i)
-        {
-            if (mCustomPlot->graph(i)->visible()){
-                mainGraph = mCustomPlot->graph(i);
-                break;
-            }
-        }
-    }
-
-    if (!mainGraph || mainGraph->data()->isEmpty()) return;
-
-    // 取当前轴范围
-    QCPRange xr = mCustomPlot->xAxis->range();
-    double xMin = xr.lower;
-    double xMax = xr.upper;
-    auto itBegin = mainGraph->data()->findBegin(xMin, true);           // 含等于 xMin 的点
-    auto itEnd   = mainGraph->data()->findEnd(xMax, true);             // 含等于 xMax 的点
-    QVector<double> data;
-    data.reserve(itEnd - itBegin);      // 注意：部分版本不是随机访问迭代器
-    for (auto it = itBegin; it != mainGraph->data()->constEnd() && it->key <= xMax; ++it)
-        data.append(it->value);
-
-    // 2. 调用你已经定义好的波形统计计算函数
-    auto stats = WaveformStats::calculate(data);
-
-    // 3. 把计算结果同步更新到你的悬浮信息Map里
-    if (mStatsOverlay) {
-        mStatsOverlay->clearAll();
-        mStatsOverlay->setText("点数：", QString::number(data.size()));
-        mStatsOverlay->setText("峰值：", QString::number(stats.max, 'f', 2));
-        mStatsOverlay->setText("谷值：", QString::number(stats.min, 'f', 2));
-        mStatsOverlay->setText("基线：", QString::number(stats.baseline, 'f', 2));
-        mStatsOverlay->setText("峰峰值：", QString::number(stats.peak2peak, 'f', 2));
-        //mStatsOverlay->setText("均方根有效值：", QString::number(stats.rms, 'f', 2));
-        mStatsOverlay->setText("平均值：", QString::number(stats.mean, 'f', 2));
-        mStatsOverlay->setText("标准差：", QString::number(stats.stdDev, 'f', 2));
-    }
+    updateWaveformDetail();
 }
 
 
@@ -1342,23 +1252,17 @@ void QCustomPlotHelper::afterLayout()
 {
     QCustomPlot* customPlot = qobject_cast<QCustomPlot*>(sender());
     QList<QCPAxisRect*> axisRects = customPlot->axisRects();
-    QFontMetrics fontMetrics(customPlot->font());
-    int avg_height = fontMetrics.ascent() + fontMetrics.descent();
 
     foreach (QCPAxisRect *axisRect, axisRects)
     {
-        if (mCbbAxisRect.contains(axisRect->objectName())){
-            QList<QComboBox*> comboBoxs = mCbbAxisRect[axisRect->objectName()];
-            // 布局改变之前重新设定位置
-            {
-                int i = 0;
-                for (auto comboBox : comboBoxs){
-                    int h = 20;//checkBox->height();
-                    if (comboBox->layoutDirection() == Qt::LeftToRight)
-                        comboBox->move(axisRect->left() + 10, axisRect->topRight().y() + i++ * h + 5);// 显示左上角
-                    else
-                        comboBox->move(axisRect->right() - comboBox->width() - 10, axisRect->topRight().y() + i++ * h + 5);// 显示右上角
-                }
+        auto it = mCbbAxisRect.constFind(axisRect->objectName());
+        if (it != mCbbAxisRect.constEnd()){
+            int i = 0;
+            for (QComboBox *comboBox : it.value()){
+                if (comboBox->layoutDirection() == Qt::LeftToRight)
+                    comboBox->move(axisRect->left() + 10, axisRect->topRight().y() + i++ * 20 + 5);// 显示左上角
+                else
+                    comboBox->move(axisRect->right() - comboBox->width() - 10, axisRect->topRight().y() + i++ * 20 + 5);// 显示右上角
             }
         }
     }
@@ -1374,10 +1278,6 @@ void QCustomPlotHelper::afterLayout()
 
 void QCustomPlotHelper::enableStraightLine(bool enable)
 {
-    if (actEnableStraightLine->property("isChecked").toBool())
-        enable = false;
-    else
-        enable = true;
     actEnableStraightLine->setProperty("isChecked", enable);
     actEnableStraightLine->setIcon(enable ? mIconChecked : mIconUnchecked);
 
@@ -1394,14 +1294,10 @@ void QCustomPlotHelper::enableStraightLine(bool enable)
     }
 }
 
-void QCustomPlotHelper::enableDataTracer(bool enable/* = true*/)
+void QCustomPlotHelper::enableAtDataPoint(bool enable/* = true*/)
 {
-    if (actEnableDataTracer->property("isChecked").toBool())
-        enable = false;
-    else
-        enable = true;
-    actEnableDataTracer->setProperty("isChecked", enable);
-    actEnableDataTracer->setIcon(enable ? mIconChecked : mIconUnchecked);
+    actEnableAtDataPoint->setProperty("isChecked", enable);
+    actEnableAtDataPoint->setIcon(enable ? mIconChecked : mIconUnchecked);
 
     {
         //mCustomPlot->replot(QCustomPlot::rpQueuedReplot);
@@ -1425,21 +1321,17 @@ void QCustomPlotHelper::clearMarker()
 
 void QCustomPlotHelper::enableRangeSelect(bool enable/* = true*/)
 {
-    if (actEnableRangeSelect->property("isChecked").toBool())
-        enable = false;
-    else
-        enable = true;
     actEnableRangeSelect->setProperty("isChecked", enable);
     actEnableRangeSelect->setIcon(enable ? mIconChecked : mIconUnchecked);
 
     if (mTracerDragLeftLine)
-        mTracerDragLeftLine->setVisible(actEnableRangeSelect->property("isChecked").toBool());
+        mTracerDragLeftLine->setVisible(enable);
     if (mTracerDragRightLine)
-        mTracerDragRightLine->setVisible(actEnableRangeSelect->property("isChecked").toBool());
+        mTracerDragRightLine->setVisible(enable);
     if (mDragStraightRect)
-        mDragStraightRect->setVisible(actEnableRangeSelect->property("isChecked").toBool());
+        mDragStraightRect->setVisible(enable);
 
-    if (!actEnableRangeSelect->property("isChecked").toBool())
+    if (!enable)
     {
         // 恢复值的颜色
         for (int i = 0; i < mCustomPlot->graphCount(); ++i)
@@ -1449,78 +1341,21 @@ void QCustomPlotHelper::enableRangeSelect(bool enable/* = true*/)
             const QColor clrNormal = graph->scatterStyle().pen().color();
             for (QCPGraphDataContainer::iterator it = graphData->begin(); it != graphData->end(); ++it)
                 it->color = clrNormal;
-            mCustomPlot->replot(QCustomPlot::rpQueuedReplot);
         }
+        mCustomPlot->replot(QCustomPlot::rpQueuedReplot);
     }
 }
 
 void QCustomPlotHelper::showWaveformDetail()
 {
     bool isChecked = actShowWaveformDetail->property("isChecked").toBool();
-    actShowWaveformDetail->setProperty("isChecked", isChecked ? false : true);
+    actShowWaveformDetail->setProperty("isChecked", !isChecked);
     actShowWaveformDetail->setIcon(!isChecked ? mIconChecked : mIconUnchecked);
-    mStatsOverlay->setVisible(!isChecked);
+    mStatsPanel->setVisible(!isChecked);
 
-    if (mStatsOverlay->visible()){
-        // 1. 取出第一个波形
-        QCPGraph* mainGraph = mCustomPlot->graph(0);
-
-        // 获取第一个所选波形
-        for (int i=0; i<mCustomPlot->graphCount(); ++i)
-        {
-            if (mCustomPlot->graph(i)->selected()){
-                mainGraph = mCustomPlot->graph(i);
-                break;
-            }
-        }
-
-        // 获取第一个可视波形
-        if (!mainGraph || mainGraph->data()->isEmpty()){
-            for (int i=0; i<mCustomPlot->graphCount(); ++i)
-            {
-                if (mCustomPlot->graph(i)->visible()){
-                    mainGraph = mCustomPlot->graph(i);
-                    break;
-                }
-            }
-        }
-
-        if (!mainGraph || mainGraph->data()->isEmpty()) return;        
-
-        // 取当前轴范围
-        QCPRange xr = mCustomPlot->xAxis->range();
-        double xMin = xr.lower;
-        double xMax = xr.upper;
-        auto itBegin = mainGraph->data()->findBegin(xMin, true);           // 含等于 xMin 的点
-        auto itEnd   = mainGraph->data()->findEnd(xMax, true);             // 含等于 xMax 的点
-        QVector<double> data;
-        data.reserve(itEnd - itBegin);      // 注意：部分版本不是随机访问迭代器
-        for (auto it = itBegin; it != mainGraph->data()->constEnd() && it->key <= xMax; ++it)
-            data.append(it->value);
-
-        // 直接从QCustomPlot内部取出y轴采样数据，不用自己额外拷贝构造QVector
-        // QVector<double> data;
-        // data.reserve(mainGraph->data()->size());
-        // for (const auto& dataPoint : *mainGraph->data()) {
-        //     data.append(dataPoint.value);
-        // }
-
-        // 2. 调用你已经定义好的波形统计计算函数
-        auto stats = WaveformStats::calculate(data);
-
-        // 3. 把计算结果同步更新到你的悬浮信息Map里
-        if (mStatsOverlay) {
-            mStatsOverlay->clearAll();
-            mStatsOverlay->setText("点数：", QString::number(data.size()));
-            mStatsOverlay->setText("峰值：", QString::number(stats.max, 'f', 2));
-            mStatsOverlay->setText("谷值：", QString::number(stats.min, 'f', 2));
-            mStatsOverlay->setText("基线：", QString::number(stats.baseline, 'f', 2));
-            mStatsOverlay->setText("峰峰值：", QString::number(stats.peak2peak, 'f', 2));
-            //mStatsOverlay->setText("均方根有效值：", QString::number(stats.rms, 'f', 2));
-            mStatsOverlay->setText("平均值：", QString::number(stats.mean, 'f', 2));
-            mStatsOverlay->setText("标准差：", QString::number(stats.stdDev, 'f', 2));
-        }
-
+    if (mStatsPanel->visible()){
+        mStatsValid = false;   // 强制重新计算一次
+        updateWaveformDetail();
         mCustomPlot->replot(QCustomPlot::rpQueuedReplot);
     }
 }
@@ -1531,19 +1366,16 @@ void QCustomPlotHelper::resetView()
     mCustomPlot->replot(QCustomPlot::rpQueuedReplot);
 }
 
-#include <QFileDialog>
-#include <QMessageBox>
-#include <QFile>
-#include <QTextStream>
-#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
-#include <QStringConverter>
-#endif
 
 namespace {
 QString csvField(const QString &text)
 {
     if (text.contains(',') || text.contains('"') || text.contains('\n'))
-        return '"' + QString(text).replace('"', "\"\"") + '"';
+    {
+        QString escaped = text;
+        escaped.replace('"', "\"\"");
+        return '"' + escaped + '"';
+    }
     return text;
 }
 }
@@ -1568,19 +1400,7 @@ void QCustomPlotHelper::exportData()
     if (!filePath.endsWith(".csv", Qt::CaseInsensitive))
         filePath += ".csv";
 
-    QCPAxisRect *axisRect = mCustomPlot->axisRect();
-    QList<QCPAxisRect*> axisRects = mCustomPlot->axisRects();
-    for (auto iter : axisRects)
-    {
-        if (iter == axisRect)
-            continue;
-
-        if (iter->rect().contains(QCursor::pos()))
-        {
-            axisRect = iter;
-            break;
-        }
-    }
+    QCPAxisRect *axisRect = axisRectAt(QCursor::pos());
 
     struct GraphInfo {
         QString name;
@@ -1650,11 +1470,6 @@ void QCustomPlotHelper::exportData()
 
 void QCustomPlotHelper::linearScale(bool enable)
 {
-    if (actLinearScale->property("isChecked").toBool())
-        enable = false;
-    else
-        enable = true;
-
     actLinearScale->setProperty("isChecked", enable);
     actLogarithmicScale->setProperty("isChecked", !enable);
     actLinearScale->setIcon(mIconChecked);
@@ -1662,8 +1477,6 @@ void QCustomPlotHelper::linearScale(bool enable)
 
     QCPAxisRect *axisRect = mCustomPlot->axisRect();
     QCPAxis* yAxis = axisRect->axis(QCPAxis::AxisType::atLeft);
-    QCPAxis* xAxis = axisRect->axis(QCPAxis::AxisType::atBottom);
-
     QSharedPointer<QCPAxisTicker> ticker(new QCPAxisTicker);
     yAxis->setTicker(ticker);
 
@@ -1677,10 +1490,6 @@ void QCustomPlotHelper::linearScale(bool enable)
 
 void QCustomPlotHelper::logarithmicScale(bool enable)
 {
-    if (actLogarithmicScale->property("isChecked").toBool())
-        enable = false;
-    else
-        enable = true;
     actLogarithmicScale->setProperty("isChecked", enable);
     actLinearScale->setProperty("isChecked", !enable);
     actLogarithmicScale->setIcon(mIconChecked);
@@ -1688,8 +1497,6 @@ void QCustomPlotHelper::logarithmicScale(bool enable)
 
     QCPAxisRect *axisRect = mCustomPlot->axisRect();
     QCPAxis* yAxis = axisRect->axis(QCPAxis::AxisType::atLeft);
-    QCPAxis* xAxis = axisRect->axis(QCPAxis::AxisType::atBottom);
-
     QSharedPointer<QCPAxisTickerLog> logTicker(new QCPAxisTickerLog);
     yAxis->setTicker(logTicker);
 
@@ -1699,24 +1506,4 @@ void QCustomPlotHelper::logarithmicScale(bool enable)
 
     yAxis->rescale(true);
     mCustomPlot->replot();
-}
-
-bool QCustomPlotHelper::eventFilter(QObject *watched, QEvent *event)
-{
-    if (watched != this && watched->inherits("QCustomPlot"))
-    {
-        // 鼠标单击
-        if (event->type() == QEvent::MouseButtonPress)
-            mousePress(reinterpret_cast<QMouseEvent*>(event));
-
-        // 鼠标移动
-        else if (event->type() == QEvent::MouseMove)
-            mouseMove(reinterpret_cast<QMouseEvent*>(event));
-
-        // 松开鼠标
-        else if (event->type() == QEvent::MouseButtonRelease)
-            mouseRelease(reinterpret_cast<QMouseEvent*>(event));
-    }
-
-    return QObject::eventFilter(watched, event);
 }

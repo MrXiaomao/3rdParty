@@ -3,94 +3,85 @@
 
 #include <QObject>
 #include "qcustomplot.h"
-#include "QCPOverlayWidget.h"
-
-class XCPItemTracer : public QObject
+#include "QCPWaveformStatsPanel.h"
+class XCPValueMarker : public QObject
 {
     Q_OBJECT
 
 public:
-    enum TracerType
+    enum Anchor
     {
-        XAxisTracer,//依附在x轴上显示x值
-        YAxisTracer,//依附在y轴上显示y值
-        DataTracer//在图中显示x,y值
+        AtXAxis,//依附在x轴上显示x值
+        AtYAxis,//依附在y轴上显示y值
+        AtDataPoint//在图中显示x,y值
     };
 
-    explicit XCPItemTracer(QCustomPlot *customPlot, TracerType _type, QObject *parent = Q_NULLPTR);
-    ~XCPItemTracer();
+    explicit XCPValueMarker(QCustomPlot *customPlot, Anchor anchor, QObject *parent = Q_NULLPTR);
+    ~XCPValueMarker();
 
     void setPen(const QPen &pen);
     void setBrush(const QBrush &brush);
     void setText(const QString &text);
     void setTextPen(const QPen &pen);
-    void updatePosition(QCPAxisRect *axisRect, double xValue, double yValue);
+    void updatePosition(QCPAxisRect *axisRect, double key, double value);
     void setVisible(bool visible);
-    void setTracerVisible(bool visible);
-    void setTextVisible(bool visible);
+    void setPointVisible(bool visible);
+    void setLabelVisible(bool visible);
     void setOffset(QPoint offset);
 
-protected:
-    bool mTracerVisible = true;//是否可见
-    bool mTextVisible = true;//是否可见
+private:
+    bool mPointVisible = true;//点是否可见
+    bool mLabelVisible = true;//标签是否可见
     QPoint mOffset;
     QCustomPlot *mCustomPlot = Q_NULLPTR;//图表
-    TracerType mTracerType;//类型
-    QCPItemTracer *mTracer = Q_NULLPTR;//跟踪的点
-    QCPItemText *mTracerText = Q_NULLPTR;//显示的数值
-    QCPItemLine *mTracerArrow = Q_NULLPTR;//箭头
+    Anchor mAnchor;//锚定位置
+    QCPItemTracer *mPointItem = Q_NULLPTR;//数据点
+    QCPItemText *mLabelItem = Q_NULLPTR;//数值标签
+    QCPItemLine *mLeadLine = Q_NULLPTR;//引线
 };
 
-class XCPItemTracerLine : public QObject
+class XCPReferenceLine : public QObject
 {
 public:
-    enum LineType
+    enum Orientation
     {
-        VerticalLine,//垂直线
-        HorizonLine, //水平线
-        Both//同时显示水平和垂直线
+        Vertical,//垂直线
+        Horizontal, //水平线
+        Crosshair//同时显示水平和垂直线
     };
 
-    explicit XCPItemTracerLine(QCustomPlot *customPlot, LineType _type = VerticalLine, QObject *parent = Q_NULLPTR);
-    ~XCPItemTracerLine();
+    explicit XCPReferenceLine(QCustomPlot *customPlot, Orientation orientation = Vertical, QObject *parent = Q_NULLPTR);
+    ~XCPReferenceLine();
 
-    void initLine();
-    void updatePosition(QCPAxisRect *axisRect, double xValue, double yValue);
+    void updatePosition(QCPAxisRect *axisRect, double key, double value);
     void setVisible(bool visible);
 
-protected:
-    bool mVisible = true;//是否可见
+private:
+    void initLine();
     QCustomPlot *mCustomPlot = Q_NULLPTR;//图表
-    LineType mLineType;//类型
-    QCPItemStraightLine *mStraightLineV = Q_NULLPTR; //垂直线
-    QCPItemStraightLine *mStraightLineH = Q_NULLPTR; //水平线
+    Orientation mOrientation;//方向
+    QCPItemStraightLine *mVerticalLine = Q_NULLPTR; //垂直参考线
+    QCPItemStraightLine *mHorizontalLine = Q_NULLPTR; //水平参考线
 };
 
-class XCPItemStraightRect : public QObject
+class XCPRangeMask : public QObject
 {
 public:
-    enum StraightType
-    {
-        VerticalStraight,//垂直线
-        HorizonStraight, //水平线
-    };
-
-    explicit XCPItemStraightRect(QCustomPlot *customPlot, StraightType _type = VerticalStraight, QObject *parent = Q_NULLPTR);
-    ~XCPItemStraightRect();
+    explicit XCPRangeMask(QCustomPlot *customPlot, QObject *parent = Q_NULLPTR);
+    ~XCPRangeMask();
 
     void setRange(QCPAxisRect *axisRect, const QCPRange& range);//更新范围
-    QCPRange range() const;//更新范围
+    QCPRange range() const;//获取范围
     void setVisible(bool visible);
     void setBrush(const QBrush &brush);
     void refresh();
 
-protected:
-    bool mVisible = true;//是否可见
+private:
     QCPRange mRange;
     QCustomPlot *mCustomPlot = Q_NULLPTR;//图表
-    StraightType mStraightType;//类型
-    QCPItemRect *mMaskRect = Q_NULLPTR; //蒙板矩形
+    QCPItemRect *mMaskRect = Q_NULLPTR; //蒙版矩形
 };
+
 
 class QCustomPlotHelper : public QObject
 {
@@ -112,7 +103,7 @@ public:
     void setRangeSelectActionVisible(bool visible = true);
 
     // 设置波形详情悬浮窗的停靠位置（坐标轴左上角/左下角/右上角/右下角）
-    void setStatsOverlayDockPosition(QCPOverlayWidget::DockPosition pos);
+    void setStatsPanelDockPosition(QCPWaveformStatsPanel::DockPosition pos);
 
     /**
     * @function name: setGraphCheckBoxList
@@ -136,7 +127,7 @@ public:
      * @function name: enablePlotSeriesDataPicker/enablePlotSeriesDataMarker
      * @brief 启用数据点标记/数据拾取
      */
-    Q_SLOT void enableDataTracer(bool enable = true);
+    Q_SLOT void enableAtDataPoint(bool enable = true);
 
     /**
     * @function name: clearMarker
@@ -231,22 +222,31 @@ public:
     Q_SIGNAL void selectRangeChanged(const QCPAxisRect *axisRect, const QCPRange& range);
 
 protected:
-    virtual bool eventFilter(QObject *watched, QEvent *event) override;
+    QCPAxisRect *axisRectAt(const QPoint &pos) const;
+    void updateWaveformDetail();
+
+    // 波形统计缓存（避免每次 replot 重复计算）
+    QCPGraph *mStatsGraph = nullptr;
+    int mStatsDataCount = 0;
+    double mStatsFirstKey = 0;
+    double mStatsLastKey = 0;
+    QCPRange mStatsXRange;
+    bool mStatsValid = false;
 
 private:
     QCustomPlot* mCustomPlot = Q_NULLPTR;
     QMenu contextMenu;
 
     // 参考线
-    XCPItemTracer *mTracerX = Q_NULLPTR;// x轴
-    XCPItemTracer *mTracerY = Q_NULLPTR;// y轴
-    XCPItemTracerLine  *mTracerCrossLine = Q_NULLPTR;// 十字线
-    QList<XCPItemTracer *> mDataTracers;// 数据点集信息
+    XCPValueMarker *mTracerX = Q_NULLPTR;// x轴
+    XCPValueMarker *mTracerY = Q_NULLPTR;// y轴
+    XCPReferenceLine  *mTracerCrossLine = Q_NULLPTR;// 十字线
+    QList<XCPValueMarker *> mDataTracers;// 数据点集信息
 
     // 点值（支持多个点位标记）
     struct DataMarker
     {
-        XCPItemTracer *tracer = Q_NULLPTR;
+        XCPValueMarker *tracer = Q_NULLPTR;
         QCPGraph *graph = Q_NULLPTR;
         double key = 0;
         double value = 0;
@@ -257,33 +257,31 @@ private:
     QAction *actNextPoint = Q_NULLPTR;
 
     // 鼠标框选
-    XCPItemTracerLine *mTracerDragLeftLine = Q_NULLPTR;
-    XCPItemTracerLine *mTracerDragRightLine = Q_NULLPTR;
-    XCPItemStraightRect* mDragStraightRect = Q_NULLPTR;
+    XCPReferenceLine *mTracerDragLeftLine = Q_NULLPTR;
+    XCPReferenceLine *mTracerDragRightLine = Q_NULLPTR;
+    XCPRangeMask* mDragStraightRect = Q_NULLPTR;
 
     QIcon mIconUnchecked, mIconChecked;
     QAction *actResetView;// 恢复试图
     QAction *actAutoScale;// 自适应模式
-    QWidgetAction* actFixedRange;//自定义范围
     quint32 mXAxisFixedRange = 300;//最近范围最值
     QAction *actClearMarker;// 清除标签
     QAction *actExportGraphic;// 导出图像
     QAction *actExportData;// 导出数据
     QAction *actEnableStraightLine;// 启用参考线或基准线
-    QAction *actEnableDataTracer;// 启用数据点标记
+    QAction *actEnableAtDataPoint;// 启用数据点标记
     QAction *actEnableRangeSelect;// 启用范围选取功能
     QAction *actShowWaveformDetail;// 显示波形详情
     QAction *actLinearScale;// 线性缩放
     QAction *actLogarithmicScale;// 对数缩放
 
-    QCPOverlayWidget* mStatsOverlay;
+    QCPWaveformStatsPanel* mStatsPanel;
 
     bool mResetActionVisible = true;
     bool mClearMarkerActionVisible = true;
     bool mStraightLineActionVisible = true;
     bool mRangeSelectActionVisible = true;
 
-    //QMap<QString, QList<QCheckBox*>> mChkAxisRect;
     QMap<QString, QList<QComboBox*>> mCbbAxisRect;
 
     /**
