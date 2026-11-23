@@ -243,8 +243,15 @@ private:
     XCPItemTracerLine  *mTracerCrossLine = Q_NULLPTR;// 十字线
     QList<XCPItemTracer *> mDataTracers;// 数据点集信息
 
-    // 点值
-    XCPItemTracer *mTracerData = Q_NULLPTR;// 选中数据点信息
+    // 点值（支持多个点位标记）
+    struct DataMarker
+    {
+        XCPItemTracer *tracer = Q_NULLPTR;
+        QCPGraph *graph = Q_NULLPTR;
+        double key = 0;
+        double value = 0;
+    };
+    QList<DataMarker> mDataMarkers;// 选中的数据点标记集合
 
     // 鼠标框选
     XCPItemTracerLine *mTracerDragLeftLine = Q_NULLPTR;

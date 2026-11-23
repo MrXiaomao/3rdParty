@@ -788,19 +788,47 @@ void QCustomPlotHelper::plottableClick(QCPAbstractPlottable *plottable, int data
 
         if (actEnableDataTracer->property("isChecked").toBool())
         {
-            //标记点和标签
-            if(!mTracerData)
-                mTracerData = new XCPItemTracer(mCustomPlot, XCPItemTracer::DataTracer);
+            // toggle: clicking a marked point again cancels its marker
+            int markerIndex = -1;
+            for (int i = 0; i < mDataMarkers.size(); ++i)
+            {
+                const DataMarker &marker = mDataMarkers[i];
+                if (marker.graph == graph
+                    && qFuzzyCompare(marker.key, key)
+                    && qFuzzyCompare(marker.value, value))
+                {
+                    markerIndex = i;
+                    break;
+                }
+            }
 
-            QColor fill = graph->pen().color();
-            fill.setAlpha(255);
-            mTracerData->setPen(graph->pen());
-            mTracerData->setBrush(QBrush(fill));
-            mTracerData->setTextPen(graph->pen());
-            mTracerData->setVisible(true);
-            mTracerData->updatePosition(axisRect, key, value);
+            if (markerIndex >= 0)
+            {
+                XCPItemTracer *tracer = mDataMarkers[markerIndex].tracer;
+                if (tracer)
+                    delete tracer;   // destructor removes the related items from the plot
+                mDataMarkers.removeAt(markerIndex);
+            }
+            else
+            {
+                XCPItemTracer *tracer = new XCPItemTracer(mCustomPlot, XCPItemTracer::DataTracer);
+                QColor fill = graph->pen().color();
+                fill.setAlpha(255);
+                tracer->setPen(graph->pen());
+                tracer->setBrush(QBrush(fill));
+                tracer->setTextPen(graph->pen());
+                tracer->setVisible(true);
+                tracer->updatePosition(axisRect, key, value);
 
-            mCustomPlot->replot(QCustomPlot::rpQueuedReplot);//曲线重绘
+                DataMarker marker;
+                marker.tracer = tracer;
+                marker.graph = graph;
+                marker.key = key;
+                marker.value = value;
+                mDataMarkers.append(marker);
+            }
+
+            mCustomPlot->replot(QCustomPlot::rpQueuedReplot);
         }
 
         emit itemActived(graph, key, value);
@@ -1328,7 +1356,6 @@ void QCustomPlotHelper::enableDataTracer(bool enable/* = true*/)
     actEnableDataTracer->setIcon(enable ? mIconChecked : mIconUnchecked);
 
     {
-        //mTracerData->setVisible(false);
         //mCustomPlot->replot(QCustomPlot::rpQueuedReplot);
     }
 }
@@ -1337,8 +1364,14 @@ void QCustomPlotHelper::clearMarker()
 {
     for (auto tracer : mDataTracers)
         tracer->setVisible(false);
-    if (mTracerData)
-        mTracerData->setVisible(false);
+
+    for (const DataMarker &marker : mDataMarkers)
+    {
+        if (marker.tracer)
+            delete marker.tracer;
+    }
+    mDataMarkers.clear();
+
     mCustomPlot->replot(QCustomPlot::rpQueuedReplot);
 }
 
