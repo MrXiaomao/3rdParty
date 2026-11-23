@@ -62,7 +62,7 @@ QToolTip{
 
 /* 状态栏基础样式 */
 QStatusBar{
-  background-color:qlineargradient(x1:0,y1:0,x2:0,y2:1,stop:0 rgba(230,230,230,255),stop:1 rgba(245,245,245,255)); /* 背景：垂直渐变浅灰（上浅下稍深） */
+  background-color:qlineargradient(x1:0,y1:0,x2:0,y2:1,stop:0 rgba(230,230,230,127),stop:1 rgba(245,245,245,75)); /* 背景：垂直渐变浅灰（上浅下稍深） */
   color:palette(text); /* 文字颜色使用系统文本色 */
 }
 
@@ -110,7 +110,7 @@ QMenu{
 
 /* 菜单项基础样式 */
 QMenu::item{
-  padding:3px 15px 3px 15px; /* 内边距：上下3px，左右15px（增大点击区域） */
+  padding:3px 35px 3px 15px; /* 内边距：上下3px，左右15px（增大点击区域） */
   border:1px solid transparent; /* 边框：1px透明（预留选中状态边框） */
 }
 
@@ -370,25 +370,30 @@ QTabBar::close-button:pressed {
   image: url(":/qss_icons/light/light_icons/window_close_pressed.png"); /* 按下图标 */
 }
 
-/* 复选框与单选按钮的指示器大小统一 */
-QCheckBox::indicator, QRadioButton::indicator {
+/* 复选框与单选按钮以及分组框的指示器大小统一 */
+QCheckBox::indicator, QRadioButton::indicator, QGroupBox::indicator {
   width:18px; /* 指示器宽度：18px */
   height:18px; /* 指示器高度：18px */
 }
 
-/* 单选按钮指示器尺寸 */
-QRadioButton::indicator{
-  width:18px; /* 宽度 */
-  height:18px; /* 高度 */
-}
-
-QCheckBox::indicator:checked
+QCheckBox::indicator:checked, QRadioButton::indicator:checked, QGroupBox::indicator:checked
 {
 	border-image: url(":/qss_icons/dark/dark_icons/checkbox_checked_pressed.png");
 }
-QCheckBox::indicator:unchecked
+
+QCheckBox::indicator:unchecked, QRadioButton::indicator:unchecked, QGroupBox::indicator:unchecked
 {
 	border-image: url(":/qss_icons/dark/dark_icons/checkbox_unchecked_pressed.png");
+}
+
+QRadioButton::indicator:checked
+{
+	border-image: url(":/qss_icons/dark/dark_icons/radio_checked_pressed.png");
+}
+
+QRadioButton::indicator:unchecked
+{
+	border-image: url(":/qss_icons/dark/dark_icons/radio_unchecked_pressed.png");
 }
 
 /* 树形视图与表格视图基础样式 */

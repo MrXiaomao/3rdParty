@@ -110,7 +110,7 @@ QMenu{
 
 /* 菜单项基础样式 */
 QMenu::item{
-  padding:3px 15px 3px 15px; /* 内边距：上下3px，左右15px */
+  padding:3px 35px 3px 15px; /* 内边距：上下3px，左右15px */
   border:1px solid transparent; /* 透明边框，为选中状态预留空间 */
 }
 
@@ -370,26 +370,31 @@ QTabBar::close-button:pressed {
   image: url(":/qss_icons/dark/dark_icons/window_close_pressed.png"); /* 按下关闭图标 */
 }
 
-/* 复选框指示器尺寸 */
-QCheckBox::indicator{
+/* 复选框与单选按钮以及分组框的指示器大小统一 */
+QCheckBox::indicator, QRadioButton::indicator, QGroupBox::indicator{
   width:18px; /* 宽度 */
   height:18px; /* 高度 */
 }
-QCheckBox::indicator:checked
+
+QCheckBox::indicator:checked, QGroupBox::indicator:checked
 {
 	border-image: url(":/qss_icons/light/light_icons/checkbox_checked_pressed.png");
 }
-QCheckBox::indicator:unchecked
+
+QCheckBox::indicator:unchecked, QGroupBox::indicator:unchecked
 {
 	border-image: url(":/qss_icons/light/light_icons/checkbox_unchecked_pressed.png");
 }
 
-/* 单选按钮指示器尺寸 */
-QRadioButton::indicator{
-  width:18px; /* 宽度 */
-  height:18px; /* 高度 */
+QRadioButton::indicator:checked
+{
+	border-image: url(":/qss_icons/dark/light_icons/radio_checked_pressed.png");
 }
 
+QRadioButton::indicator:unchecked
+{
+	border-image: url(":/qss_icons/dark/light_icons/radio_unchecked_pressed.png");
+}
 /* 树视图和表格视图基础样式 */
 QTreeView, QTableView{
   alternate-background-color:palette(window); /* 交替行背景色：系统窗口色 */
