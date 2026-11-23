@@ -252,6 +252,9 @@ private:
         double value = 0;
     };
     QList<DataMarker> mDataMarkers;// 选中的数据点标记集合
+    void moveActiveMarker(int step);
+    QAction *actPrevPoint = Q_NULLPTR;
+    QAction *actNextPoint = Q_NULLPTR;
 
     // 鼠标框选
     XCPItemTracerLine *mTracerDragLeftLine = Q_NULLPTR;

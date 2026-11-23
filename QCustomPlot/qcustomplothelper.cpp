@@ -474,6 +474,18 @@ QCustomPlotHelper::QCustomPlotHelper(QCustomPlot* customPlot, QObject *parent)
     // 坐标轴同步缩放
     connect(mCustomPlot->xAxis, SIGNAL(rangeChanged(QCPRange)), mCustomPlot->xAxis2, SLOT(setRange(QCPRange)));
     connect(mCustomPlot->yAxis, SIGNAL(rangeChanged(QCPRange)), mCustomPlot->yAxis2, SLOT(setRange(QCPRange)));
+    // 左右方向键切换当前点位标记
+    actPrevPoint = new QAction(this);
+    actPrevPoint->setShortcut(QKeySequence(Qt::Key_Left));
+    actPrevPoint->setShortcutContext(Qt::WidgetShortcut);
+    connect(actPrevPoint, &QAction::triggered, this, [this](){ moveActiveMarker(-1); });
+    mCustomPlot->addAction(actPrevPoint);
+
+    actNextPoint = new QAction(this);
+    actNextPoint->setShortcut(QKeySequence(Qt::Key_Right));
+    actNextPoint->setShortcutContext(Qt::WidgetShortcut);
+    connect(actNextPoint, &QAction::triggered, this, [this](){ moveActiveMarker(1); });
+    mCustomPlot->addAction(actNextPoint);
 }
 
 QCustomPlotHelper::~QCustomPlotHelper()
@@ -835,6 +847,47 @@ void QCustomPlotHelper::plottableClick(QCPAbstractPlottable *plottable, int data
     }
 }
 
+void QCustomPlotHelper::moveActiveMarker(int step)
+{
+    if (mDataMarkers.isEmpty())
+        return;
+
+    // 最近点击/标记的点位作为当前点位
+    DataMarker &marker = mDataMarkers.last();
+    QCPGraph *graph = marker.graph;
+    if (!graph || !mCustomPlot->hasPlottable(graph))
+        return;
+
+    QSharedPointer<QCPGraphDataContainer> data = graph->data();
+    if (data.isNull() || data->isEmpty())
+        return;
+
+    QCPGraphDataContainer::const_iterator it = data->findBegin(marker.key, false);
+    if (it == data->constEnd() || !qFuzzyCompare(it->key, marker.key))
+        return;   // 数据已变化，原标记不再对应有效数据点
+
+    const int count = data->size();
+    int index = int(it - data->constBegin()) + step;
+    if (index < 0)
+        index = 0;
+    else if (index >= count)
+        index = count - 1;
+
+    const QCPGraphData &target = *(data->constBegin() + index);
+    if (qFuzzyCompare(target.key, marker.key) && qFuzzyCompare(target.value, marker.value))
+        return;   // 已到数据边界
+
+    if (!marker.tracer)
+        return;
+
+    marker.key = target.key;
+    marker.value = target.value;
+    marker.tracer->updatePosition(graph->keyAxis()->axisRect(), target.key, target.value);
+
+    mCustomPlot->replot(QCustomPlot::rpQueuedReplot);
+    emit itemActived(graph, target.key, target.value);
+}
+
 void QCustomPlotHelper::mouseDoubleClick(QMouseEvent *event)
 {
     QCustomPlot* customPlot = qobject_cast<QCustomPlot*>(sender());
@@ -1050,21 +1103,16 @@ void QCustomPlotHelper::mouseMove(QMouseEvent * event)
                 for (int i = 0; i < mCustomPlot->graphCount(axisRect); ++i)
                 {
                     QCPGraph *graph = mCustomPlot->graph(axisRect, i);
-                    QVector<double> keys, values;
-                    QVector<QColor> colors;
-                    for (int i=0; i<graph->data()->size(); ++i){
-                        if ((qFuzzyCompare(graph->data()->at(i)->key, key_from) || graph->data()->at(i)->key>=key_from) && (qFuzzyCompare(graph->data()->at(i)->key,key_to) || graph->data()->at(i)->key<=key_to)){// && graph->data()->at(i)->value>=value_to) {
-                            keys << (double)graph->data()->at(i)->key;
-                            values << (double)graph->data()->at(i)->value;
-                            colors << graph->scatterStyle().pen().color().darker();
-                        } else {
-                            keys << (double)graph->data()->at(i)->key;
-                            values << (double)graph->data()->at(i)->value;
-                            colors << graph->scatterStyle().pen().color();
-                        }
+                    // recolor only: mutate the data container directly instead of setData (no data rebuild)
+                    QSharedPointer<QCPGraphDataContainer> graphData = graph->data();
+                    const QColor clrNormal = graph->scatterStyle().pen().color();
+                    const QColor clrSelected = clrNormal.darker();
+                    for (QCPGraphDataContainer::iterator it = graphData->begin(); it != graphData->end(); ++it)
+                    {
+                        const bool inRange = (qFuzzyCompare(it->key, key_from) || it->key >= key_from)
+                                          && (qFuzzyCompare(it->key, key_to) || it->key <= key_to);
+                        it->color = inRange ? clrSelected : clrNormal;
                     }
-
-                    graph->setData(keys, values, colors);
                 }
 
                 mTracerDragLeftLine->setVisible(true);
@@ -1397,15 +1445,10 @@ void QCustomPlotHelper::enableRangeSelect(bool enable/* = true*/)
         for (int i = 0; i < mCustomPlot->graphCount(); ++i)
         {
             QCPGraph *graph = mCustomPlot->graph(i);
-            QVector<double> keys, values;
-            QVector<QColor> colors;
-            for (int i=0; i<graph->data()->size(); ++i){
-                keys << (double)graph->data()->at(i)->key;
-                values << (double)graph->data()->at(i)->value;
-                colors << graph->scatterStyle().pen().color();
-            }
-
-            graph->setData(keys, values, colors);
+            QSharedPointer<QCPGraphDataContainer> graphData = graph->data();
+            const QColor clrNormal = graph->scatterStyle().pen().color();
+            for (QCPGraphDataContainer::iterator it = graphData->begin(); it != graphData->end(); ++it)
+                it->color = clrNormal;
             mCustomPlot->replot(QCustomPlot::rpQueuedReplot);
         }
     }
